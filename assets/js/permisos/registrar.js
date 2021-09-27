@@ -831,7 +831,8 @@ class Permisos {
         tipoEmpleado.addEventListener("change", this.validar_tipoPersona_nacionalidad)
         tipoSeguro.addEventListener("change", this.validar_seguro)
 
-        clavePatronal.addEventListener("change", this.validar_clave_patronal)
+        empresa_rfc.addEventListener("onfocusout", this.validar_rfc)
+
         curp.addEventListener("keyup", (ev) => {
             ev.target.value = ev.target.value.toUpperCase()
             $(errorPersonalDuplicado).html("")
@@ -1666,16 +1667,14 @@ class Permisos {
         }
 
     }
-    validar_clave_patronal(ev) {
+    validar_rfc(ev) {
         if (ev.target.value != '') {
             $.ajax({
-                url: base_url + 'Usuarios/Ctrl_Empresas/getByClave',
+                url: base_url_rest + 'empresas/rfc/'+ ev.target.value,
                 type: 'GET',
                 dataType: 'json',
                 global: false,
-                data: {
-                    clave: ev.target.value
-                },
+                headers: {"Authorization": 'Bearer '+_token},
                 beforeSend: function () {
                     idempresa.value = 0
                 },
