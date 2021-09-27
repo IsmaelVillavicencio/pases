@@ -1681,8 +1681,22 @@ class Permisos {
                 success: function (response) {
                     if (response.data != null) {
                         idempresa.value = response.data.id
-                        empresa.value = response.data.nombre
+
+                        if(response.data.siglas != null){
+                            empresa.value = response.data.siglas
+                        }else{
+                            empresa.value = response.data.nombre
+                        }
+                        
                         errorempresa.innerHTML = ''
+                        errorempresa_rfc.innerHTML = ''
+                        errorclavePatronal.innerHTML = ''
+
+                        clavePatronal.disabled = true
+                        empresa.disabled = true
+                    }else{
+                        clavePatronal.disabled = false
+                        empresa.disabled = false
                     }
                 }
             }).fail(function (response) {
@@ -3679,10 +3693,10 @@ class Permisos {
 			$(errorSubirPersonal).html("Campo obligatorio"); validacion = false;
 		}
         if(![1,7].includes(parseInt(tipoEmpleado.value))){
-            if(clavePatronal.value == ""){
+            /*if(clavePatronal.value == ""){
                 errorclavePatronal.innerHTML = "Campo obligatorio"
                 validacion = false
-            }
+            }*/
             if(empresa.value == ""){
                 errorempresa.innerHTML = "Campo obligatorio"
                 validacion = false
