@@ -831,7 +831,7 @@ class Permisos {
         tipoEmpleado.addEventListener("change", this.validar_tipoPersona_nacionalidad)
         tipoSeguro.addEventListener("change", this.validar_seguro)
 
-        empresa_rfc.addEventListener("onfocusout", this.validar_rfc)
+        empresa_rfc.addEventListener("focusout", this.validar_rfc)
 
         curp.addEventListener("keyup", (ev) => {
             ev.target.value = ev.target.value.toUpperCase()
