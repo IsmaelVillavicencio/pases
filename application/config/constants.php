@@ -83,3 +83,37 @@ defined('EXIT_USER_INPUT')     OR define('EXIT_USER_INPUT', 7); // invalid user 
 defined('EXIT_DATABASE')       OR define('EXIT_DATABASE', 8); // database error
 defined('EXIT__AUTO_MIN')      OR define('EXIT__AUTO_MIN', 9); // lowest automatically-assigned error code
 defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
+
+switch (trim($_SERVER['HTTP_HOST'],'/')) {
+    case 'www.https://pis-contratos-qa.kioscoweb.mx':
+    case 'https://pis-contratos-qa.kioscoweb.mx':    
+        $config = false;
+        break;    
+    default:
+        $config = true;
+        break;
+}
+
+define('DESARROLLO', $config);
+define('BASE_URL_REST', "https://pis-rest.kioscoweb.mx/api_puertov1/public/");
+define('BASE_URL_REST_LOGIN', "https://pis-autenticacion-qa.azurewebsites.net/api/");
+
+if (!empty($_SERVER['HTTP_CLIENT_IP'])){
+    define('IP_ADDRESS', $_SERVER['HTTP_CLIENT_IP']);
+}elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])){
+    define('IP_ADDRESS', $_SERVER['HTTP_X_FORWARDED_FOR']);
+}else{
+    define('IP_ADDRESS', $_SERVER['REMOTE_ADDR']);
+}
+
+if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+    define("FileSystem", "\\");
+} else {
+    define("FileSystem", "/");
+}
+
+date_default_timezone_set('America/Mexico_City');
+$FechaActualizacion= date('Y-m-d H:i');
+$HoraActualizacion= date('H:i');
+define("FECHA_ACTUALIZACION",$FechaActualizacion);
+define("HORA_ACTUALIZACION",$HoraActualizacion);
