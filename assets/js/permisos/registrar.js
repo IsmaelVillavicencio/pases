@@ -236,6 +236,17 @@ class Permisos {
                 }
             }
         })
+        empresa_rfc.addEventListener("change", (ev) => {
+            if (ev.keyCode != 16) {
+                this.validaciones = new VALIDACIONES();
+                let resultado = this.validaciones.caracteres_validos_sin_acentos_con_numero(ev.target.value,1);
+                if (!resultado.resp) {
+                    errorempresa_rfc.innerHTML = "Información no valida"
+                }else{
+                    errorempresa_rfc.innerHTML = ""
+                }
+            }
+        })
         nombre.addEventListener("keydown", (ev) => {
             if (ev.keyCode != 16) {
                 this.validaciones = new VALIDACIONES();
@@ -1545,6 +1556,7 @@ class Permisos {
         if ((tipoEmpleado.value == 1 || tipoEmpleado.value == 6 || tipoEmpleado.value == 7) || tipoEmpleado.value == '') {
             divEmpresa.style.display = "none"
             divClavePatronal.style.display = "none"
+            divRFC.style.display = "none"
             /*divNoIssste.style.display = 'none'
             if(tipoEmpleado.value == 1){    
                 divNoSeguroSocial.style.display = ""
@@ -1554,6 +1566,7 @@ class Permisos {
         } else {
             divEmpresa.style.display = ""
             divClavePatronal.style.display = ""
+            divRFC.style.display = ""
         }
 
         if (tipoEmpleado.value == 5) {
@@ -1621,6 +1634,7 @@ class Permisos {
         } else {
             divEmpresa.style.display = "none"
             divClavePatronal.style.display = "none"
+            divRFC.style.display = "none"
 
             divTipoSeguro.style.display = 'none'
             divEntidad.style.display = "none"
@@ -2293,7 +2307,6 @@ class Permisos {
 
         fileReader.onload = function () {
             var TheFileContents = fileReader.result;
-            console.log(TheFileContents);
             $(pdfViewerLicencia).html('<img width="460" height="200" src="' + TheFileContents + '"/>');
         };
         fileReader.readAsDataURL(fotoLicencia);
@@ -3146,8 +3159,6 @@ class Permisos {
                 if (response.data != null) {
                     let vehiculo = response.data['vehiculo']
                     let imagenes = response.data['imagenes']
-                    //console.log(vehiculo)
-                    //console.log(imagenes)
 
                     if(vehiculo[0].placa != '' && noPlaca.value == ''){
                         noPlaca.value = vehiculo[0].placa;
@@ -3677,6 +3688,10 @@ class Permisos {
                 errorempresa.innerHTML = "Campo obligatorio"
                 validacion = false
             }
+            if(empresa_rfc.value == ""){
+                errorempresa_rfc.innerHTML = "Campo obligatorio"
+                validacion = false
+            }
         }
         /*if (tipoIdentificacion.value != "" && adjuntarIdentificacion.value == "" && adjuntarIdentificacion.dataset.imagen == "" && fotoIdentificacion == null) {
             $(errorSubirIdentificacion).html("Campo obligatorio")
@@ -3703,6 +3718,7 @@ class Permisos {
             entidadGobierno: (entidadGobierno.value == '' ? 0 : entidadGobierno.value),
             empresa: empresa.value,
             clavePatronal: clavePatronal.value,
+            rfc: empresa_rfc.value,
             tipoSeguro: tipoSeguro.value,
             numSeguroSocial: numSeguroSocial.value,
             noIssste: noIssste.value,
@@ -3754,7 +3770,6 @@ class Permisos {
             vehiculotab.disabled = true
         }*/
 
-        console.log(datos);
         if (!validacion) {
             $(errorPersonalDuplicado).html("El registro ya existe el la lista")
             return validacion;
@@ -3762,7 +3777,6 @@ class Permisos {
             $(errorPersonalDuplicado).html("")
         )
         datosPersonal.push(datos)
-		console.log(datos);
         /*if (permisoGrupal.checked == false && datosPersonal.length == 1) {
             tipoEmpleado.setAttribute("disabled", true)
         }*/
@@ -3802,6 +3816,7 @@ class Permisos {
         divNacionalidad.style.display = "none"
         divEntidad.style.display = "none"
         divEmpresa.style.display = "none"
+        divRFC.style.display = "none"
         divClavePatronal.style.display = "none"
         divTipoSeguro.style.display = "none"
         divNoSeguroSocial.style.display = "none"
@@ -4780,6 +4795,7 @@ $(tabPersonal).on('click', '.modificar-persona', function (ev) {
     entidadGobierno.value = datosPersonal[ev.target.dataset.id].entidadGobierno
     empresa.value = datosPersonal[ev.target.dataset.id].empresa
     clavePatronal.value = datosPersonal[ev.target.dataset.id].clavePatronal
+    empresa_rfc.value = datosPersonal[ev.target.dataset.id].rfc
     tipoSeguro.value = datosPersonal[ev.target.dataset.id].tipoSeguro
 
     if (tipoSeguro.value == 1) {
@@ -4910,6 +4926,7 @@ $(tabPersonal).on('click', '.modificar-persona', function (ev) {
     $(errorentidadGobierno).html("")
     $(errorempresa).html("")
     $(errorclavePatronal).html("")
+    $(errorempresa_rfc).html("")
     $(errornombre).html("")
     $(errorprimerApellido).html("")
     $(errornumtelefono).html("")
