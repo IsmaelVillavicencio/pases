@@ -11,7 +11,7 @@ class Inicio extends CI_Controller {
     parent::__construct();
     //$this->load->Model('Sesiones/SubMenu');
     //$this->load->Model('Sesiones/Menu');
-    $this->load->model('Usuarios/Empresas');
+    //$this->load->model('Usuarios/Empresas');
     $this->load->model('Permisos/Permisos');
     $this->load->library('WS');
   }
@@ -28,20 +28,20 @@ class Inicio extends CI_Controller {
       $resultado = json_decode($myWS->obtener_datos()); 
 
       if(isset($resultado->valor->empresa_Id)){
-        $response = $this->Empresas->getByIdREST($resultado->valor->empresa_Id);
+        /*$response = $this->Empresas->getByIdREST($resultado->valor->empresa_Id);
         if(!isset($response['data']->id)){
           $this->Empresas->addEmpresaREST($resultado->valor->empresa_Nombre, $resultado->valor->empresa_Id);
           $response = $this->Empresas->getByIdREST($resultado->valor->empresa_Id);
-        }
+        }*/
 
         if (is_null($this->session->_id_sistema)){
           $sesion_info = array(
             '_id_user'       => $resultado->valor->usuario_Id,
             '_id_sistema'     => $resultado->valor->usuario_Id,
-            '_id_empresa_rest'  => $resultado->valor->empresa_Id,
-            '_empresa_rest'    => $resultado->valor->empresa_Nombre,
-            '_id_empresa'    => $response['data']->id,
-            '_empresa'      => $resultado->valor->empresa_Nombre,
+            '_id_empresa'  => $resultado->valor->empresa_Id,
+            '_empresa'    => $resultado->valor->empresa_Nombre,
+            //'_id_empresa'    => $response['data']->id,
+            //'_empresa'      => $resultado->valor->empresa_Nombre,
             '_id_contrato'     => $resultado->valor->contrato_Id,
             '_numero_contrato'   => $resultado->valor->contrato_Numero,
             '_permiso_rol'    => $resultado->valor->idRolApp,
@@ -53,10 +53,10 @@ class Inicio extends CI_Controller {
         }else{
           $this->session->set_userdata('_id_user', $resultado->valor->usuario_Id);
           $this->session->set_userdata('_id_sistema', $resultado->valor->usuario_Id);
-          $this->session->set_userdata('_id_empresa_rest', $resultado->valor->empresa_Id);
-          $this->session->set_userdata('_empresa_rest', $resultado->valor->empresa_Nombre);
-          $this->session->set_userdata('_id_empresa', $response['data']->id);
+          $this->session->set_userdata('_id_empresa', $resultado->valor->empresa_Id);
           $this->session->set_userdata('_empresa', $resultado->valor->empresa_Nombre);
+          //$this->session->set_userdata('_id_empresa', $response['data']->id);
+          //$this->session->set_userdata('_empresa', $resultado->valor->empresa_Nombre);
           $this->session->set_userdata('_id_contrato', $resultado->valor->contrato_Id);
           $this->session->set_userdata('_numero_contrato', $resultado->valor->contrato_Numero);
           $this->session->set_userdata('_permiso_rol', $resultado->valor->idRolApp);
