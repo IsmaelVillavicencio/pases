@@ -936,13 +936,13 @@ class Permisos extends CI_Model
             tbl_Contactos.telefono,
             cat_Tipo_Nacionalidad.id as id_nacionalidad,
             cat_Tipo_Nacionalidad.nombre as nacionalidad,
-            tbl_Empresas.nombre as empresa,
-            tbl_Empresas.clave_patronal,
+            --tbl_Empresas.nombre as empresa,
+            --tbl_Empresas.clave_patronal,
             det_Pase_Personal.estatus_pase,
             det_Pase_Personal.observacion,
             det_Pase_Personal.estatus_pase_migracion,
             det_Pase_Personal.observacion_migracion,
-            tbl_Empresas.id as id_empresa,
+            --tbl_Empresas.id as id_empresa,
             tbl_personas.id as id_persona,
             F1.licencia,
             F1.numero_licencia,
@@ -965,8 +965,8 @@ class Permisos extends CI_Model
             AND det_Persona_Empresa_Puesto.id_empresa = det_Pase_Personal.id_empresa
             left JOIN tbl_Contactos
             ON tbl_Contactos.id_persona = tbl_personas.id and tbl_Contactos.estatus = 1 --AND tbl_Contactos.id_empresa = det_Persona_Empresa_Puesto.id_empresa
-            JOIN tbl_Empresas
-            ON tbl_Empresas.id = det_Persona_Empresa_Puesto.id_empresa
+            --JOIN tbl_Empresas
+            --ON tbl_Empresas.id = det_Persona_Empresa_Puesto.id_empresa
             LEFT JOIN (
                 SELECT CONCAT(tbl_Imagenes.link,tbl_Imagenes.nombre) as licencia, id_personal, numero_identificacion as numero_licencia, fecha_expiracion
                 FROM tbl_Imagenes
