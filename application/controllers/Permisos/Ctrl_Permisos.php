@@ -352,6 +352,13 @@ class Ctrl_Permisos extends Sesion {
 				);
 
 				$response = $this->Permisos->getGridPermisos($datos);
+
+				foreach ($response['data'] as $value) {
+					if($value->id_usuario_registro != null){
+						$dataWS = $this->getValidatorName($value->id_usuario_registro);
+						$value->solicitado_por = $dataWS['valor'];
+					}
+				}
 			}else{
 				$response['data'] = 'Petición inválida';
 				throw new Exception('Petición inválida');
@@ -384,11 +391,18 @@ class Ctrl_Permisos extends Sesion {
 					'fechatermino'	=> $this->input->get('fechatermino'),
 					'idtipopermiso'	=> $this->input->get('idtipopermiso'),
 					'idestatuspase'	=> $this->input->get('idestatuspase'),
-					'idempresa'		=> $this->session->_id_empresa,
+					'idempresa'		=> $this->session->_id_empresa_rest,
 					'permiso_rol'	=> 8
 				);
 
 				$response = $this->Permisos->getGridPermisos($datos);
+
+				foreach ($response['data'] as $value) {
+					if($value->id_usuario_registro != null){
+						$dataWS = $this->getValidatorName($value->id_usuario_registro);
+						$value->solicitado_por = $dataWS['valor'];
+					}
+				}
 			}else{
 				$response['data'] = 'Petición inválida';
 				throw new Exception('Petición inválida');

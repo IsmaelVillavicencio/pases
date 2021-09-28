@@ -77,7 +77,7 @@ class Permisos {
         this.obtener_periodos()
     }
     inicio() {
-        id_empresa = idempresavigenteusuario
+        id_empresa = _id_empresa_rest
         id_contrato = idcontratovigenteusuario
         btnGuardar.disabled = true;
         DTPersonal = $(tabPersonal).DataTable({
@@ -1680,7 +1680,7 @@ class Permisos {
                 },
                 success: function (response) {
                     if (response.data != null) {
-                        idempresa.value = response.data.id
+                        idempresa.value = response.data.id_empresa
 
                         if(response.data.siglas != null){
                             empresa.value = response.data.siglas
@@ -4541,7 +4541,7 @@ class Permisos {
                 confirmar_guardar.disabled = false;
                 btnGuardar.disabled = false;
                 $(modal_error).css('margin-top', ajuste_altura_modal(ev));
-                peticion_fallida(thrownError);
+                peticion_fallida();
                 spinner_buttons('btnGuardar', 'Enviar solicitud', false);
             }
         }).fail(function (response) {
