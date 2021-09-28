@@ -341,6 +341,18 @@ class Ctrl_Permisos extends Sesion {
 
 				if($this->session->_permiso_rol == 4 ||$this->session->_permiso_rol == 5){
 					$response = $this->Permisos->getAll($idpermiso);
+
+					$empresa_name = '';
+
+					foreach ($response['data'] as $value) {
+						if($value->id_empresa != null){
+							$dataWS = $this->getEmpressName($value->id_empresa);
+							$empresa_name = $dataWS['data']['nombre'];
+						}
+						$value->empresa = $empresa_name;
+						$empresa_name = '';
+					}
+
 					echo json_encode($response);
 					return;
 				}
@@ -362,7 +374,7 @@ class Ctrl_Permisos extends Sesion {
 				foreach ($response['data'] as $value) {
 					if($value->id_empresa != null){
 						$dataWS = $this->getEmpressName($value->id_empresa);
-						$empresa_name .= $dataWS['data']['nombre'];
+						$empresa_name = $dataWS['data']['nombre'];
 					}
 					$value->empresa = $empresa_name;
 					$empresa_name = '';
@@ -410,7 +422,7 @@ class Ctrl_Permisos extends Sesion {
 				foreach ($response['data'] as $value) {
 					if($value->id_empresa != null){
 						$dataWS = $this->getEmpressName($value->id_empresa);
-						$empresa_name .= $dataWS['data']['nombre'];
+						$empresa_name = $dataWS['data']['nombre'];
 					}
 					$value->empresa = $empresa_name;
 					$empresa_name = '';
