@@ -75,7 +75,7 @@ class Permisos {
         this.obtener_periodos()
     }
     inicio() {
-        id_empresa = idempresavigenteusuario
+        id_empresa = _id_empresa_rest
         id_contrato = idcontratovigenteusuario
         btnGuardar.disabled = true;
         DTPersonal = $(tabPersonal).DataTable({
@@ -220,6 +220,17 @@ class Permisos {
                 }else{
                     console.log(resultado)
                     errorclavePatronal.innerHTML = ""
+                }
+            }
+        })
+        empresa_rfc.addEventListener("change", (ev) => {
+            if (ev.keyCode != 16) {
+                this.validaciones = new VALIDACIONES();
+                let resultado = this.validaciones.caracteres_validos_sin_acentos_con_numero(ev.target.value,1);
+                if (!resultado.resp) {
+                    errorempresa_rfc.innerHTML = "Información no valida"
+                }else{
+                    errorempresa_rfc.innerHTML = ""
                 }
             }
         })
@@ -784,7 +795,9 @@ class Permisos {
         tipoEmpleado.addEventListener("change", this.validar_tipoPersona_nacionalidad)
         tipoSeguro.addEventListener("change", this.validar_seguro)
 
+
         clavePatronal.addEventListener("change", this.validar_clave_patronal)
+        empresa_rfc.addEventListener("focusout", this.validar_rfc)
         curp.addEventListener("keyup", (ev) => {
             ev.target.value = ev.target.value.toUpperCase()
             $(errorPersonalDuplicado).html("")
@@ -1390,6 +1403,7 @@ class Permisos {
         if ((tipoEmpleado.value == 1 || tipoEmpleado.value == 6 || tipoEmpleado.value == 7) || tipoEmpleado.value == '') {
             divEmpresa.style.display = "none"
             divClavePatronal.style.display = "none"
+            divRFC.style.display = "none"
             /*divNoIssste.style.display = 'none'
             if(tipoEmpleado.value == 1){    
                 divNoSeguroSocial.style.display = ""
@@ -1399,12 +1413,14 @@ class Permisos {
         } else {
             divEmpresa.style.display = ""
             divClavePatronal.style.display = ""
+            divRFC.style.display = ""
         }
 
         if (tipoEmpleado.value == 5) {
             if (nacionalidad.value == 1) {
                 divEntidad.style.display = ""
                 divClavePatronal.style.display = ""
+                divRFC.style.display = ""
                 /*divNoSeguroSocial.style.display = "none"
                 divNoIssste.style.display = ""
                 divNoSeguro.style.display = "none"
@@ -1412,6 +1428,7 @@ class Permisos {
             } else if (nacionalidad.value == 2) {
                 divEntidad.style.display = "none"
                 divClavePatronal.style.display = ""
+                divRFC.style.display = ""
                 /*divNoSeguroSocial.style.display = "none"
                 divNoIssste.style.display = ""
                 divNoSeguro.style.display = "none"
@@ -1419,6 +1436,7 @@ class Permisos {
             } else {
                 divEntidad.style.display = "none"
                 divClavePatronal.style.display = "none"
+                divRFC.style.display = "none"
                 /*divNoSeguroSocial.style.display = "none"
                 divNoIssste.style.display = "none"
                 divNoSeguro.style.display = "none"
@@ -1439,6 +1457,7 @@ class Permisos {
 
         if (tipoEmpleado.value != 1 && tipoEmpleado.value != 5 && tipoEmpleado.value != 6 && tipoEmpleado.value != 7 && nacionalidad.value == 2) {
             divClavePatronal.style.display = ""
+            divRFC.style.display = ""
             //divEntidad.style.display = ''
             /*divNoSeguroSocial.style.display = "none"
             divNoIssste.style.display = "none"
@@ -1464,6 +1483,7 @@ class Permisos {
         } else {
             divEmpresa.style.display = "none"
             divClavePatronal.style.display = "none"
+            divRFC.style.display = "none"
 
             divTipoSeguro.style.display = 'none'
             divEntidad.style.display = "none"
@@ -1494,6 +1514,45 @@ class Permisos {
             segundoApellido.setAttribute("disabled", true)
         }
 
+    }
+    validar_rfc(ev) {
+        if (ev.target.value != '') {
+            $.ajax({
+                url: base_url_rest + 'empresas/rfc/'+ ev.target.value,
+                type: 'GET',
+                dataType: 'json',
+                global: false,
+                headers: {"Authorization": 'Bearer '+_token},
+                beforeSend: function () {
+                    idempresa.value = 0
+                },
+                success: function (response) {
+                    if (response.data != null) {
+                        idempresa.value = response.data.id_empresa
+
+                        if(response.data.siglas != null){
+                            empresa.value = response.data.siglas
+                        }else{
+                            empresa.value = response.data.nombre
+                        }
+                        
+                        errorempresa.innerHTML = ''
+                        errorempresa_rfc.innerHTML = ''
+                        errorclavePatronal.innerHTML = ''
+
+                        clavePatronal.disabled = true
+                        empresa.disabled = true
+                    }else{
+                        clavePatronal.disabled = false
+                        empresa.disabled = false
+                    }
+                }
+            }).fail(function (response) {
+                if (response.responseText == "Sesion") {
+                    error_sesion();
+                }
+            });
+        }
     }
     validar_clave_patronal(ev) {
         if (ev.target.value != '') {
@@ -3181,6 +3240,10 @@ class Permisos {
                 errorempresa.innerHTML = "Campo obligatorio"
                 validacion = false
             }
+            if(empresa_rfc.value == ""){
+                errorempresa_rfc.innerHTML = "Campo obligatorio"
+                validacion = false
+            }
         }
         /*if (tipoIdentificacion.value != "" && adjuntarIdentificacion.value == "" && adjuntarIdentificacion.dataset.imagen == "" && fotoIdentificacion == null) {
             $(errorSubirIdentificacion).html("Campo obligatorio")
@@ -3206,6 +3269,7 @@ class Permisos {
             entidadGobierno: (entidadGobierno.value == '' ? 0 : entidadGobierno.value),
             empresa: empresa.value,
             clavePatronal: clavePatronal.value,
+            rfc: empresa_rfc.value,
             tipoSeguro: tipoSeguro.value,
             numSeguroSocial: numSeguroSocial.value,
             noIssste: noIssste.value,
@@ -3309,6 +3373,7 @@ class Permisos {
         divEntidad.style.display = "none"
         divEmpresa.style.display = "none"
         divClavePatronal.style.display = "none"
+        divRFC.style.display = "none"
         divTipoSeguro.style.display = "none"
         divNoSeguroSocial.style.display = "none"
         divNoIssste.style.display = "none"
@@ -4165,6 +4230,7 @@ $(tabPersonal).on('click', '.modificar-persona', function (ev) {
     entidadGobierno.value = datosPersonal[ev.target.dataset.id].entidadGobierno
     empresa.value = datosPersonal[ev.target.dataset.id].empresa
     clavePatronal.value = datosPersonal[ev.target.dataset.id].clavePatronal
+    empresa_rfc.value = datosPersonal[ev.target.dataset.id].rfc
     tipoSeguro.value = datosPersonal[ev.target.dataset.id].tipoSeguro
 
     if (tipoSeguro.value == 1) {
