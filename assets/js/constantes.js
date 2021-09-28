@@ -4,9 +4,10 @@ const id_usuario_sesion = $("#id_usuario").val();
 const ip_address = $("#ip_address").val();
 const idcontratovigenteusuario = $("#idcontratovigenteusuario").val();
 const idempresavigenteusuario = $("#idempresavigenteusuario").val();
-const _id_empresa_rest = $("#_id_empresa_rest").val();
 const app_path = $("#app_path").val();
 const _token = $("#token").val();
+const _empresa = $("#empresa").val();
+const _numero_contrato = $("#numerocontrato").val();
 
 var cambios = 0;
 //FUNCIONES CONSTANTES (modales)

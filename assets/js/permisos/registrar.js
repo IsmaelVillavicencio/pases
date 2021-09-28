@@ -77,7 +77,7 @@ class Permisos {
         this.obtener_periodos()
     }
     inicio() {
-        id_empresa = _id_empresa_rest
+        id_empresa = idempresavigenteusuario
         id_contrato = idcontratovigenteusuario
         btnGuardar.disabled = true;
         DTPersonal = $(tabPersonal).DataTable({
@@ -2730,53 +2730,9 @@ class Permisos {
     }*/
     obtener_datos_contrato() {
         if(id_empresa != 0){
-            $.ajax({
-                url: base_url + 'Usuarios/Ctrl_Empresas/getById',
-                type: 'GET',
-                dataType: 'json',
-                data: {
-                    id: id_empresa
-                },
-                beforeSend: () => {
-                    spinner.style.visibility = "visible";
-                },
-                success: function (response) {
-                    if (response.data != "") {
-                        entidad.value = response.data.nombre
-                    }
-                },
-                complete: function () {
-    
-                }
-            }).fail(function (response) {
-    
-            });
+            entidad.value = _empresa
+            referencia.value = _numero_contrato
         }
-
-        /*if(id_contrato != 0){
-            $.ajax({
-                url: base_url + 'Contratos/Ctrl_Contratos/getById',
-                type: 'GET',
-                dataType: 'json',
-                data: {
-                    idcontrato: id_contrato
-                },
-                beforeSend: () => {
-                    spinner.style.visibility = "visible";
-                },
-                success: function (response) {
-                    if (response.data != "") {
-                        entidad.value = response.data.empresa
-                        referencia.value = response.data.numero_contrato
-                    }
-                },
-                complete: function () {
-    
-                }
-            }).fail(function (response) {
-    
-            });
-        }*/
     }
     obtener_tipos_permisos() {
         $.ajax({
