@@ -83,7 +83,7 @@ class Permisos {
         this.obtener_info_pase()
     }
     inicio() {
-        id_empresa = idempresavigenteusuario
+        id_empresa = _id_empresa_rest
         id_contrato = idcontratovigenteusuario
         btnGuardar.disabled = true;
         DTPersonal = $(tabPersonal).DataTable({
@@ -242,6 +242,18 @@ class Permisos {
                 }
             }
         })
+        empresa_rfc.addEventListener("change", (ev) => {
+            if (ev.keyCode != 16) {
+                this.validaciones = new VALIDACIONES();
+                let resultado = this.validaciones.caracteres_validos_sin_acentos_con_numero(ev.target.value,1);
+                if (!resultado.resp) {
+                    errorempresa_rfc.innerHTML = "Información no valida"
+                }else{
+                    errorempresa_rfc.innerHTML = ""
+                }
+            }
+        })
+        empresa_rfc.addEventListener("change",this.validar_rfc)
         nombre.addEventListener("keydown", (ev) => {
             if (ev.keyCode != 16) {
                 this.validaciones = new VALIDACIONES();
@@ -838,7 +850,7 @@ class Permisos {
         tipoEmpleado.addEventListener("change", this.validar_tipoPersona_nacionalidad)
         tipoSeguro.addEventListener("change", this.validar_seguro)
 
-        clavePatronal.addEventListener("change", this.validar_clave_patronal)
+        //clavePatronal.addEventListener("change", this.validar_clave_patronal)
         curp.addEventListener("keyup", (ev) => {
             ev.target.value = ev.target.value.toUpperCase()
             $(errorPersonalDuplicado).html("")
@@ -1376,6 +1388,40 @@ class Permisos {
         })
 
     }
+    validar_rfc(ev) {
+        if (ev.target.value != '') {
+            $.ajax({
+                url: base_url_rest + 'empresas/rfc/'+ ev.target.value,
+                type: 'GET',
+                dataType: 'json',
+                global: false,
+                headers: {"Authorization": 'Bearer '+_token},
+                beforeSend: function () {
+                    idempresa.value = 0
+                },
+                success: function (response) {
+                    if (response.data != null) {
+                        idempresa.value = response.data.id_empresa
+                        errorempresa.innerHTML = ''
+                        clavePatronal.setAttribute("disabled", true)
+                        empresa.setAttribute("disabled", true)
+                        if(response.data.siglas != null){
+                            empresa.value = response.data.nombre 
+                        }else{
+                            empresa.value = response.data.siglas
+                        }
+                    }else{
+                        clavePatronal.removeAttribute("disabled")
+                        empresa.removeAttribute("disabled")
+                    }
+                }
+            }).fail(function (response) {
+                if (response.responseText == "Sesion") {
+                    error_sesion();
+                }
+            });
+        }
+    }
     validar_vigencias() {
         $(errorfechaVenciminetoLic).html("")
         $(errorfechaVenciminetoIdent).html("")
@@ -1495,6 +1541,7 @@ class Permisos {
         if ((tipoEmpleado.value == 1 || tipoEmpleado.value == 6 || tipoEmpleado.value == 7) || tipoEmpleado.value == '') {
             divEmpresa.style.display = "none"
             divClavePatronal.style.display = "none"
+            divRfc.style.display = "none"
             /*divNoIssste.style.display = 'none'
             if(tipoEmpleado.value == 1){    
                 divNoSeguroSocial.style.display = ""
@@ -1504,12 +1551,14 @@ class Permisos {
         } else {
             divEmpresa.style.display = ""
             divClavePatronal.style.display = ""
+            divRfc.style.display = ""
         }
 
         if (tipoEmpleado.value == 5) {
             if (nacionalidad.value == 1) {
                 divEntidad.style.display = ""
                 divClavePatronal.style.display = ""
+                divRfc.style.display = ""
                 /*divNoSeguroSocial.style.display = "none"
                 divNoIssste.style.display = ""
                 divNoSeguro.style.display = "none"
@@ -1517,6 +1566,7 @@ class Permisos {
             } else if (nacionalidad.value == 2) {
                 divEntidad.style.display = "none"
                 divClavePatronal.style.display = ""
+                divRfc.style.display = ""
                 /*divNoSeguroSocial.style.display = "none"
                 divNoIssste.style.display = ""
                 divNoSeguro.style.display = "none"
@@ -1524,6 +1574,7 @@ class Permisos {
             } else {
                 divEntidad.style.display = "none"
                 divClavePatronal.style.display = "none"
+                divRfc.style.display = "none"
                 /*divNoSeguroSocial.style.display = "none"
                 divNoIssste.style.display = "none"
                 divNoSeguro.style.display = "none"
@@ -1544,6 +1595,7 @@ class Permisos {
 
         if (tipoEmpleado.value != 1 && tipoEmpleado.value != 5 && tipoEmpleado.value != 6 && tipoEmpleado.value != 7 && nacionalidad.value == 2) {
             divClavePatronal.style.display = ""
+            divRfc.style.display = ""
             //divEntidad.style.display = ''
             /*divNoSeguroSocial.style.display = "none"
             divNoIssste.style.display = "none"
@@ -1571,6 +1623,7 @@ class Permisos {
         } else {
             divEmpresa.style.display = "none"
             divClavePatronal.style.display = "none"
+            divRfc.style.display = "none"
 
             divTipoSeguro.style.display = 'none'
             divEntidad.style.display = "none"
@@ -1602,7 +1655,7 @@ class Permisos {
         }
 
     }
-    validar_clave_patronal(ev) {
+    /*validar_clave_patronal(ev) {
         if (ev.target.value != '') {
             $.ajax({
                 url: base_url + 'Usuarios/Ctrl_Empresas/getByClave',
@@ -1628,7 +1681,7 @@ class Permisos {
                 }
             });
         }
-    }
+    }*/
     INE_IFE(ev) {
         this.validaciones = new VALIDACIONES();
         let resultado = this.validaciones.INE_IFE(ev.target.value);
@@ -2756,6 +2809,7 @@ class Permisos {
                                 entidadGobierno: element.id_tipo_entidad_gobierno,
                                 empresa: element.nombre_personal_pase_empresa,
                                 clavePatronal: element.clave_personal_pase_empresa,
+                                rfc: empresa_rfc.value,
                                 tipoSeguro: element.id_tipo_seguro,
                                 numSeguroSocial: (element.id_tipo_seguro == 1 ? element.nss : ''),
                                 noIssste: (element.id_tipo_seguro == 2 ? element.nss : ''),
@@ -4011,6 +4065,10 @@ class Permisos {
                 errorempresa.innerHTML = "Campo obligatorio"
                 validacion = false
             }
+            if(empresa_rfc.value == ""){
+                errorempresa_rfc.innerHTML = "Campo obligatorio"
+                validacion = false
+            }
         }
         /*if (tipoIdentificacion.value != "" && adjuntarIdentificacion.value == "" && adjuntarIdentificacion.dataset.imagen == "" && fotoIdentificacion == null) {
             $(errorSubirIdentificacion).html("Campo obligatorio")
@@ -4185,6 +4243,7 @@ class Permisos {
         divEntidad.style.display = "none"
         divEmpresa.style.display = "none"
         divClavePatronal.style.display = "none"
+        divRfc.style.display = "none"
         divTipoSeguro.style.display = "none"
         divNoSeguroSocial.style.display = "none"
         divNoIssste.style.display = "none"
@@ -5138,6 +5197,7 @@ $(tabPersonal).on('click', '.modificar-persona', function (ev) {
     entidadGobierno.value = datosPersonal[ev.target.dataset.idindextblmodpersonas].entidadGobierno
     empresa.value = datosPersonal[ev.target.dataset.idindextblmodpersonas].empresa
     clavePatronal.value = datosPersonal[ev.target.dataset.idindextblmodpersonas].clavePatronal
+    empresa_rfc.value = datosPersonal[ev.target.dataset.id].rfc
     tipoSeguro.value = datosPersonal[ev.target.dataset.idindextblmodpersonas].tipoSeguro
     tipoSeguro.disabled = true
 
@@ -5281,6 +5341,7 @@ $(tabPersonal).on('click', '.modificar-persona', function (ev) {
     $(errorentidadGobierno).html("")
     $(errorempresa).html("")
     $(errorclavePatronal).html("")
+    $(errorempresa_rfc).html("")
     $(errornombre).html("")
     $(errorprimerApellido).html("")
     $(errornumtelefono).html("")

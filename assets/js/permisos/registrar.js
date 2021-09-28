@@ -831,7 +831,8 @@ class Permisos {
         tipoEmpleado.addEventListener("change", this.validar_tipoPersona_nacionalidad)
         tipoSeguro.addEventListener("change", this.validar_seguro)
 
-        clavePatronal.addEventListener("change", this.validar_clave_patronal)
+        empresa_rfc.addEventListener("focusout", this.validar_rfc)
+
         curp.addEventListener("keyup", (ev) => {
             ev.target.value = ev.target.value.toUpperCase()
             $(errorPersonalDuplicado).html("")
@@ -1666,24 +1667,36 @@ class Permisos {
         }
 
     }
-    validar_clave_patronal(ev) {
+    validar_rfc(ev) {
         if (ev.target.value != '') {
             $.ajax({
-                url: base_url + 'Usuarios/Ctrl_Empresas/getByClave',
+                url: base_url_rest + 'empresas/rfc/'+ ev.target.value,
                 type: 'GET',
                 dataType: 'json',
                 global: false,
-                data: {
-                    clave: ev.target.value
-                },
+                headers: {"Authorization": 'Bearer '+_token},
                 beforeSend: function () {
                     idempresa.value = 0
                 },
                 success: function (response) {
                     if (response.data != null) {
                         idempresa.value = response.data.id
-                        empresa.value = response.data.nombre
+
+                        if(response.data.siglas != null){
+                            empresa.value = response.data.siglas
+                        }else{
+                            empresa.value = response.data.nombre
+                        }
+                        
                         errorempresa.innerHTML = ''
+                        errorempresa_rfc.innerHTML = ''
+                        errorclavePatronal.innerHTML = ''
+
+                        clavePatronal.disabled = true
+                        empresa.disabled = true
+                    }else{
+                        clavePatronal.disabled = false
+                        empresa.disabled = false
                     }
                 }
             }).fail(function (response) {
@@ -3680,10 +3693,10 @@ class Permisos {
 			$(errorSubirPersonal).html("Campo obligatorio"); validacion = false;
 		}
         if(![1,7].includes(parseInt(tipoEmpleado.value))){
-            if(clavePatronal.value == ""){
+            /*if(clavePatronal.value == ""){
                 errorclavePatronal.innerHTML = "Campo obligatorio"
                 validacion = false
-            }
+            }*/
             if(empresa.value == ""){
                 errorempresa.innerHTML = "Campo obligatorio"
                 validacion = false
