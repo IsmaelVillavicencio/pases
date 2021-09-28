@@ -942,7 +942,7 @@ class Permisos extends CI_Model
             det_Pase_Personal.observacion,
             det_Pase_Personal.estatus_pase_migracion,
             det_Pase_Personal.observacion_migracion,
-            --tbl_Empresas.id as id_empresa,
+            det_Pase_Personal.id_empresa as id_empresa,
             tbl_personas.id as id_persona,
             F1.licencia,
             F1.numero_licencia,

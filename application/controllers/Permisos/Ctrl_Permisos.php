@@ -847,6 +847,14 @@ class Ctrl_Permisos extends Sesion {
 				$id = $this->security->xss_clean($this->input->get('id'));
 				$idpermiso = $this->security->xss_clean($this->input->get('idpermiso'));
 				$response = $this->Permisos->getPersonalById($id,$idpermiso);
+
+				$empresa_name = '';
+					if($value->id_empresa != null){
+						$dataWS = $this->getEmpressName($value->id_empresa);
+						$empresa_name = $dataWS['data']['nombre'];
+					}
+				$value->empresa = $empresa_name;
+				$empresa_name = '';
 			}else{
 				$response['data'] = 'Petición inválida';
 				throw new Exception('Petición inválida');
