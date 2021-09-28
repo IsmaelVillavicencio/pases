@@ -600,7 +600,7 @@ class Permisos extends CI_Model
 
     public function getGridPermisos($datos){
         if($this->session->_permiso_rol == 8){
-            $idempresa = $this->session->_id_empresa;
+            $idempresa = $this->session->_id_empresa_rest;
         }else if($datos['permiso_rol'] == 8){
             $idempresa = $datos['idempresa'];
         }else{

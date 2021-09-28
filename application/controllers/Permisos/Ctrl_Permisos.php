@@ -387,7 +387,7 @@ class Ctrl_Permisos extends Sesion {
 					'fechatermino'	=> $this->input->get('fechatermino'),
 					'idtipopermiso'	=> $this->input->get('idtipopermiso'),
 					'idestatuspase'	=> $this->input->get('idestatuspase'),
-					'idempresa'		=> $this->session->_id_empresa,
+					'idempresa'		=> $this->session->_id_empresa_rest,
 					'permiso_rol'	=> 8
 				);
 
