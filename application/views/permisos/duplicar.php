@@ -130,7 +130,7 @@
             <div class="row">
                 <div class="col-md-4 col-sm-6 col-xs-12" id="divRfc" style="display:none;">
                     <br>
-                    <span class="required">*</span><span> Empresa RFC:</span>
+                    <span class="required">*</span><span> RFC:</span>
                         <input autocomplete="off" type="text" id="empresa_rfc" class="form-control reiniciar-personal" value="" maxlength="13" required>
                     <span id="errorrfc" class="error"></span>
                 </div>
