@@ -849,12 +849,14 @@ class Ctrl_Permisos extends Sesion {
 				$response = $this->Permisos->getPersonalById($id,$idpermiso);
 
 				$empresa_name = '';
-					if($value->id_empresa != null){
-						$dataWS = $this->getEmpressName($value->id_empresa);
+				$empresa_clave = '';
+					if($response['data']->id_empresa != null){
+						$dataWS = $this->getEmpressName($response['data']->id_empresa);
 						$empresa_name = $dataWS['data']['nombre'];
+						$empresa_clave = ($dataWS['data']['clave_patronal'] != null ? $dataWS['data']['clave_patronal'] : '');
 					}
-				$value->empresa = $empresa_name;
-				$empresa_name = '';
+				$response['data']->empresa = $empresa_name;
+				$response['data']->clave_patronal = $empresa_clave;
 			}else{
 				$response['data'] = 'Petición inválida';
 				throw new Exception('Petición inválida');
