@@ -85,6 +85,9 @@
 	<input type="hidden" id="ip_address" value="<?php echo IP_ADDRESS; ?>">
 	<input type="hidden" id="idcontratovigenteusuario" value="<?php echo $this->session->_id_contrato ?>">
 	<input type="hidden" id="idempresavigenteusuario" value="<?php echo $this->session->_id_empresa ?>">
+	<input type="hidden" id="token" value="<?php echo $this->session->_token; ?>"> 
+	<input type="hidden" id="_id_empresa_rest" value="<?php echo $this->session->_id_empresa_rest; ?>">
+	<input type="hidden" id="_empresa" value="<?php echo $this->session->_empresa; ?>">
 	<input type="hidden" id="id_rol" value="<?php echo $this->session->_permiso_rol; ?>"> 
 	<input type="hidden" id="csrf" name="<?php echo $this->security->get_csrf_token_name();?>" value="<?php echo $this->security->get_csrf_hash();?>">
 
