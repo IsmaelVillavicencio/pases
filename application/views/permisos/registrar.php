@@ -128,6 +128,12 @@
                 </div>
             </div>
             <div class="row">
+                <div class="col-md-4 col-sm-6 col-xs-12" id="divRFC" style="display:none;">
+                    <br>
+                    <span class="required">*</span><span> RFC:</span>
+                        <input autocomplete="off" type="text" id="empresa_rfc" class="form-control reiniciar-personal" value="" required>
+                    <span id="errorempresa_rfc" class="error"></span>
+                </div>
                 <div class="col-md-4 col-sm-6 col-xs-12" id="divClavePatronal" style="display:none;">
                     <br>
                     <span class="required">*</span><span> Clave patronal:</span>
@@ -140,12 +146,6 @@
                         <input type="hidden" id="idempresa" value="0">
                         <input autocomplete="off" type="text" id="empresa" class="form-control reiniciar-personal" value="" required>
                     <span id="errorempresa" class="error"></span>
-                </div>
-                <div class="col-md-4 col-sm-6 col-xs-12" id="divRFC" style="display:none;">
-                    <br>
-                    <span class="required">*</span><span> RFC:</span>
-                        <input autocomplete="off" type="text" id="empresa_rfc" class="form-control reiniciar-personal" value="" required>
-                    <span id="errorempresa_rfc" class="error"></span>
                 </div>
             </div>
             <div class="row" id="divCURP" style="display:none;">

@@ -56,7 +56,7 @@ const camQrResult = document.getElementById('cam-qr-result');
 class Permisos {
     constructor() {
         this.inicio();
-        this.obtener_datos_contrato()
+        //this.obtener_datos_contrato()
         this.obtener_tipos_permisos()
         this.obtener_actividades_realizar()
         this.obtener_vigencias()
@@ -77,6 +77,7 @@ class Permisos {
     inicio() {
         id_empresa = _id_empresa_rest
         id_contrato = idcontratovigenteusuario
+        entidad.value = _empresa
         btnGuardar.disabled = true;
         DTPersonal = $(tabPersonal).DataTable({
             "language": {
@@ -796,7 +797,7 @@ class Permisos {
         tipoSeguro.addEventListener("change", this.validar_seguro)
 
 
-        clavePatronal.addEventListener("change", this.validar_clave_patronal)
+        //clavePatronal.addEventListener("change", this.validar_clave_patronal)
         empresa_rfc.addEventListener("focusout", this.validar_rfc)
         curp.addEventListener("keyup", (ev) => {
             ev.target.value = ev.target.value.toUpperCase()
@@ -1525,11 +1526,13 @@ class Permisos {
                 headers: {"Authorization": 'Bearer '+_token},
                 beforeSend: function () {
                     idempresa.value = 0
+                    empresa.value = ''
+                    clavePatronal.value = ''
                 },
                 success: function (response) {
-                    if (response.data != null) {
+                    if (response.data != false) {
                         idempresa.value = response.data.id_empresa
-
+                        clavePatronal.value = response.data.clave_patronal
                         if(response.data.siglas != null){
                             empresa.value = response.data.siglas
                         }else{
@@ -1554,7 +1557,7 @@ class Permisos {
             });
         }
     }
-    validar_clave_patronal(ev) {
+    /*validar_clave_patronal(ev) {
         if (ev.target.value != '') {
             $.ajax({
                 url: base_url + 'Usuarios/Ctrl_Empresas/getByClave',
@@ -1580,7 +1583,7 @@ class Permisos {
                 }
             });
         }
-    }
+    }*/
     INE_IFE(ev) {
         this.validaciones = new VALIDACIONES();
         let resultado = this.validaciones.INE_IFE(ev.target.value);
@@ -2505,7 +2508,7 @@ class Permisos {
             }
         }
     }
-    obtener_datos_contrato() {
+   /* obtener_datos_contrato() {
         if(id_empresa != 0){
             $.ajax({
                 url: base_url + 'Usuarios/Ctrl_Empresas/getById',
@@ -2553,8 +2556,8 @@ class Permisos {
             }).fail(function (response) {
     
             });
-        }*/
-    }
+        }
+    }*/
     obtener_tipos_permisos() {
         $.ajax({
             url: base_url + 'Catalogos/Ctrl_TiposPermisos/getByEstatus',
