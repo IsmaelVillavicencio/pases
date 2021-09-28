@@ -392,6 +392,17 @@ class Ctrl_Permisos extends Sesion {
 				);
 
 				$response = $this->Permisos->getGridPermisos($datos);
+
+				$empresa_name = '';
+
+				foreach ($response['data'] as $value) {
+					if($value->id_empresa != null){
+						$dataWS = $this->getEmpressName($value->id_empresa);
+						$empresa_name .= $dataWS['data']['nombre'];
+					}
+					$value->empresa = $empresa_name;
+					$empresa_name = '';
+				}
 			}else{
 				$response['data'] = 'Petición inválida';
 				throw new Exception('Petición inválida');
@@ -1018,6 +1029,17 @@ class Ctrl_Permisos extends Sesion {
         $myWS->parametros = $datos;
         $dataWS = $myWS->peticion_post();
         return $dataWS;
+    }
+
+	public function getEmpressName($userId){
+        $myWS = new WS();
+        $myWS->url = BASE_URL_REST;
+		$myWS->token = $this->session->_token;
+        //$resp = $myWS->login();
+
+        $myWS->endpoint = 'empresas/'.$userId;
+        $dataWS = $myWS->obtener_datos();
+        return json_decode($dataWS, true);
     }
 
 	public function getValidatorName($userId){

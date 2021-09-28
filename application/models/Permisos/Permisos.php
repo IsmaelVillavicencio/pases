@@ -1344,7 +1344,7 @@ class Permisos extends CI_Model
                         }else{
                             $this->sendTelegram("Registro personal: ".json_encode($respuestaPersonal));
                             $error = false;
-                        }*/
+                        }*/ // DESCOMENTAR PARA SUBIR A PROD, Si vez esto y no eres nosotors, gracias
                     }
                 }
                 
