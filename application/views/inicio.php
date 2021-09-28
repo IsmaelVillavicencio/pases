@@ -33,7 +33,7 @@
 								if ($this->session->_permiso_rol == 5) { ?>
 									<div class="col-md-3 col-sm-4 col-xs-6 text-center mt-5">
 										<a id="permisosCabotaje" class="btn bg-transparent" href="<?php echo base_url("Permisos/Ctrl_Cabotaje/index"); ?>">
-											<img id="permisosCabotaje" src="<?php echo base_url('assets/iconos/Permisos_cabotaje/PermisosdecabotajeNIV3Recurso22xhdpi.png'); ?>">
+											<img id="permisosCabotaje" src="<?php echo base_url('assets/iconos/Permisos/Permisos_cabotaje/PermisosdecabotajeNIV3Recurso22xhdpi.png'); ?>">
 											<span class="p-ink" style="height: 228px; width: 228px; top: 46px; left: 1px;"></span>
 										</a>
 										<h5 id="titlepermisosCabotaje">Permisos cabotaje</h5>
