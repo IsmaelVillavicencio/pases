@@ -355,6 +355,18 @@ class Ctrl_Permisos extends Sesion {
 				}
 				if($this->session->_permiso_rol != 5 && $this->session->_permiso_rol != 6 && $this->session->_permiso_rol != 7 && $this->session->_permiso_rol != 8)
 					$response = $this->Permisos->getAllByEstatus($idpermiso);
+
+
+				$empresa_name = '';
+
+				foreach ($response['data'] as $value) {
+					if($value->id_empresa != null){
+						$dataWS = $this->getEmpressName($value->id_empresa);
+						$empresa_name .= $dataWS['data']['nombre'];
+					}
+					$value->empresa = $empresa_name;
+					$empresa_name = '';
+				}
 			}else{
 				$response['data'] = 'Petición inválida';
 				throw new Exception('Petición inválida');
