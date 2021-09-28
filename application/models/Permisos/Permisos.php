@@ -1618,7 +1618,6 @@ class Permisos extends CI_Model
             ".$datos['tipoEmpleado'].",
             ".$datos['entidadGobierno'].",
             ".$datos['idempresa'].",
-            ".$this->session->_id_empresa_rest.",
             ".$estatus.",
             '".$datos['empresa']."',
             '".$datos['clavePatronal']."',
