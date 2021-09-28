@@ -38,7 +38,7 @@
                         <input type="text" id="vigenciaTarjeta" class="lectura" value="" disabled>
                     </div-->
                 </div>
-                <!--div class="row mt-4">
+                <div class="row mt-4">
                     <div class="col-md-6 col-sm-6">
                         Tipo de documento:
                         <input type="text" id="tipoDocumento" class="lectura" value="" disabled>
@@ -47,7 +47,7 @@
                         Número de factura:
                         <input type="text" id="noFacturaVehiculo" class="lectura" value="" disabled>
                     </div>
-                </div-->
+                </div>
                 <div class="row mt-4">
                     <div class="col-md-6 col-sm-6">
                         Aseguradora:
@@ -66,6 +66,12 @@
                     <div class="col-md-6 col-sm-6">
                         Fecha fin:
                         <input type="text" id="fechaFin" class="lectura" value="" disabled>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-md-6 col-sm-6">
+                        Chofer:
+                        <input type="text" id="chofer" class="lectura" value="" disabled>
                     </div>
                 </div>
                 <div id="divRepuve">

@@ -113,7 +113,7 @@ class Permisos {
             } else {
                 let resultado = this.validaciones.caracteres_validos_especial(ev.target.value, 2);
                 if (!resultado.resp) {
-                    elementError.innerHTML = 'Información no valida'
+                    elementError.innerHTML = 'Información no válida'
                 }
             }
         })
@@ -138,7 +138,7 @@ class Permisos {
             } else {
                 let resultado = this.validaciones.caracteres_validos_especial(ev.target.value, 2);
                 if (!resultado.resp) {
-                    elementError.innerHTML = 'Información no valida'
+                    elementError.innerHTML = 'Información no válida'
                 }
             }
         })
@@ -162,7 +162,7 @@ class Permisos {
             } else {
                 let resultado = this.validaciones.caracteres_validos(ev.target.value, 2);
                 if (!resultado.resp) {
-                    elementError.innerHTML = 'Información no valida'
+                    elementError.innerHTML = 'Información no válida'
                 }
             }
         })
@@ -207,7 +207,7 @@ class Permisos {
             } else {
                 let resultado = this.validaciones.caracteres_validos(ev.target.value, 2);
                 if (!resultado.resp) {
-                    elementError.innerHTML = 'Información no valida'
+                    elementError.innerHTML = 'Información no válida'
                 }
             }
         })
@@ -232,7 +232,7 @@ class Permisos {
             } else {
                 let resultado = this.validaciones.caracteres_validos(ev.target.value, 2);
                 if (!resultado.resp) {
-                    elementError.innerHTML = 'Información no valida'
+                    elementError.innerHTML = 'Información no válida'
                 }
             }
         })
@@ -254,7 +254,7 @@ class Permisos {
             this.validaciones = new VALIDACIONES();
             let resultado = this.validaciones.caracteres_validos(ev.target.value, 1);
             if (!resultado.resp) {
-                elementError.innerHTML = 'Información no valida'
+                elementError.innerHTML = 'Información no válida'
             }
         })
 
@@ -332,7 +332,7 @@ class Permisos {
             } else {
                 let resultado = this.validaciones.caracteres_validos_sin_acentos_con_numero(ev.target.value, 1);
                 if (!resultado.resp) {
-                    elementError.innerHTML = 'Información no valida'
+                    elementError.innerHTML = 'Información no válida'
                 }
             }
         })
@@ -357,7 +357,7 @@ class Permisos {
             } else {
                 let resultado = this.validaciones.caracteres_validos_sin_acentos_con_numero(ev.target.value, 1);
                 if (!resultado.resp) {
-                    elementError.innerHTML = 'Información no valida'
+                    elementError.innerHTML = 'Información no válida'
                 }
             }
         })
@@ -379,7 +379,7 @@ class Permisos {
             this.validaciones = new VALIDACIONES();
             let resultado = this.validaciones.caracteres_validos_sin_acentos_con_numero(ev.target.value, 1);
             if (!resultado.resp) {
-                elementError.innerHTML = 'Información no valida'
+                elementError.innerHTML = 'Información no válida'
             }
         })
 
@@ -400,7 +400,7 @@ class Permisos {
             this.validaciones = new VALIDACIONES();
             let resultado = this.validaciones.caracteres_validos_sin_acentos_con_numero(ev.target.value, 1);
             if (!resultado.resp) {
-                elementError.innerHTML = 'Información no valida'
+                elementError.innerHTML = 'Información no válida'
             }
         })
 
@@ -421,7 +421,7 @@ class Permisos {
             this.validaciones = new VALIDACIONES();
             let resultado = this.validaciones.caracteres_validos_sin_acentos_con_numero(ev.target.value, 1);
             if (!resultado.resp) {
-                elementError.innerHTML = 'Información no valida'
+                elementError.innerHTML = 'Información no válida'
             }
         })
 
@@ -442,7 +442,7 @@ class Permisos {
             this.validaciones = new VALIDACIONES();
             let resultado = this.validaciones.caracteres_validos_sin_acentos_con_numero(ev.target.value, 1);
             if (!resultado.resp) {
-                elementError.innerHTML = 'Información no valida'
+                elementError.innerHTML = 'Información no válida'
             }
         })
 
@@ -545,7 +545,7 @@ class Permisos {
             this.validaciones = new VALIDACIONES();
             let resultado = this.validaciones.caracteres_validos_numericos(ev.target.value, 1);
             if (!resultado.resp) {
-                elementError.innerHTML = 'Información no valida'
+                elementError.innerHTML = 'Información no válida'
             }
         })
 
@@ -569,7 +569,7 @@ class Permisos {
             } else {
                 let resultado = this.validaciones.caracteres_validos_numericos(ev.target.value, 1);
                 if (!resultado.resp) {
-                    elementError.innerHTML = 'Información no valida'
+                    elementError.innerHTML = 'Información no válida'
                 }
             }
         })
@@ -591,7 +591,7 @@ class Permisos {
             this.validaciones = new VALIDACIONES();
             let resultado = this.validaciones.caracteres_validos_especial(ev.target.value, 1);
             if (!resultado.resp) {
-                elementError.innerHTML = 'Información no valida'
+                elementError.innerHTML = 'Información no válida'
             }
         })
 

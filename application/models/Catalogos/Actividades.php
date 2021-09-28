@@ -4,11 +4,6 @@ class Actividades extends CI_Model
 	function __construct(){
 		parent:: __construct();
     }
-
-    public function getAll(){
-        $query = "select * from cat_tipo_Actividad;";
-        return $this->db->query($query)->result_array();
-    }
     
     /*
     *Nombre:        getByEstatus

@@ -3,7 +3,7 @@ const id_permiso = localStorage.getItem("id_permiso");
 const url_regreso = localStorage.getItem("url_regreso");
 var estatus_permiso = 0;
 
-let DTVehiculos, DTPersonal, DTEquipoHerramienta, DTMaterial, DTDocAdicionales;
+let DTVehiculos, DTPersonal, DTEquipoHerramienta, DTMaterial;
 var id_empleado, id_empresa, id_persona_fisica, id_equipo, id_vehiculo;
 var idPeticionREPUVE = 0;
 var peticionesREPUVE = 0;
@@ -51,18 +51,6 @@ class Permisos{
 			"language": {
 			"url": "https://cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
 			}
-        });
-
-        DTDocAdicionales = $(tabDocumentosAdicionales).DataTable({
-            "language": {
-                "url": "https://cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
-            },
-            "lengthChange": false,
-            "searching": false,
-            "pageLength": 5,
-            "columnDefs": [
-                { "width": "100%", "targets": 0 }
-            ]
         });
 
         regresar.setAttribute("href", base_url+url_regreso);
@@ -269,8 +257,7 @@ class Permisos{
                             '<center>'+element.tipo_material+'</center>',
                             '<center>'+element.descripcion+'</center>',
                             '<center>'+element.cantidad+'</center>',
-                            '<center>'+(element.tipo_medida == null ? '' : element.tipo_medida)+'</center>',
-                            '<center><a href="'+base_url+'assets/uploads/permisos/materiales/'+element.material_fotografia+'" target="_blank">Visualizar archivo</center>'
+                            '<center>'+(element.tipo_medida == null ? '' : element.tipo_medida)+'</center>'
                         ]).draw(false)
                     })
                 }
@@ -307,11 +294,11 @@ class Permisos{
 
                         DTVehiculos.row.add([
                             '<center>'+element.numero_serie+'</center>',
-                            '<center>'+(element.numero_placa != '' ? element.numero_placa : element.tv_placa)+'</center>',
+                            '<center>'+element.numero_placa+'</center>',
                             '<center>'+element.marca+'</center>',
                             '<center>'+element.modelo+'</center>',
                             '<center>'+element.anio+'</center>',
-                            '<center>'+(element.color != '' ? element.color : element.tv_color)+'</center>',
+                            '<center>'+element.color+'</center>',
                             '<center><span style="font-size: 12px;" id="estatus_validarVehiculo'+element.id+'">'+element.estatus+'</span></center>',
                             '<center><span style="font-size: 12px;" id="nombre_validarVehiculo'+element.id+'">'+element.validadopor+'</span></center>',
                             '<div class="d-flex justify-content-center">'+
@@ -342,21 +329,9 @@ class Permisos{
                 $(pdfViewerFotografiaPersonal).html('')
                 $(pdfViewerFotografiaIdentificacion).html('')
                 $(pdfViewerFotografiaLicencia).html('')
-
-                DTDocAdicionales.clear().draw()
             },
             success: function (response) {
                 if (response.data != "") {
-                    if(response.data.id_tipo_seguro == 1){
-                        labelSeguro.innerHTML = 'NSS:'
-                    }
-                    if(response.data.id_tipo_seguro == 2){
-                        labelSeguro.innerHTML = 'ISSSTE:'
-                    }
-                    if(response.data.id_tipo_seguro == 3){
-                        labelSeguro.innerHTML = 'No. Seguro:'
-                    }
-                    
                     nss.value = response.data.nss
                     nombre.value = response.data.nombre
                     curp.value = response.data.curp
@@ -377,10 +352,9 @@ class Permisos{
                         mensaje_observacion += "\n\n"
                     }
                     if(response.data.estatus_pase_migracion != 9 && response.data.estatus_pase_migracion != null){
-                        mensaje_observacion += 'Migración: '+response.data.observacion_migracion
+                        mensaje_observacion += 'Migracion: '+response.data.observacion_migracion
                     }
                     txtObservacionPersonal.value = mensaje_observacion
-                    txtObservacionPersonal.style.cssText = "border-bottom:0px !important"
                     
                     this.validaciones = new VALIDACIONES();
                     let resultado = this.validaciones.curp(response.data.curp);
@@ -419,7 +393,7 @@ class Permisos{
                     if(response.data.fotopersonal != null){
                         let ext = response.data.fotopersonal.split('.').pop();
                         if(ext == 'pdf'){
-                            $(pdfViewerFotografiaPersonal).html('<object> <embed src="'+base_url+ response.data.fotopersonal+'" width="100%" height="300px"/></object>');
+                            $(pdfViewerFotografiaPersonal).html('<a href="'+base_url+ response.data.fotopersonal+'"target="_blank">Ver pantalla completa<object> <embed src="'+base_url+ response.data.fotopersonal+'" width="100%" height="300px"/></object></a>');
                         }else{
                             $(pdfViewerFotografiaPersonal).html('<div></div>');
                             $(pdfViewerFotografiaPersonal).html('<a href="'+base_url+ response.data.fotopersonal+'"target="_blank"><div class="img-zoom-container"><img id="fotografiapersonal" width="100%" src="' + base_url + response.data.fotopersonal + '"/></a>');
@@ -433,7 +407,7 @@ class Permisos{
                     if(response.data.identificacion != null){
                         let ext = response.data.identificacion.split('.').pop();
                         if(ext == 'pdf'){
-                            $(pdfViewerFotografiaIdentificacion).html('<object> <embed src="'+base_url+ response.data.identificacion+'" width="100%" height="300px"/></object><br><center><a href="'+base_url+ response.data.identificacion+'"target="_blank">Visualizar</a></center>');
+                            $(pdfViewerFotografiaIdentificacion).html('<a href="'+base_url+ response.data.identificacion+'"target="_blank">Ver pantalla completa<object> <embed src="'+base_url+ response.data.identificacion+'" width="100%" height="300px"/></object></a>');
                         }else{
                             $(pdfViewerFotografiaIdentificacion).html('<div></div>');
                             $(pdfViewerFotografiaIdentificacion).html('<a href="'+base_url+ response.data.identificacion+'"target="_blank"><div class="img-zoom-container"><img id="fotografiaidentificacion" width="100%" src="' + base_url + response.data.identificacion + '"/></a>');
@@ -444,10 +418,10 @@ class Permisos{
                             }
                         }
                     }
-                    if(response.data.licencia != ''){
+                    if(response.data.licencia != null){
                         let ext = response.data.licencia.split('.').pop();
                         if(ext == 'pdf'){
-                            $(pdfViewerFotografiaLicencia).html('<object> <embed src="'+base_url+ response.data.licencia+'" width="100%" height="300px"/></object><br><center><a href="'+base_url+ response.data.licencia+'"target="_blank">Visualizar</a></center>');
+                            $(pdfViewerFotografiaLicencia).html('<a href="'+base_url+ response.data.licencia+'"target="_blank">Ver pantalla completa<object> <embed src="'+base_url+ response.data.licencia+'" width="100%" height="300px"/></object></a>');
                         }else{
                             $(pdfViewerFotografiaLicencia).html('<div></div>');
                             $(pdfViewerFotografiaLicencia).html('<a href="'+base_url+ response.data.licencia+'"target="_blank"><div class="img-zoom-container"><img id="fotografialicencia" width="100%" src="' + base_url + response.data.licencia + '"/></a>');
@@ -459,12 +433,6 @@ class Permisos{
                         }
                     }
 
-                    response.data.documentos_adicionales.forEach(element => {
-                        DTDocAdicionales.row.add([
-                            '<center><a href="'+base_url+element.link+element.nombre+'" target="_blank" style="font-size: 18px;">Visualizar archivo</a></center>'
-                        ]).draw(false)	
-                    });
- 
                     id_empleado = response.data.id_persona
                     id_empresa = response.data.id_empresa
                     id_persona_fisica = response.data.id_persona_fisica
@@ -528,24 +496,24 @@ class Permisos{
 
 
 
-                    if(response.data.imagen_factura != null){
+                    if(response.data.numero_factura != null){
                         let ext = response.data.imagen_factura.split('.').pop();
                         if(ext == 'pdf'){
-                            $(pdfViewerfacturaequipo).html('<object> <embed src="'+base_url+ response.data.imagen_factura+'" width="100%" height="300px"/></object><br><center><a href="'+base_url+ response.data.imagen_factura+'"target="_blank">Visualizar</a></center>');
+                            $(pdfViewerfacturaequipo).html('<a href="'+base_url+ response.data.imagen_factura+'"target="_blank">Ver pantalla completa<object> <embed src="'+base_url+ response.data.imagen_factura+'" width="100%" height="300px"/></object></a>');
                         }else{
                             $(pdfViewerfacturaequipo).html('<div></div>');
                             $(pdfViewerfacturaequipo).html('<a href="'+base_url+ response.data.imagen_factura+'"target="_blank"><div class="img-zoom-container"><img id="fotografiaequipo" width="100%" src="' + base_url + response.data.imagen_factura + '"/></a>');
-                        }
 
-                        divFactura.style.display = ''
-                        tipoDocumentoEquipo.value = response.data.documento_factura
-                        noFacturaEquipo.value = response.data.numero_factura
+                            divFactura.style.display = ''
+                            tipoDocumentoEquipo.value = response.data.documento_factura
+                            noFacturaEquipo.value = response.data.numero_factura
+                        }
                     }
 
                     if(response.data.numero_equipo != null){
                         let ext = response.data.imagen_equipo.split('.').pop();
                         if(ext == 'pdf'){
-                            $(pdfViewerherramienta).html('<object> <embed src="'+base_url+ response.data.imagen_equipo+'" width="100%" height="300px"/></object><br><center><a href="'+base_url+ response.data.imagen_equipo+'"target="_blank">Visualizar</a></center>');
+                            $(pdfViewerherramienta).html('<a href="'+base_url+ response.data.imagen_equipo+'"target="_blank">Ver pantalla completa<object> <embed src="'+base_url+ response.data.imagen_equipo+'" width="100%" height="300px"/></object></a>');
                         }else{
                             $(pdfViewerherramienta).html('<div></div>');
                             $(pdfViewerherramienta).html('<a href="'+base_url+ response.data.imagen_equipo+'"target="_blank"><div class="img-zoom-container"><img id="fotografiaherramiento" width="100%" src="' + base_url + response.data.imagen_equipo + '"/></a>');
@@ -555,7 +523,7 @@ class Permisos{
                     if(response.data.imagen_anexo != ""){
                         let ext = response.data.imagen_anexo.split('.').pop();
                         if(ext == 'pdf'){
-                            $(pdfViewerAnexo).html('<object> <embed src="'+base_url+ response.data.imagen_anexo+'" width="100%" height="300px"/></object><br><center><a href="'+base_url+ response.data.imagen_anexo+'"target="_blank">Visualizar</a></center>');
+                            $(pdfViewerAnexo).html('<a href="'+base_url+ response.data.imagen_anexo+'"target="_blank">Ver pantalla completa<object> <embed src="'+base_url+ response.data.imagen_anexo+'" width="100%" height="300px"/></object></a>');
                         }else{
                             $(pdfViewerAnexo).html('<div></div>');
                             $(pdfViewerAnexo).html('<a href="'+base_url+ response.data.imagen_anexo+'"target="_blank"><div class="img-zoom-container"><img id="fotografiaherramiento" width="100%" src="' + base_url + response.data.imagen_anexo + '"/></a>');
@@ -565,7 +533,7 @@ class Permisos{
                     if(response.data.imagen_rf != ""){
                         let ext = response.data.imagen_rf.split('.').pop();
                         if(ext == 'pdf'){
-                            $(pdfViewerRF).html('<object> <embed src="'+base_url+ response.data.imagen_rf+'" width="100%" height="300px"/></object><br><center><a href="'+base_url+ response.data.imagen_rf+'"target="_blank">Visualizar</a></center>');
+                            $(pdfViewerRF).html('<a href="'+base_url+ response.data.imagen_rf+'"target="_blank">Ver pantalla completa<object> <embed src="'+base_url+ response.data.imagen_rf+'" width="100%" height="300px"/></object></a>');
                         }else{
                             $(pdfViewerRF).html('<div></div>');
                             $(pdfViewerRF).html('<a href="'+base_url+ response.data.imagen_rf+'"target="_blank"><div class="img-zoom-container"><img id="fotografiaherramiento" width="100%" src="' + base_url + response.data.imagen_rf + '"/></a>');
@@ -608,12 +576,13 @@ class Permisos{
                     tipoTarjeta.value = response.data.tipo_tarjeta_circulacion
                     noTarjeta.value = response.data.numero_tarjeta_circulacion
                     //vigenciaTarjeta.value = response.data.vigencia_tarjeta_circulacion
-                    //tipoDocumento.value = response.data.tipo_factura
-                    //noFacturaVehiculo.value = response.data.numero_factura
+                    tipoDocumento.value = response.data.tipo_factura
+                    noFacturaVehiculo.value = response.data.numero_factura
                     aseguradora.value = response.data.tipo_aseguradora
                     noPolizaVehiculo.value = response.data.numero_poliza
                     fechaInicio.value = response.data.fecha_inicio_cobertura
                     fechaFin.value = response.data.fecha_fin_cobertura
+                    chofer.value = response.data.chofer
                 
                     if(response.data.observacion != null){
                         txtObservacionVehiculo.value = response.data.observacion

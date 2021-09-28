@@ -129,7 +129,7 @@
                 <tr>
                     <td style="text-align: justify; width: 675; line-height: 1.6; color: red">
                     <br>
-                        A fin de que el titular tenga acceso a la <?php echo mb_convert_case($permiso["data"]->tipo_recinto, MB_CASE_UPPER, $encoding); ?>, este instrumento digital NO acredita relación alguna con la Administración Portuaria Integral de Manzanillo S.A de C.V.
+                        A fin de que el titular tenga acceso a la <?php echo mb_convert_case($permiso["data"]->tipo_recinto, MB_CASE_UPPER, $encoding); ?>, este instrumento digital NO acredita relación alguna con la administración portuaria integral de manzanillo s.a de c.v.
                     </td>
                 </tr>
             </table>

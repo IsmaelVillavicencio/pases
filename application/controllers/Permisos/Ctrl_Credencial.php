@@ -58,11 +58,16 @@ class Ctrl_Credencial extends CI_Controller {
 		foreach ($data["vehiculos"]["data"] as $valor) {
 			$countVechiculo++;
 			$rowVehiculo .= "<tr style='height:26.25pt'>".
-							"<td width=109 	style='border:none;padding:0cm 5.4pt 0cm 5.4pt;height:26.25pt'><p class='FormatoNormal EstiloGeneral'><span>$valor->marca		</span></p></td>".
-							"<td width=109 	style='border:none;padding:0cm 5.4pt 0cm 5.4pt;height:26.25pt'><p class='FormatoNormal EstiloGeneral'><span>$valor->modelo		</span></p></td>".
-							"<td width=89 	style='border:none;padding:0cm 5.4pt 0cm 5.4pt;height:26.25pt'><p class='FormatoNormal EstiloGeneral'><span>$valor->color		</span></p></td>".
-							"<td width=159 	style='border:none;padding:0cm 5.4pt 0cm 5.4pt;height:26.25pt'><p class='FormatoNormal EstiloGeneral'><span>$valor->numero_serie</span></p></td>".
-							"<td width=79 	style='border:none;padding:0cm 5.4pt 0cm 5.4pt;height:26.25pt'><p class='FormatoNormal EstiloGeneral'><span>$valor->numero_placa</span></p></td></tr>";
+							"<td width=65 	style='border:none;padding:0cm 5.4pt 0cm 5.4pt;height:26.25pt'><p class='FormatoNormal EstiloGeneral'><span>$valor->marca		</span></p></td>".
+							"<td width=65 	style='border:none;padding:0cm 5.4pt 0cm 5.4pt;height:26.25pt'><p class='FormatoNormal EstiloGeneral'><span>$valor->modelo		</span></p></td>".
+							"<td width=65 	style='border:none;padding:0cm 5.4pt 0cm 5.4pt;height:26.25pt'><p class='FormatoNormal EstiloGeneral'><span>$valor->color		</span></p></td>".
+							"<td width=135 	style='border:none;padding:0cm 5.4pt 0cm 5.4pt;height:26.25pt'><p class='FormatoNormal EstiloGeneral'><span>$valor->numero_serie</span></p></td>".
+							"<td width=55 	style='border:none;padding:0cm 5.4pt 0cm 5.4pt;height:26.25pt'><p class='FormatoNormal EstiloGeneral'><span>$valor->numero_placa</span></p></td>";
+				if($data["datos"]["data"]->id != 26399 && $data["datos"]["data"]->id != 31645){
+						$rowVehiculo .= "<td width=120 	style='border:none;padding:0cm 5.4pt 0cm 5.4pt;height:26.25pt'><p class='FormatoNormal EstiloGeneral'><span>$valor->chofer		</span></p></td></tr>";
+				} else{
+						$rowVehiculo .= "<td width=120 	style='border:none;padding:0cm 5.4pt 0cm 5.4pt;height:26.25pt'><p class='FormatoNormal EstiloGeneral'><span> Sin responsable </span></p></td></tr>";
+				}
 		};
 		$t_vehiculos = "";
 		if ($rowVehiculo!=""){
@@ -98,7 +103,7 @@ class Ctrl_Credencial extends CI_Controller {
 		$t_materiales = "";
 
 		if ($rowMateriales!=""){
-			$t_materiales = $this->load->view('permisos/t_materiales', array('materiales'=> $rowMateriales), true);
+			$t_materiales = $this->load->view('permisos/t_materiales', array('materiales'=> $rowMateriales, 'responsable' => $data["materiales"]["data"]["info"]->responsable), true);
 		}
 
 		// echo json_encode($t_herramientas);

@@ -1,18 +1,9 @@
-<style>
-    .form-horizontal .control-label {
-        text-align: left!important;
-    }
-    .ml {
-        padding-left: 60px;
-    }
-</style>
-
 <div class="container">
     <div class="row">
         <div class="col-md-12"><h3>Administrar permisos de acceso</h3></div>
     </div>
     <br>
-    <div class="row">
+        <div class="row">
         <div class="col-md-12">
             <a class="btn btn-default" id="btnFiltrar" role="button" data-toggle="collapse" href="#collapseFiltro" aria-expanded="false" aria-controls="collapseExample">Filtrar</a>
             <div class="collapse" id="collapseFiltro">
@@ -41,7 +32,6 @@
                     <label for="f_entidad" class="col-sm-5 control-label">Empresas:</label>
                     <div class="col-sm-7">
                     <select name="f_entidad" id="f_entidad" class="form-control">
-                        <!--option value="" selected >Seleccione</option-->
                     </select>
                     </div>
                 </div>
@@ -65,7 +55,6 @@
                     <label for="f_tpermiso" class="col-sm-5 control-label">Tipo de permiso:</label>
                     <div class="col-sm-7">
                     <select name="f_tpermiso" id="f_tpermiso" class="form-control">
-                        <!--option value="" selected >Seleccione</option-->
                     </select>
                     </div>
                 </div>
@@ -75,7 +64,6 @@
                     <label for="f_estatus" class="col-sm-5 control-label ml">Estatus: </label>
                     <div class="col-sm-7">
                     <select id="f_estatus" name="f_estatus" class="form-control">
-                        <!--option value="" selected>Seleccione</option-->
                     </select>
                     </div>
                 </div>
@@ -98,16 +86,6 @@
                     </div>
                 </div>
             </div>
-            <!--div class="col-md-6">
-                <div class="form-group">
-                    <label for="f_usuario" class="col-sm-5 control-label ml">Usuario: </label>
-                    <div class="col-md-4 col-sm-6">
-                        <select id="f_usuario" class="form-control">
-                            <option value=""></option>
-                        </select>
-                    </div>
-                </div>
-            </div-->
         </div>
         <div class="row mt-4">
             <div class="col-md-6">
@@ -119,20 +97,6 @@
                 </div>
             </div>
         </div>
-        <!--div class="row mt-4">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="f_mOrde" class="col-sm-5 control-label">Método de ordenamiento:</label>
-                    <div class="col-sm-7">
-                    <select name="f_mOrde" id="f_mOrde" class="form-control">
-                        <option value="" selected >Seleccione</option>
-                        <option value="0">Ascendente</option>
-                        <option value="1">Descendente</option>
-                    </select>
-                    </div>
-                </div>
-            </div>
-        </div-->
         <div class="row mt-4">
             <div class="col-md-10">
                 <button class="btn btn-default pull-right" id="limpiarFiltro">Limpiar filtro</button>
@@ -141,45 +105,6 @@
                 <button type="button" class="btn btn-default pull-right" id="btnFiltrarAplicar">Aplicar</button>
             </div>
         </div>
-    
-                <!--form class="form-horizontal" id="formFilter"-->
-                <!--
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="f_nombre" class="col-sm-5 control-label">Nombre:</label>
-                                <div class="col-sm-7">
-                                <input type="text" class="form-control" name="f_nombre" id="f_nombre" >
-                                </div>
-                            </div>
-                        </div>
-                        -->
-                        <!--div class="col-md-6">
-                        <div class="form-group">
-                                <label for="f_placa" class="col-sm-5 control-label">Placa: </label>
-                                <div class="col-sm-7">
-                                <input type="text" class="form-control" id="f_placa" name="f_placa" >
-                                </div>
-                            </div>
-                        </div>
-                
-                    
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="f_noSerie" class="col-sm-5 control-label ml">Número de serie:</label>
-                                <div class="col-sm-7">
-                                <input type="text" class="form-control" id="f_noSerie" name="f_noSerie" >
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                        <div class="form-group">
-                                <label for="f_marca" class="col-sm-5 control-label">Marca: </label>
-                                <div class="col-sm-7">
-                                <input type="text" class="form-control" id="f_marca" name="f_marca" >
-                                </div>
-                            </div>
-                        </div-->
-                        <!--/form-->
             </div>
         </div>
     </div>
@@ -188,7 +113,7 @@
         <div class="col-md-12" id="btnRegistrar">
             <a href="#!" class="btn btn-default" id="btnRegistrarPermiso">Registrar permiso</a>
         </div>
-    </div>  
+    </div>
     <br>
     <div class="row">
         <div class="col-md-12 table-responsive">

@@ -1,6 +1,6 @@
 //VARIABLES GLOBALES
 const id_permiso = localStorage.getItem("id_permiso");
-let DTVehiculos, DTPersonal, DTEquipoHerramienta, DTMaterial, DTDocAdicionales;
+let DTVehiculos, DTPersonal, DTEquipoHerramienta, DTMaterial;
 var id_empleado, id_empresa, id_persona_fisica, id_equipo, id_vehiculo, id_lista, var_id_estatus_pase;
 var noSerieVehiculo, noPlacaVehiculo;
 
@@ -46,69 +46,33 @@ class Permisos {
 			"url": "https://cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
 			}
         });
-        DTDocAdicionales = $(tabDocumentosAdicionales).DataTable({
-            "language": {
-                "url": "https://cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
-            },
-            "lengthChange": false,
-            "searching": false,
-            "pageLength": 5,
-            "columnDefs": [
-                { "width": "100%", "targets": 0 }
-            ]
-        });
         //Modal persona
-        rechazar_persona.addEventListener('click', (ev) => {
-            this.rechazar_persona(ev);
-        });
-        verificar_persona.addEventListener('click', (ev) => {
-            this.verificar_persona(ev);
-        });
+        rechazar_persona.addEventListener('click', this.rechazar_persona)
+        verificar_persona.addEventListener('click', this.verificar_persona)
         //Modal equipo
         //rechazar_equipo.addEventListener('click', this.rechazar_equipo)
-        rechazar_equipo.addEventListener('click', (ev) => {
-            this.habilitar_motivos(ev);
-        });
-        verificar_equipo.addEventListener('click', (ev) => {
-            this.verificar_equipo(ev);
-        });
+        rechazar_equipo.addEventListener('click', this.habilitar_motivos)
+        verificar_equipo.addEventListener('click', this.verificar_equipo)
         //Modal vehiuclos
-        rechazar_vehiculo.addEventListener('click', (ev) => {
-            this.rechazar_vehiculo(ev);
-        });
-        verificar_vehiculo.addEventListener('click',(ev) => {
-            this.verificar_vehiculo(ev);
-        });
+        rechazar_vehiculo.addEventListener('click', this.rechazar_vehiculo)
+        verificar_vehiculo.addEventListener('click', this.verificar_vehiculo)
         //Modal vehiuclos
-        rechazar_material.addEventListener('click', (ev) => {
-            this.rechazar_material(ev);
-        });
-        validar_material.addEventListener('click', (ev) => {
-            this.verificar_material(ev);
-        });
+        rechazar_material.addEventListener('click', this.rechazar_material)
+        validar_material.addEventListener('click', this.verificar_material)
         //Boton validar permiso
-        validar_permiso.addEventListener('click', (ev) => {
-            this.solicitud_validada(ev);
-        });
-        //enviar_migracion.addEventListener('click', this.solicitud_migracion)
-        rechazar_permiso.addEventListener('click', (ev) => {
-            this.confirmar_rechazo(ev);
-        });
+        validar_permiso.addEventListener('click', this.solicitud_validada)
+        enviar_migracion.addEventListener('click', this.solicitud_migracion)
+        rechazar_permiso.addEventListener('click', this.confirmar_rechazo)
         
-        confirmar_baja.addEventListener('click', (ev) => {
-            this.solicitud_rechazada(ev);
-        });
+        confirmar_baja.addEventListener('click', this.solicitud_rechazada)
 
-        aceptar_autorizaciones.addEventListener('click', ()=>{
-            window.location.href = base_url + 'Permisos/Ctrl_Permisos';
-        })
 
         $(motivosRechazo).select2({placeholder : 'Seleccione'});
         //$('#selArea').val(areas).trigger('change');
 
-        /*if(Area == 6 || Area == 7){
+        if(Area == 6 || Area == 7){
             labelEnviarMigracion.style.display = 'none'
-        }*/
+        }
     }
     obtener_datos_contrato() {
         $.ajax({
@@ -152,9 +116,9 @@ class Permisos {
                     }
                     var_id_estatus_pase = response.data.id_estatus_pase
 
-                    /*if(response.data.id_estatus_pase != 1 && response.data.id_estatus_pase != 2){
+                    if(response.data.id_estatus_pase != 1 && response.data.id_estatus_pase != 2){
                         labelEnviarMigracion.style.display = 'none'
-                    }*/
+                    }
                 }
             }
         }).fail(function (response) {
@@ -249,8 +213,8 @@ class Permisos {
                             '<center>'+element.modelo+'</center>',
                             '<center>'+element.marca+'</center>',
                             '<center>'+element.numero_serie+'</center>',
-                            '<center><span class="fz-regular" id="estatus_validarEquipo'+element.id+'">'+element.estatus+'</span></center>',
-                            '<center><span class="fz-regular" id="nombre_validarEquipo'+element.id+'">'+element.validadopor+'</span></center>',
+                            '<center><span style="font-size: 12px;" id="estatus_validarEquipo'+element.id+'">'+element.estatus+'</span></center>',
+                            '<center><span style="font-size: 12px;" id="nombre_validarEquipo'+element.id+'">'+element.validadopor+'</span></center>',
                             '<div class="d-flex justify-content-center">'+
                                 consultar+
                                 validar+
@@ -292,8 +256,7 @@ class Permisos {
                             '<center>'+element.tipo_material+'</center>',
                             '<center>'+element.descripcion+'</center>',
                             '<center>'+element.cantidad+'</center>',
-                            '<center>'+(element.tipo_medida == null ? '' : element.tipo_medida)+'</center>',
-                            '<center><a href="'+base_url+'assets/uploads/permisos/materiales/'+element.material_fotografia+'" target="_blank">Visualizar archivo</center>'
+                            '<center>'+(element.tipo_medida == null ? '' : element.tipo_medida)+'</center>'
                         ]).draw(false)
                     })
                 }
@@ -305,7 +268,7 @@ class Permisos {
 
         });
     }
-    obtenerVehiculo(ev){
+    obtenerVehiculo(){
         $.ajax({
             url: base_url + 'Permisos/Ctrl_Permisos/getVehiculos',
             type: 'GET',
@@ -338,13 +301,13 @@ class Permisos {
 
                         DTVehiculos.row.add([
                             '<center>'+element.numero_serie+'</center>',
-                            '<center>'+(element.numero_placa != '' ? element.numero_placa : element.tv_placa)+'</center>',
+                            '<center>'+element.numero_placa+'</center>',
                             '<center>'+element.marca+'</center>',
                             '<center>'+element.modelo+'</center>',
                             '<center>'+element.anio+'</center>',
-                            '<center>'+(element.color != '' ? element.color : element.tv_color)+'</center>',
-                            '<center><span class="fz-regular" id="estatus_validarVehiculo'+element.id+'">'+element.estatus+'</span></center>',
-                            '<center><span class="fz-regular" id="nombre_validarVehiculo'+element.id+'">'+element.validadopor+'</span></center>',
+                            '<center>'+element.color+'</center>',
+                            '<center><span style="font-size: 12px;" id="estatus_validarVehiculo'+element.id+'">'+element.estatus+'</span></center>',
+                            '<center><span style="font-size: 12px;" id="nombre_validarVehiculo'+element.id+'">'+element.validadopor+'</span></center>',
                             '<div class="d-flex justify-content-center">'+
                                 consultar+
                                 validar+
@@ -374,8 +337,6 @@ class Permisos {
                 $(pdfViewerFotografiaPersonal).html('')
                 $(pdfViewerFotografiaIdentificacion).html('')
                 $(pdfViewerFotografiaLicencia).html('')
-
-                DTDocAdicionales.clear().draw()
             },
             success: function (response) {
                 if (response.data != "") {
@@ -386,17 +347,6 @@ class Permisos {
                         verificar_persona.style.display = 'none';
                         cerrar_persona.style.display = 'block';
                     }
-
-                    if(response.data.id_tipo_seguro == 1){
-                        labelSeguro.innerHTML = 'NSS:'
-                    }
-                    if(response.data.id_tipo_seguro == 2){
-                        labelSeguro.innerHTML = 'ISSSTE:'
-                    }
-                    if(response.data.id_tipo_seguro == 3){
-                        labelSeguro.innerHTML = 'No. Seguro:'
-                    }
-
                     nss.value = response.data.nss
                     nombre.value = response.data.nombre
                     curp.value = response.data.curp
@@ -408,8 +358,6 @@ class Permisos {
                     clavePatronal.value = response.data.clave_patronal
                     //estatus.value = (response.data.estatus == 1 ? 'Activo' : 'Inactiva')
                     let mensaje_observacion = ''
-                    txtObservacionPersonal.classList.remove("lectura");
-                    txtObservacionPersonal.disabled = false
                     if(response.data.estatus_pase != 6 && response.data.estatus_pase_migracion != 9){
                         if(response.data.estatus_pase != 6){
                             txtObservacionPersonal.classList.add("lectura");
@@ -417,12 +365,12 @@ class Permisos {
                             mensaje_observacion += 'API: '+response.data.observacion
                         }
                         if(response.data.estatus_pase != 6 && (response.data.estatus_pase_migracion != 9 && response.data.estatus_pase_migracion != null)){
-                            mensaje_observacion += "\n"
+                            mensaje_observacion += "\n\n"
                         }
                         if(response.data.estatus_pase_migracion != 9 && response.data.estatus_pase_migracion != null){
                             txtObservacionPersonal.classList.add("lectura");
                             txtObservacionPersonal.disabled = true
-                            mensaje_observacion += 'Migración: '+response.data.observacion_migracion
+                            mensaje_observacion += 'Migracion: '+response.data.observacion_migracion
                         }
                     }
                     txtObservacionPersonal.value = mensaje_observacion
@@ -464,7 +412,7 @@ class Permisos {
                     if(response.data.fotopersonal != null){
                         let ext = response.data.fotopersonal.split('.').pop();
                         if(ext == 'pdf'){
-                            $(pdfViewerFotografiaPersonal).html('<object> <embed src="'+base_url+ response.data.fotopersonal+'" width="100%" height="300px"/></object>');
+                            $(pdfViewerFotografiaPersonal).html('<a href="'+base_url+ response.data.fotopersonal+'"target="_blank">Ver pantalla completa<object> <embed src="'+base_url+ response.data.fotopersonal+'" width="100%" height="300px"/></object></a>');
                         }else{
                             $(pdfViewerFotografiaPersonal).html('<div></div>');
                             $(pdfViewerFotografiaPersonal).html('<a href="'+base_url+ response.data.fotopersonal+'"target="_blank"><div class="img-zoom-container"><img id="fotografiapersonal" width="100%" src="' + base_url + response.data.fotopersonal + '"/></a>');
@@ -478,7 +426,7 @@ class Permisos {
                     if(response.data.identificacion != null){
                         let ext = response.data.identificacion.split('.').pop();
                         if(ext == 'pdf'){
-                            $(pdfViewerFotografiaIdentificacion).html('<object> <embed src="'+base_url+ response.data.identificacion+'" width="100%" height="300px"/></object><br><center><a href="'+base_url+ response.data.identificacion+'"target="_blank"><div class="img-zoom-container">Visualizar</a></center>');
+                            $(pdfViewerFotografiaIdentificacion).html('<a href="'+base_url+ response.data.identificacion+'"target="_blank">Ver pantalla completa<object> <embed src="'+base_url+ response.data.identificacion+'" width="100%" height="300px"/></object></a>');
                         }else{
                             $(pdfViewerFotografiaIdentificacion).html('<div></div>');
                             $(pdfViewerFotografiaIdentificacion).html('<a href="'+base_url+ response.data.identificacion+'"target="_blank"><div class="img-zoom-container"><img id="fotografiaidentificacion" width="100%" src="' + base_url + response.data.identificacion + '"/></a>');
@@ -489,10 +437,10 @@ class Permisos {
                             }
                         }
                     }
-                    if(response.data.licencia != ''){
+                    if(response.data.licencia != null){
                         let ext = response.data.licencia.split('.').pop();
                         if(ext == 'pdf'){
-                            $(pdfViewerFotografiaLicencia).html('<object> <embed src="'+base_url+ response.data.licencia+'" width="100%" height="300px"/></object><br><center><a href="'+base_url+ response.data.licencia+'"target="_blank"><div class="img-zoom-container">Visualizar</a></center>');
+                            $(pdfViewerFotografiaLicencia).html('<a href="'+base_url+ response.data.licencia+'"target="_blank">Ver pantalla completa<object> <embed src="'+base_url+ response.data.licencia+'" width="100%" height="300px"/></object></a>');
                         }else{
                             $(pdfViewerFotografiaLicencia).html('<div></div>');
                             $(pdfViewerFotografiaLicencia).html('<a href="'+base_url+ response.data.licencia+'"target="_blank"><div class="img-zoom-container"><img id="fotografialicencia" width="100%" src="' + base_url + response.data.licencia + '"/></a>');
@@ -504,19 +452,12 @@ class Permisos {
                         }
                     }
 
-                    response.data.documentos_adicionales.forEach(element => {
-                        DTDocAdicionales.row.add([
-                            '<center><a href="'+base_url+element.link+element.nombre+'" target="_blank" style="font-size: 18px;">Visualizar archivo</a></center>'
-                        ]).draw(false)	
-                    });
-
                     id_empleado = response.data.id_persona
                     id_empresa = response.data.id_empresa
                     id_persona_fisica = response.data.id_persona_fisica
                 }
             },
             complete: function () {
-                $(modal_autorizar_permiso_personal).css('margin-top', ajuste_altura_modal(ev));
                 $(modal_autorizar_permiso_personal).modal('show');
             }
         }).fail(function (response) {
@@ -578,23 +519,24 @@ class Permisos {
 
 
 
-                    if(response.data.imagen_factura != null){
+                    if(response.data.numero_factura != null){
                         let ext = response.data.imagen_factura.split('.').pop();
                         if(ext == 'pdf'){
-                            $(pdfViewerfacturaequipo).html('<object> <embed src="'+base_url+ response.data.imagen_factura+'" width="100%" height="300px"/></object><br><center><a href="'+base_url+ response.data.imagen_factura+'"target="_blank">Visualizar</a></center>');
+                            $(pdfViewerfacturaequipo).html('<a href="'+base_url+ response.data.imagen_factura+'"target="_blank">Ver pantalla completa<object> <embed src="'+base_url+ response.data.imagen_factura+'" width="100%" height="300px"/></object></a>');
                         }else{
                             $(pdfViewerfacturaequipo).html('<div></div>');
                             $(pdfViewerfacturaequipo).html('<a href="'+base_url+ response.data.imagen_factura+'"target="_blank"><div class="img-zoom-container"><img id="fotografiaequipo" width="100%" src="' + base_url + response.data.imagen_factura + '"/></a>');
+
+                            divFactura.style.display = ''
+                            tipoDocumentoEquipo.value = response.data.documento_factura
+                            noFacturaEquipo.value = response.data.numero_factura
                         }
-                        divFactura.style.display = ''
-                        tipoDocumentoEquipo.value = response.data.documento_factura
-                        noFacturaEquipo.value = response.data.numero_factura
                     }
 
                     if(response.data.numero_equipo != null){
                         let ext = response.data.imagen_equipo.split('.').pop();
                         if(ext == 'pdf'){
-                            $(pdfViewerherramienta).html('<object> <embed src="'+base_url+ response.data.imagen_equipo+'" width="100%" height="300px"/></object><br><center><a href="'+base_url+ response.data.imagen_equipo+'"target="_blank">Visualizar</a></center>');
+                            $(pdfViewerherramienta).html('<a href="'+base_url+ response.data.imagen_equipo+'"target="_blank">Ver pantalla completa<object> <embed src="'+base_url+ response.data.imagen_equipo+'" width="100%" height="300px"/></object></a>');
                         }else{
                             $(pdfViewerherramienta).html('<div></div>');
                             $(pdfViewerherramienta).html('<a href="'+base_url+ response.data.imagen_equipo+'"target="_blank"><div class="img-zoom-container"><img id="fotografiaherramiento" width="100%" src="' + base_url + response.data.imagen_equipo + '"/></a>');
@@ -604,7 +546,7 @@ class Permisos {
                     if(response.data.imagen_anexo != ""){
                         let ext = response.data.imagen_anexo.split('.').pop();
                         if(ext == 'pdf'){
-                            $(pdfViewerAnexo).html('<object> <embed src="'+base_url+ response.data.imagen_anexo+'" width="100%" height="300px"/></object><br><center><a href="'+base_url+ response.data.imagen_anexo+'"target="_blank">Visualizar</a></center>');
+                            $(pdfViewerAnexo).html('<a href="'+base_url+ response.data.imagen_anexo+'"target="_blank">Ver pantalla completa<object> <embed src="'+base_url+ response.data.imagen_anexo+'" width="100%" height="300px"/></object></a>');
                         }else{
                             $(pdfViewerAnexo).html('<div></div>');
                             $(pdfViewerAnexo).html('<a href="'+base_url+ response.data.imagen_anexo+'"target="_blank"><div class="img-zoom-container"><img id="fotografiaherramiento" width="100%" src="' + base_url + response.data.imagen_anexo + '"/></a>');
@@ -614,7 +556,7 @@ class Permisos {
                     if(response.data.imagen_rf != ""){
                         let ext = response.data.imagen_rf.split('.').pop();
                         if(ext == 'pdf'){
-                            $(pdfViewerRF).html('<object> <embed src="'+base_url+ response.data.imagen_rf+'" width="100%" height="300px"/></object><br><center><a href="'+base_url+ response.data.imagen_rf+'"target="_blank">Visualizar</a></center>');
+                            $(pdfViewerRF).html('<a href="'+base_url+ response.data.imagen_rf+'"target="_blank">Ver pantalla completa<object> <embed src="'+base_url+ response.data.imagen_rf+'" width="100%" height="300px"/></object></a>');
                         }else{
                             $(pdfViewerRF).html('<div></div>');
                             $(pdfViewerRF).html('<a href="'+base_url+ response.data.imagen_rf+'"target="_blank"><div class="img-zoom-container"><img id="fotografiaherramiento" width="100%" src="' + base_url + response.data.imagen_rf + '"/></a>');
@@ -628,7 +570,6 @@ class Permisos {
                         rf.value = response.data.rf
                         descripcionEquipo.value = response.data.descripcion
                     }
-                    $(modal_autorizar_permiso_equipo).css('margin-top', ajuste_altura_modal(ev));
                     $(modal_autorizar_permiso_equipo).modal('show');
                 }
             },
@@ -658,12 +599,13 @@ class Permisos {
                     tipoTarjeta.value = response.data.tipo_tarjeta_circulacion
                     noTarjeta.value = response.data.numero_tarjeta_circulacion
                     //vigenciaTarjeta.value = response.data.vigencia_tarjeta_circulacion
-                    //tipoDocumento.value = response.data.tipo_factura
-                    //noFacturaVehiculo.value = response.data.numero_factura
+                    tipoDocumento.value = response.data.tipo_factura
+                    noFacturaVehiculo.value = response.data.numero_factura
                     aseguradora.value = response.data.tipo_aseguradora
                     noPolizaVehiculo.value = response.data.numero_poliza
                     fechaInicio.value = response.data.fecha_inicio_cobertura
                     fechaFin.value = response.data.fecha_fin_cobertura
+                    chofer.value = response.data.chofer
 
                     if(Area != 5){
                         txtObservacionEquipo.classList.add("lectura");
@@ -694,7 +636,6 @@ class Permisos {
 
                     }
 
-                    $(modal_autorizar_permiso_vehiculo).css('margin-top', ajuste_altura_modal(ev));
                     $(modal_autorizar_permiso_vehiculo).modal('show');
                 }
             },
@@ -794,7 +735,7 @@ class Permisos {
             }
         })
     }
-    rechazar_persona(ev){
+    rechazar_persona(){
         let estatus_validacion
         let mensage_validacion = ''
         if(Area == 5){
@@ -803,11 +744,7 @@ class Permisos {
         }
         if(Area == 7){
             estatus_validacion = 8
-            mensage_validacion = 'Rechazado Migración'
-        }
-
-        if(txtObservacionPersonal.value == ''){
-            
+            mensage_validacion = 'Rechazado Migracion'
         }
         let datos = {
             id_permiso: id_permiso,
@@ -827,7 +764,7 @@ class Permisos {
                 csrf.value = response.token;
                 txtObservacionPersonal.value = ''
                 validar_permiso.style.display = 'none'
-                //labelEnviarMigracion.style.display = 'none'
+                labelEnviarMigracion.style.display = 'none'
                 rechazar_permiso.style.display = 'none'
                 let element1 = document.getElementById('validarPersona'+id_empleado)
                 let element2 = document.getElementById('estatus_validarPersona'+id_empleado)
@@ -837,14 +774,11 @@ class Permisos {
                 element2.innerHTML = mensage_validacion
                 if(response.data.nombre != null)
                     element3.innerHTML += response.data.nombre
-                $(modal_autorizar_permiso_personal).css('margin-top', ajuste_altura_modal(ev));
-                $(modal_autorizar_permiso_personal).modal('toggle');
-                $(modal_registro_exitoso).css('margin-top', ajuste_altura_modal(ev));
+                $(modal_autorizar_permiso_personal).modal('toggle'); 
                 registro_exitoso();
                 Permisos.prototype.validar_faltantes();
             },
             error: (xhr, ajaxOptions, thrownError) =>{
-                $(modal_error).css('margin-top', ajuste_altura_modal(ev));
                 peticion_fallida(thrownError);
                 csrf.value = xhr.responseJSON.token;
             }
@@ -854,7 +788,7 @@ class Permisos {
             }
         })
     }
-    verificar_persona(ev){
+    verificar_persona(){
         let estatus_validacion
         let mensage_validacion = ''
         if(Area == 5){
@@ -863,7 +797,7 @@ class Permisos {
         }
         if(Area == 7){
             estatus_validacion = 7
-            mensage_validacion = 'Validado Migración'
+            mensage_validacion = 'Validado Migracion'
         }
         let datos = {
             id_permiso: id_permiso,
@@ -890,14 +824,11 @@ class Permisos {
                 element2.innerHTML = mensage_validacion
                 if(response.data.nombre != null)
                     element3.innerHTML += response.data.nombre
-                $(modal_autorizar_permiso_personal).css('margin-top', ajuste_altura_modal(ev));
                 $(modal_autorizar_permiso_personal).modal('toggle');
-                $(modal_registro_exitoso).css('margin-top', ajuste_altura_modal(ev));
                 registro_exitoso();
                 Permisos.prototype.validar_faltantes();
             },
             error: (xhr, ajaxOptions, thrownError) =>{
-                $(modal_error).css('margin-top', ajuste_altura_modal(ev));
                 peticion_fallida(thrownError);
                 csrf.value = xhr.responseJSON.token;
             }
@@ -907,12 +838,12 @@ class Permisos {
             }
         })
     }
-    habilitar_motivos(ev){
+    habilitar_motivos(){
         divMotivosRechazo.style.display=""
         rechazar_equipo.removeEventListener('click',Permisos.prototype.habilitar_motivos)
-        rechazar_equipo.addEventListener('click', Permisos.prototype.rechazar_equipo(ev))
+        rechazar_equipo.addEventListener('click', Permisos.prototype.rechazar_equipo)
     }
-    rechazar_equipo(ev){
+    rechazar_equipo(){
         let mensage_validacion = 'Rechazado Aduana'
         let datos = {
             id_permiso: id_permiso,
@@ -932,7 +863,7 @@ class Permisos {
                 csrf.value = response.token;
                 txtObservacionEquipo.value = ''
                 validar_permiso.style.display = 'none'
-                //labelEnviarMigracion.style.display = 'none'
+                labelEnviarMigracion.style.display = 'none'
                 rechazar_permiso.style.display = 'none'
                 let element1 = document.getElementById('validarEquipo'+id_equipo)
                 let element2 = document.getElementById('estatus_validarEquipo'+id_equipo)
@@ -942,9 +873,7 @@ class Permisos {
                 element2.innerHTML = mensage_validacion
                 if(response.data.nombre != null)
                 element3.innerHTML = response.data.nombre
-                $(modal_autorizar_permiso_equipo).css('margin-top', ajuste_altura_modal(ev));
                 $(modal_autorizar_permiso_equipo).modal('toggle');
-                $(modal_registro_exitoso).css('margin-top', ajuste_altura_modal(ev));
                 registro_exitoso();
                 Permisos.prototype.validar_faltantes();
             },
@@ -954,7 +883,6 @@ class Permisos {
                 rechazar_equipo.addEventListener('click', Permisos.prototype.habilitar_motivos)
             },
             error: (xhr, ajaxOptions, thrownError) =>{
-                $(modal_error).css('margin-top', ajuste_altura_modal(ev));
                 peticion_fallida(thrownError);
                 csrf.value = xhr.responseJSON.token;
             }
@@ -964,7 +892,7 @@ class Permisos {
             }
         })
     }
-    verificar_equipo(ev){
+    verificar_equipo(){
         let mensage_validacion = 'Validado Aduana'
         let datos = {
             id_permiso: id_permiso,
@@ -991,14 +919,11 @@ class Permisos {
                 element2.innerHTML = mensage_validacion
                 if(response.data.nombre != null)
                 element3.innerHTML = response.data.nombre
-                $(modal_autorizar_permiso_equipo).css('margin-top', ajuste_altura_modal(ev));
                 $(modal_autorizar_permiso_equipo).modal('toggle');
-                $(modal_registro_exitoso).css('margin-top', ajuste_altura_modal(ev));
                 registro_exitoso();
                 Permisos.prototype.validar_faltantes();
             },
             error: (xhr, ajaxOptions, thrownError) =>{
-                $(modal_error).css('margin-top', ajuste_altura_modal(ev));
                 peticion_fallida(thrownError);
                 csrf.value = xhr.responseJSON.token;
             }
@@ -1008,7 +933,7 @@ class Permisos {
             }
         })
     }
-    rechazar_material(ev){
+    rechazar_material(){
         let mensage_validacion = 'Rechazado Aduana'
         let datos = {
             id_permiso: id_permiso,
@@ -1027,18 +952,16 @@ class Permisos {
                 csrf.value = response.token;
                 //txtObservacionMaterial.value = ''
                 validar_permiso.style.display = 'none'
-                //labelEnviarMigracion.style.display = 'none'
+                labelEnviarMigracion.style.display = 'none'
                 rechazar_permiso.style.display = 'none'
                 estatus_validarMaterial.value = mensage_validacion
                 if(response.data.nombre != null)
                 nombre_validarMaterial.value = response.data.nombre
                 divValidarMaterial.style.display = 'none'
-                $(modal_registro_exitoso).css('margin-top', ajuste_altura_modal(ev));
                 registro_exitoso();
                 Permisos.prototype.validar_faltantes();
             },
             error: (xhr, ajaxOptions, thrownError) =>{
-                $(modal_error).css('margin-top', ajuste_altura_modal(ev));
                 peticion_fallida(thrownError);
                 csrf.value = xhr.responseJSON.token;
             }
@@ -1048,7 +971,7 @@ class Permisos {
             }
         })
     }
-    verificar_material(ev){
+    verificar_material(){
         let mensage_validacion = 'Validado Aduana'
         let datos = {
             id_permiso: id_permiso,
@@ -1069,12 +992,10 @@ class Permisos {
                 if(response.data.nombre != null)
                 nombre_validarMaterial.value = response.data.nombre
                 divValidarMaterial.style.display = 'none'
-                $(modal_registro_exitoso).css('margin-top', ajuste_altura_modal(ev));
                 registro_exitoso();
                 Permisos.prototype.validar_faltantes();
             },
             error: (xhr, ajaxOptions, thrownError) =>{
-                $(modal_error).css('margin-top', ajuste_altura_modal(ev));
                 peticion_fallida(thrownError);
                 csrf.value = xhr.responseJSON.token;
             }
@@ -1084,7 +1005,7 @@ class Permisos {
             }
         })
     }
-    rechazar_vehiculo(ev){
+    rechazar_vehiculo(){
         let mensage_validacion = 'Rechazado API'
         let datos = {
             id_permiso: id_permiso,
@@ -1104,7 +1025,7 @@ class Permisos {
                 csrf.value = response.token;
                 txtObservacionVehiculo.value = ''
                 validar_permiso.style.display = 'none'
-                //labelEnviarMigracion.style.display = 'none'
+                labelEnviarMigracion.style.display = 'none'
                 rechazar_permiso.style.display = 'none'
                 let element1 = document.getElementById('validarVehiculo'+id_vehiculo)
                 let element2 = document.getElementById('estatus_validarVehiculo'+id_vehiculo)
@@ -1114,14 +1035,11 @@ class Permisos {
                 element2.innerHTML = mensage_validacion
                 if(response.data.nombre != null)
                 element3.innerHTML = response.data.nombre
-                $(modal_autorizar_permiso_vehiculo).css('margin-top', ajuste_altura_modal(ev));
                 $(modal_autorizar_permiso_vehiculo).modal('toggle');
-                $(modal_registro_exitoso).css('margin-top', ajuste_altura_modal(ev));
                 registro_exitoso();
                 Permisos.prototype.validar_faltantes();
             },
             error: (xhr, ajaxOptions, thrownError) =>{
-                $(modal_error).css('margin-top', ajuste_altura_modal(ev));
                 peticion_fallida(thrownError);
                 csrf.value = xhr.responseJSON.token;
             }
@@ -1131,7 +1049,7 @@ class Permisos {
             }
         })
     }
-    verificar_vehiculo(ev){
+    verificar_vehiculo(){
         let mensage_validacion = 'Validado API'
         let datos = {
             id_permiso: id_permiso,
@@ -1158,14 +1076,11 @@ class Permisos {
                 element2.innerHTML = mensage_validacion
                 if(response.data.nombre != null)
                 element3.innerHTML = response.data.nombre
-                $(modal_autorizar_permiso_vehiculo).css('margin-top', ajuste_altura_modal(ev));
                 $(modal_autorizar_permiso_vehiculo).modal('toggle');
-                $(modal_registro_exitoso).css('margin-top', ajuste_altura_modal(ev));
                 registro_exitoso();
                 Permisos.prototype.validar_faltantes();
             },
             error: (xhr, ajaxOptions, thrownError) =>{
-                $(modal_error).css('margin-top', ajuste_altura_modal(ev));
                 peticion_fallida(thrownError);
                 csrf.value = xhr.responseJSON.token;
             }
@@ -1175,7 +1090,7 @@ class Permisos {
             }
         })
     }
-    validar_faltantes(ev){
+    validar_faltantes(){
         let personas = false
         let vechiculos = false
         let equipos = false
@@ -1247,15 +1162,13 @@ class Permisos {
             data: datos,
             success: function(response){
                 csrf.value = response.token;
-                $(modal_registro_exitoso_autorizaciones).css('margin-top', ajuste_altura_modal(ev));
-                registro_exitoso_autorizaciones();
+                registro_exitoso();
                 validar_permiso.style.display = 'none'
-                //labelEnviarMigracion.style.display = 'none'
-                //enviar_migracion.disabled = true
+                labelEnviarMigracion.style.display = 'none'
+                enviar_migracion.disabled = true
                 rechazar_permiso.style.display = 'none'
             },
             error: (xhr, ajaxOptions, thrownError) =>{
-                $(modal_error).css('margin-top', ajuste_altura_modal(ev));
                 peticion_fallida(thrownError);
                 csrf.value = xhr.responseJSON.token;
             }
@@ -1266,7 +1179,6 @@ class Permisos {
         })
     }
     confirmar_rechazo(ev){
-        $("#modal_confirmar_baja_motivo").css('margin-top', ajuste_altura_modal(ev));
         pedir_confirmacion_eliminar_motivo()
     }
     solicitud_rechazada(ev){
@@ -1288,14 +1200,12 @@ class Permisos {
             },
             success: function(response){
                 csrf.value = response.token;
-                $(modal_registro_exitoso_autorizaciones).css('margin-top', ajuste_altura_modal(ev));
-                registro_exitoso_autorizaciones();
+                registro_exitoso();
                 validar_permiso.style.display = 'none'
-                //labelEnviarMigracion.style.display = 'none'
+                labelEnviarMigracion.style.display = 'none'
                 rechazar_permiso.style.display = 'none'
             },
             error: (xhr, ajaxOptions, thrownError) =>{
-                $(modal_error).css('margin-top', ajuste_altura_modal(ev));
                 peticion_fallida(thrownError);
                 csrf.value = xhr.responseJSON.token;
             }
@@ -1305,7 +1215,7 @@ class Permisos {
             }
         })
     }
-    /*solicitud_migracion(ev){
+    solicitud_migracion(ev){
         let datos = {
             idpermiso: id_permiso,
             [csrf.name] : csrf.value
@@ -1320,7 +1230,7 @@ class Permisos {
             success: function(response){
                 csrf.value = response.token;
                 registro_exitoso("Se ha enviado a migracion");
-                //labelEnviarMigracion.style.display = 'none'
+                labelEnviarMigracion.style.display = 'none'
             },
             error: (xhr, ajaxOptions, thrownError) =>{
                 peticion_fallida(thrownError);
@@ -1331,7 +1241,7 @@ class Permisos {
                 error_sesion();
             }
         })
-    }*/
+    }
 }
 const permiso = new Permisos();
 

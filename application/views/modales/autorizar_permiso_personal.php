@@ -25,7 +25,7 @@
                     <div class="col-md-8">
                         <div class="row">
                             <div class="col-md-6 col-sm-6">
-                                <span id="labelSeguro">NSS:</span>
+                                NSS:
                                 <input type="text" id="nss" class="lectura" value="" disabled>
                             </div>
                             <div class="col-md-6 col-sm-6">
@@ -125,22 +125,6 @@
                             <div class="col-xs-12">
                                     Observaciones:
                                 <textarea name="txtObservacion" id="txtObservacionPersonal" cols="2" rows="10" style="width:100%; resize: none;"></textarea>
-                            </div>
-                        </div>
-                        <div class="row  mt-4">
-                            <div class="col-sm-12">
-                                Documentos adicionales
-                            </div>
-                            <div class="col-sm-12">
-                                <table id="tabDocumentosAdicionales" class="table table-striped table-bordered" width="100%">
-                                    <thead>
-                                        <tr>
-                                            <th width=100%>Documento</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    </tbody>
-                                </table>
                             </div>
                         </div>
                     </div>

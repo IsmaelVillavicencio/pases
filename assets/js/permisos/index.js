@@ -1,4 +1,5 @@
 var DTPermisos;
+let permisosCancelar = []
 let datosFiltro = {}
 let fecha_catual = new Date().toISOString().split("T")[0];
 const url_regreso = localStorage.getItem("url_regreso");
@@ -30,16 +31,16 @@ class Permisos{
             if (ev.keyCode == 219)
                 ev.preventDefault();
         })
-        f_nombre.addEventListener('keydown',(ev)=>{
+        /*f_usuario.addEventListener('keydown',(ev)=>{
             if (ev.keyCode == 219)
                 ev.preventDefault();
-        })
+        })*/
         limpiarFiltro.addEventListener('click',(ev)=>{
             Permisos.prototype.obtenerDatosTabla();
             f_fecha_inicio.value = ""
             f_fecha_final.value = ""
             f_noSolicitud.value = ""
-            f_nombre.value = ""
+            //f_usuario.value = ""
             f_entidad.value = ""
             f_vigencia.value = ""
             f_tpermiso.value = ""
@@ -56,7 +57,7 @@ class Permisos{
 			"language": {
 			"url": "https://cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Spanish.json"
 			},
-			"order": [[ 0, "desc" ]]
+			//"order": [[ 0, "desc" ]]
         });
         confirmar_baja.addEventListener("click",this.confirmarbaja)
         if(typeof btnRegistrar !== 'undefined' && idcontratovigenteusuario == 0){
@@ -72,7 +73,9 @@ class Permisos{
             
         }
         //if(Area != 8){
-            btnFiltrarAplicar.addEventListener('click',this.obtenerDatosTabla)
+            btnFiltrarAplicar.addEventListener('click',()=>{
+                busqueda()
+            })
         //}
         if(typeof btnRegistrarPermiso !== 'undefined'){
             btnRegistrarPermiso.addEventListener("click",()=>{
@@ -80,11 +83,13 @@ class Permisos{
                 window.location.href = base_url + 'Permisos/Ctrl_Permisos/registrar';
             })
         }
+
         if(Area == 8){
             regresar.addEventListener("click",()=>{
-                window.top.location.href = "http://pis-portal-qa.azurewebsites.net/#/home/dashboard"; 
+                window.top.location.href = "https://puertointeligenteseguro.com.mx/#/home/dashboard"; 
             })
         }
+
     }
     obtener_empresas() {
         /*var controlador
@@ -179,20 +184,6 @@ class Permisos{
 			url: base_url+'Permisos/Ctrl_Permisos/getAll',
 			type: 'GET',
 			dataType: 'json',
-            data:{
-                fechainicio:    f_fecha_inicio.value,
-                fechatermino:   f_fecha_final.value, 
-                nosolicitud:    f_noSolicitud.value,
-                idempresa:      f_entidad.value, 
-                idvigencia:     f_vigencia.value, 
-                idtipopermiso:  f_tpermiso.value, 
-                idestatuspase:  f_estatus.value, 
-                nombrepersona:  f_nombre.value,
-                noplaca:        f_noPlaca.value
-            },
-            beforeSend: function(){
-                DTPermisos.clear().draw();
-            },
 			success: function(response){
                 //if(U || D){
                 if(response != null){
@@ -205,6 +196,64 @@ class Permisos{
                         let imprimir = "";
                         let enviar = "";
                         let enviar_whats = "";
+
+                        let estatus_message = ''
+                        let api = true, aduana = true, migracion = true;
+
+                        if(element.id_estatus_pase == 2){
+                            if(element.autorizacion != null){
+                                estatus_message += 'Autorizado API'
+                                api = false
+                            }else{
+                                estatus_message += 'Pendiente API'
+                            }
+                            estatus_message += ', '
+                            if(element.autorizacion_aduana != null){
+                                estatus_message += 'Autorizado Aduana'
+                                aduana = false
+                            }else{
+                                estatus_message += 'Pendiente Aduana'
+                            }
+                        }
+
+                        if(element.id_estatus_pase == 3){
+                            if(element.autorizacion != null){
+                                estatus_message += 'Autorizado API'
+                                api = false
+                            }else{
+                                estatus_message += 'Pendiente API'
+                            }
+                            estatus_message += ', '
+                            if(element.autorizacion_migracion != null){
+                                estatus_message += 'Autorizado Migracion'
+                                migracion = false
+                            }else{
+                                estatus_message += 'Pendiente Migracion'
+                            }
+                        }
+
+                        if(element.id_estatus_pase == 4){
+                            if(element.autorizacion != null){
+                                estatus_message += 'Autorizado API'
+                                api = false
+                            }else{
+                                estatus_message += 'Pendiente API'
+                            }
+                            estatus_message += ', '
+                            if(element.autorizacion_aduana != null){
+                                estatus_message += 'Autorizado Aduana'
+                                aduana = false
+                            }else{
+                                estatus_message += 'Pendiente Aduana'
+                            }
+                            estatus_message += ', '
+                            if(element.autorizacion_migracion != null){
+                                estatus_message += 'Autorizado Migracion'
+                                migracion = false
+                            }else{
+                                estatus_message += 'Pendiente Migracion'
+                            }
+                        }
 
                                 consultar = '<div class="p-1">'+
                                     '<a href="#!" title="Consultar">'+
@@ -246,7 +295,7 @@ class Permisos{
                                 }
                             }
                             if((Area == 5 && element.id_estatus_pase == 1) || ((Area == 5 || Area == 6) && element.id_estatus_pase == 2) || ((Area == 5 || Area == 7) && element.id_estatus_pase == 3) || ((Area == 5 || Area == 6 || Area == 7) && element.id_estatus_pase == 4)){
-                               if((Area == 5 && element.autorizacion == null) || (Area == 6 && element.autorizacion_aduana == null) || (Area == 7 && element.autorizacion_migracion == null)){
+                               if((Area == 5 && api) || (Area == 6 && aduana) || (Area == 7 && migracion)){
                                 autorizar = '<div class="p-1">'+
                                     '<a href="#!" title="Autorizar">'+
                                         '<span class="glyphicon glyphicon-list-alt editar" data-id="'+element.id+'"></span>'+
@@ -254,24 +303,13 @@ class Permisos{
                                 '</div>';
                                }
                             }
-                            if (Area == 8) {
-                                if(element.id_estatus_pase != 1 && element.id_estatus_pase != 2 && element.id_estatus_pase != 3 && element.id_estatus_pase != 4){
-                                    duplicar = '<div class="p-1">'+
-                                        '<a href="#!"  title="Duplicar">'+
-                                            '<span class="glyphicon glyphicon-repeat duplicar" data-id="'+element.id+'"></span>'+
-                                        '</a>'+
-                                    '</div>';
-                                }
-                            }
-                            if(Area == 8 && element.id_estatus_pase == 11){
-                                if(element.bext){
-                                    extender = '<div class="p-1">'+
+                            if( (Area == 4 || Area == 8) && element.id_estatus_pase == 11){
+                                    /*extender = '<div class="p-1">'+
                                         '<a href="#!" title="Extender">'+
                                             '<span class="icon-calendar extender" data-id="'+element.id+'"></span>'+
                                         '</a>'+
                                     '</div>';
-                                }
-                                    /*duplicar = '<div class="p-1">'+
+                                    duplicar = '<div class="p-1">'+
                                         '<a href="#!"  title="Duplicar">'+
                                             '<span class="glyphicon glyphicon-repeat duplicar" data-id="'+element.id+'"></span>'+
                                         '</a>'+
@@ -303,7 +341,7 @@ class Permisos{
                             '<center>'+element.fecha_termino+'</center>',
                             '<center>'+element.tipo_permiso+'</center>',
                             '<center>'+(element.permiso_grupal == 1 ? 'Grupal' : 'Personal')+'</center>',
-                            '<center>'+element.estatus_nombre+'</center>',
+                            '<center>'+(estatus_message == '' ? element.estatus_nombre : estatus_message)+'</center>',
                             '<div class="d-flex justify-content-center" >'+
                                 enviar+
                                 enviar_whats+
@@ -328,7 +366,7 @@ class Permisos{
                     });
                 }*/
               }
-			}
+			},
 		}).fail( function(response) {
 	
 		});
@@ -393,7 +431,6 @@ class Permisos{
     }
     extender_registro(ev){
         localStorage.setItem("id_permiso", ev.target.dataset.id);
-        localStorage.setItem("url_regreso", 'Permisos/Ctrl_Permisos');
         window.location.href= base_url + "Permisos/Ctrl_Permisos/extender";
     }
     duplicar_registro(ev){
@@ -416,7 +453,6 @@ class Permisos{
             success: (data) => {
                 csrf.value = data.token;
                 if(data.status == true){
-                    observacionMotivo.value = ''
                     registro_exitoso(data.message);
                     Permisos.prototype.obtenerDatosTabla();
                 }
@@ -430,6 +466,25 @@ class Permisos{
             }
         })
 	}
+    cancelar_permisos_vencidos(){
+        for (let index = 0; index < permisosCancelar.length; index++) {
+            $.ajax({
+                url: base_url + 'Permisos/Ctrl_Permisos/delete_vencidos',
+                type: "POST",
+                async: false,
+                data: {
+                    idpermiso: permisosCancelar[index]
+                },
+                success: (data) => {
+
+                }
+            })
+        }
+
+        permisosCancelar = []
+        DTPermisos.clear().draw();
+        Permisos.prototype.obtenerDatosTabla();
+    }
 }
 
 const per = new Permisos()
@@ -458,3 +513,199 @@ $(tabPermisos).on('click', '.extender', function(ev){
 $(tabPermisos).on('click', '.duplicar', function(ev){
     per.duplicar_registro(ev);
 });
+
+
+function busqueda(){
+    $.ajax({
+        url : base_url + 'Permisos/Ctrl_Permisos/getFiltro',
+        type : 'GET',
+        data: {
+            fechainicio: f_fecha_inicio.value,
+            fechatermino: f_fecha_final.value, 
+            nosolicitud: f_noSolicitud.value,
+            identidad: f_entidad.value, 
+            idvigencia: f_vigencia.value, 
+            idtipopermiso: f_tpermiso.value, 
+            idestatuspase:  f_estatus.value, 
+            nombrepersona: f_nombre.value,
+            noplaca: f_noPlaca.value
+        },
+        dataType: 'json',
+        success : function(response) {
+           if(response.data == ""){
+                peticion_fallida("No se encontraron registros con los criterios de búsqueda")
+                per.obtenerDatosTabla()
+           }else{
+            //if(response.data != null){
+                DTPermisos.clear().draw();
+                response.data.forEach(element => {
+                    let consultar = "";
+                    let eliminar = "";
+                    let autorizar = "";
+                    let extender = "";
+                    let duplicar = "";
+                    let imprimir = "";
+                    let enviar = "";
+                    let enviar_whats = "";
+
+                    let estatus_message = ''
+                    let api = true, aduana = true, migracion = true;
+
+                    if(element.id_estatus_pase == 2){
+                        if(element.autorizacion != null){
+                            estatus_message += 'Autorizado API'
+                            api = false
+                        }else{
+                            estatus_message += 'Pendiente API'
+                        }
+                        estatus_message += ', '
+                        if(element.autorizacion_aduana != null){
+                            estatus_message += 'Autorizado Aduana'
+                            aduana = false
+                        }else{
+                            estatus_message += 'Pendiente Aduana'
+                        }
+                    }
+
+                    if(element.id_estatus_pase == 3){
+                        if(element.autorizacion != null){
+                            estatus_message += 'Autorizado API'
+                            api = false
+                        }else{
+                            estatus_message += 'Pendiente API'
+                        }
+                        estatus_message += ', '
+                        if(element.autorizacion_migracion != null){
+                            estatus_message += 'Autorizado Migracion'
+                            migracion = false
+                        }else{
+                            estatus_message += 'Pendiente Migracion'
+                        }
+                    }
+
+                    if(element.id_estatus_pase == 4){
+                        if(element.autorizacion != null){
+                            estatus_message += 'Autorizado API'
+                            api = false
+                        }else{
+                            estatus_message += 'Pendiente API'
+                        }
+                        estatus_message += ', '
+                        if(element.autorizacion_aduana != null){
+                            estatus_message += 'Autorizado Aduana'
+                            aduana = false
+                        }else{
+                            estatus_message += 'Pendiente Aduana'
+                        }
+                        estatus_message += ', '
+                        if(element.autorizacion_migracion != null){
+                            estatus_message += 'Autorizado Migracion'
+                            migracion = false
+                        }else{
+                            estatus_message += 'Pendiente Migracion'
+                        }
+                    }
+
+                            consultar = '<div class="p-1">'+
+                                '<a href="#!" title="Consultar">'+
+                                    '<span class="glyphicon glyphicon-eye-open ver" data-id="'+element.id+'"></span>'+
+                                '</a>'+
+                            '</div>';
+                        if(Area == 6){
+                            if(element.id_estatus_pase != 13 &&element.id_estatus_pase != 12 && element.id_estatus_pase != 11 && element.id_estatus_pase != 6 && element.id_estatus_pase != 8 && element.id_estatus_pase != 10){
+                                eliminar = '<div class="p-1">'+
+                                    '<a href="#!" title="Dar de baja">'+
+                                        '<span class="glyphicon glyphicon-trash eliminar" data-id="'+element.id+'"></span>'+
+                                    '</a>'+
+                                '</div>';
+                            }
+                        }
+                        if(Area == 5){
+                            if(element.id_estatus_pase == 11){
+                                eliminar = '<div class="p-1">'+
+                                    '<a href="#!" title="Dar de baja">'+
+                                        '<span class="glyphicon glyphicon-trash eliminar" data-id="'+element.id+'"></span>'+
+                                    '</a>'+
+                                '</div>';
+                            }
+                        }
+                        if(Area == 8){
+                            if(element.id_estatus_pase != 13 || element.id_estatus_pase != 14){
+                                eliminar = '<div class="p-1">'+
+                                    '<a href="#!" title="Dar de baja">'+
+                                        '<span class="glyphicon glyphicon-trash eliminar" data-id="'+element.id+'"></span>'+
+                                    '</a>'+
+                                '</div>';
+                            }
+                        }
+                        if(Area == 8){
+                            if(element.id_estatus_pase == 11 || element.id_estatus_pase == 12){
+                            }
+                        }
+                        if((Area == 5 && element.id_estatus_pase == 1) || ((Area == 5 || Area == 6) && element.id_estatus_pase == 2) || ((Area == 5 || Area == 7) && element.id_estatus_pase == 3) || ((Area == 5 || Area == 6 || Area == 7) && element.id_estatus_pase == 4)){
+                        if((Area == 5 && api) || (Area == 6 && aduana) || (Area == 7 && migracion)){
+                            autorizar = '<div class="p-1">'+
+                                '<a href="#!" title="Autorizar">'+
+                                    '<span class="glyphicon glyphicon-list-alt editar" data-id="'+element.id+'"></span>'+
+                                '</a>'+
+                            '</div>';
+                        }
+                        }
+                        if(Area == 4 || Area == 8){
+                            if(element.id_estatus_pase == 11){
+                                imprimir = '<div class="p-1">'+
+                                    '<a href="#!" title="Imprimir">'+
+                                        '<span class="glyphicon glyphicon-print imprimir" data-id="'+element.id+'"></span>'+
+                                    '</a>'+
+                                '</div>';
+                            }
+                        }
+                        if(Area == 8 && element.id_estatus_pase == 11){
+                            /*duplicar = '<div class="p-1">'+
+                                '<a href="#!"  title="Duplicar">'+
+                                    '<span class="glyphicon glyphicon-repeat duplicar" data-id="'+element.id+'"></span>'+
+                                '</a>'+
+                            '</div>';*/
+                            enviar = '<div class="p-1">'+
+                                '<a href="#!" title="Enviar correo">'+
+                                    '<span class="glyphicon glyphicon-envelope enviar" data-id="'+element.id+'"></span>'+
+                                '</a>'+
+                            '</div>';
+
+                            enviar_whats = '<div class="p-1">'+
+                                '<a href="#!" title="Enviar whatsapp" style="color:#000000">'+
+                                    '<i class="fa fa-whatsapp enviar_whatsapp" aria-hidden="true" data-id="'+element.id+'"></i>'+
+                                '</a>'+
+                            '</div>';
+                        }
+                        
+                    DTPermisos.row.add([
+                        '<center>'+element.id+'</center>',
+                        '<center>'+(element.empresa == null ? '' : element.empresa)+'</center>',
+                        '<center>'+element.fecha_inicio+'</center>',
+                        '<center>'+element.fecha_termino+'</center>',
+                        '<center>'+element.tipo_permiso+'</center>',
+                        '<center>'+(element.permiso_grupal == 1 ? 'Grupal' : 'Personal')+'</center>',
+                        '<center>'+(estatus_message == '' ? element.estatus_nombre : estatus_message)+'</center>',
+                        '<div class="d-flex justify-content-center" >'+
+                            enviar+
+                            enviar_whats+
+                            imprimir +
+                            extender +
+                            duplicar+
+                            autorizar+
+                            consultar+
+                            eliminar+
+                        '</div>'
+                    ]).draw(false)
+
+                    if(element.fecha_termino < fecha_catual && ![6,8,10,12,13,14].includes(element.id_estatus_pase)){
+                        permisosCancelar.push(element.id)
+                    }
+                });
+            }/*else{
+                peticion_fallida("No se encontraron registros con los criterios de búsqueda")
+            }*/
+        }
+    });
+}

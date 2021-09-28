@@ -66,7 +66,7 @@
             <div class="row mt-4">
                 <div class="col-md-4 col-sm-6 col-xs-12">
                     <br>Fecha de inicio:
-                    <input type="date" id="fechaIni" class="lectura" value="" disabled>
+                        <input type="date" id="fechaIni" class="lectura" value="" disabled>
                 </div>
                 <div class="col-md-4 col-sm-6 col-xs-12">
                     <br>Fecha de término:
@@ -187,7 +187,6 @@
                                 <th width=30%>Descripción</th>
                                 <th width=20%>Cantidad</th>
                                 <th width=20%>Tipo de medida</th>
-                                <th width=20%>Documento</th>
                             </tr>
                         </thead>
                         <tbody></tbody>

@@ -1,7 +1,7 @@
 <div class="container">
   <div class="row">
     <div class="col-xs-12"><br><h3>Administrar solicitudes de permisos de cabotaje</h3></div>
-    <div class="col-xs-12"><br><a href="<?php echo base_url(); ?>Permisos/Ctrl_Cabotaje/registrar" class="btn btn-default">Registrar solicitud de permiso de cabotaje</a></div>
+    <div class="col-xs-12"><br><a href="<?php echo base_url(); ?>Permisos/Ctrl_Permisos/registrar_solicitud_cabotaje" class="btn btn-default">Registrar solicitud de permiso de cabotaje</a></div>
     <div class="col-xs-12">
       <br><table id="tabSolicitudesPermiso" class="table table-striped table-bordered w-100">
         <thead>

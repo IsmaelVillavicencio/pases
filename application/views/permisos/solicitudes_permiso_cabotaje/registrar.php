@@ -11,8 +11,8 @@
     </div>
     <div class="col-md-4 v-collapse-to-lg"></div>
     <div class="col-xs-12 col-sm-6 col-md-4">
-      <br><span class="required">*</span>&nbsp;IMO/Matricula:
-      <input type="number" id="imo_matricula" class="form-control" pattern="/^-?\d+\.?\d*$/" onKeyPress="if(this.value.length==7) return false;" onPaste="if(this.value.length==7) return false;" required>
+      <br><span class="required">*</span>&nbsp;IMO:
+      <input type="number" id="imo" class="form-control" pattern="/^-?\d+\.?\d*$/" onKeyPress="if(this.value.length==7) return false;" onPaste="if(this.value.length==7) return false;" required>
       <span id="errorimo" class="error"></span>
     </div>
     <div class="col-xs-12 col-sm-6 col-md-4">
@@ -181,7 +181,7 @@
             <div class="row m-0" hidden id="divOperadoresExcel">
               <div class="col-xs-12">
                 <br><br>Descargue el archivo para capturar la información necesaria para el registro de operadores:<br><br>
-                <a href="<?php echo base_url(); ?>assets\uploads\permisos_cabotaje\operadores.xlsx" class="btn btn-default">Descargar archivo</a>
+                <a href="<?php echo base_url(); ?>assets\uploads\permisos_cabotaje\operadores\operadores.xlsx" class="btn btn-default">Descargar archivo</a>
               </div>
               <div class="col-xs-12">
                 <br><br>Subir documentos excel<br><br>
@@ -225,11 +225,11 @@
             <div class="row m-0" id="divContenedoresExcel" hidden>
               <div class="col-xs-12">
                 <br><br>Descargue el archivo para capturar la información necesaria para el registro de contenedores:<br><br>
-                <a href="<?php echo base_url(); ?>assets\uploads\permisos_cabotaje\contenedores.xlsx" class="btn btn-default">Descargar archivo</a>
+                <a href="<?php echo base_url(); ?>assets\uploads\permisos_cabotaje\contenedores\contenedores.xlsx" class="btn btn-default">Descargar archivo</a>
               </div>
               <div class="col-xs-12">
                 <br><br>Subir documentos excel<br><br>
-                <button class="btn btn-default" id="subirArchivoContenedor">Subir archivo</button>
+                <button class="btn btn-default">Subir archivo</button>
               </div>
             </div>
             <div class="col-xs-12 col-md-8">
@@ -354,7 +354,7 @@
             <div class="row m-0" id="divTractosExcel" hidden>
               <div class="col-xs-12">
                 <br><br>Descargue el archivo para capturar la información necesaria para el registro de tractos:<br><br>
-                <a href="<?php echo base_url(); ?>assets\uploads\permisos_cabotaje\tractos.xlsx" class="btn btn-default">Descargar archivo</a>
+                <a href="<?php echo base_url(); ?>assets\uploads\permisos_cabotaje\tractos\tractos.xlsx" class="btn btn-default">Descargar archivo</a>
               </div>
               <div class="col-xs-12">
                 <br><br>Subir documentos excel<br><br>
@@ -536,41 +536,6 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" id="cerrarModal">Aceptar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal" id="modalExcel" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="">Adjuntar excel</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                	<span aria-hiddeSn="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-            <input type="hidden" id="excelOperador" value="">
-                <input type="hidden" id="excelContenedor" value="">
-                <input type="hidden" id="excelTractos" value="">
-                <div class="row">
-                    <div class="col-xs-12" id=""></div>
-                    <div class="col-xs-12" style="margin-top:7px">
-                        <label>Adjuntar excel</label><br>
-                        <!--label for="docExcel" class="btn btn-sm btn-secondary">Seleccionar archivo</label-->
-                        <input type="file" accept=".xls,.xlsx" id="docExcel" style="color:transparent">
-                        <br>
-                        <span style="color: blue" id="archivoadjunto"></span>
-                        <br>
-                        <span id="errordocExcel" class="error"></span>
-                        <span id="process"></span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary aceptarSubirExcel" data-dismiss="modal" id="aceptarSubirExcel">Aceptar</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal" id="cerrarModalExcel">Cancelar</button>
             </div>
         </div>
     </div>

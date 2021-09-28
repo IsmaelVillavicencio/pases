@@ -286,7 +286,6 @@ class Ctrl_Permisos extends Sesion {
 		$this->load->view('modales/autorizar_permiso_equipo');
 		$this->load->view('modales/autorizar_permiso_vehiculo');
 		$this->load->view('modales/registro_exitoso');
-		$this->load->view('modales/registro_exitoso_autorizaciones');
 		$this->load->view('modales/confirmar_regresar');
 		$this->load->view('modales/confirmar_baja_motivo');
 		$this->load->view('template/footer');
@@ -338,27 +337,24 @@ class Ctrl_Permisos extends Sesion {
 
 		try {
 			if ($this->input->is_ajax_request()) {
-				$datos = array(
-					'nosolicitud'   => $this->input->get('nosolicitud'),
-					'idvigencia'    => $this->input->get('idvigencia'),
-					'noplaca'		=> $this->input->get('noplaca'),
-					'nombrepersona' => $this->input->get('nombrepersona'),
-					'fechainicio'	=> $this->input->get('fechainicio'),
-					'fechatermino'	=> $this->input->get('fechatermino'),
-					'idtipopermiso'	=> $this->input->get('idtipopermiso'),
-					'idestatuspase'	=> $this->input->get('idestatuspase'),
-					'idempresa'		=> $this->input->get('idempresa'),
-					'permiso_rol'	=> $this->session->_permiso_rol
-				);
+				$idpermiso = $this->input->get("idpermiso");
 
-				$response = $this->Permisos->getGridPermisos($datos);
-
-				foreach ($response['data'] as $value) {
-					if($value->id_usuario_registro != null){
-						$dataWS = $this->getValidatorName($value->id_usuario_registro);
-						$value->solicitado_por = $dataWS['valor'];
-					}
+				if($this->session->_permiso_rol == 4 ||$this->session->_permiso_rol == 5){
+					$response = $this->Permisos->getAll($idpermiso);
+					echo json_encode($response);
+					return;
 				}
+				if($this->session->_permiso_rol == 8){
+					$response = $this->Permisos->getAllByUser($idpermiso);
+				}
+				if($this->session->_permiso_rol == 6){
+					$response = $this->Permisos->getAllAduana($idpermiso);
+				}
+				if($this->session->_permiso_rol == 7){
+					$response = $this->Permisos->getAllMigracion($idpermiso);
+				}
+				if($this->session->_permiso_rol != 5 && $this->session->_permiso_rol != 6 && $this->session->_permiso_rol != 7 && $this->session->_permiso_rol != 8)
+					$response = $this->Permisos->getAllByEstatus($idpermiso);
 			}else{
 				$response['data'] = 'Petición inválida';
 				throw new Exception('Petición inválida');
@@ -391,18 +387,11 @@ class Ctrl_Permisos extends Sesion {
 					'fechatermino'	=> $this->input->get('fechatermino'),
 					'idtipopermiso'	=> $this->input->get('idtipopermiso'),
 					'idestatuspase'	=> $this->input->get('idestatuspase'),
-					'idempresa'		=> $this->session->_id_empresa_rest,
+					'idempresa'		=> $this->session->_id_empresa,
 					'permiso_rol'	=> 8
 				);
 
 				$response = $this->Permisos->getGridPermisos($datos);
-
-				foreach ($response['data'] as $value) {
-					if($value->id_usuario_registro != null){
-						$dataWS = $this->getValidatorName($value->id_usuario_registro);
-						$value->solicitado_por = $dataWS['valor'];
-					}
-				}
 			}else{
 				$response['data'] = 'Petición inválida';
 				throw new Exception('Petición inválida');
@@ -449,6 +438,73 @@ class Ctrl_Permisos extends Sesion {
 		exit;
 	}
 
+	public function getFiltro(){
+
+		$response = [
+			'status' 	=> false,
+			'message'	=> '',
+			'data'		=> null
+		];
+
+		try {
+			if ($this->input->is_ajax_request()) {
+
+				$datos = array(
+					//'idarea'        => $this->input->get('idarea'),
+					'fechainicio'	=> $this->input->get('fechainicio'),
+					'fechatermino'	=> $this->input->get('fechatermino'),
+					'nosolicitud'   => $this->input->get('nosolicitud'),
+				    //'usuario'       => $this->input->get('usuario'),
+					'identidad'     => $this->input->get('identidad'),
+					'idvigencia'    => $this->input->get('idvigencia'),
+					'idtipopermiso'	=> $this->input->get('idtipopermiso'),
+					'idestatuspase'	=> $this->input->get('idestatuspase'),
+					'nombrepersona'	=> $this->input->get('nombrepersona'),
+					'noplaca'		=> $this->input->get('noplaca')
+				);
+
+				if($this->session->_permiso_rol == 4 ||$this->session->_permiso_rol == 5){
+					$response = $this->Permisos->getFiltro($datos);
+				}
+				if($this->session->_permiso_rol == 6){
+					$response = $this->Permisos->getFiltroAduana($datos);
+				}
+				if($this->session->_permiso_rol == 7){
+					$response = $this->Permisos->getFiltroMigracion($datos);
+				}
+				if($this->session->_permiso_rol == 8){
+					$response = $this->Permisos->getFiltroByUser($datos);
+				}
+			}
+			/*if ($this->input->is_ajax_request()) {
+				$datos = array(
+					'idarea'        => $this->input->get('idarea'),
+					'fechainicio'	=> $this->input->get('fechainicio'),
+					'fechatermino'	=> $this->input->get('fechatermino'),
+					'nosolicitud'   => $this->input->get('nosolicitud'),
+					//'usuario'       => $this->input->get('usuario'),
+					'identidad'     => $this->input->get('identidad'),
+					'idvigencia'    => $this->input->get('idvigencia'),
+					'idtipopermiso'	=> $this->input->get('idtipopermiso'),
+					'idestatuspase'	=> $this->input->get('idestatuspase'),
+	
+				);
+				$response = $this->Permisos->getFiltro($datos);
+			}*/else{
+				$response['data'] = 'Petición inválida';
+				throw new Exception('Petición inválida');
+			}
+		} 
+		catch (Exception $e) {
+			header("HTTP/1.0 400 " . utf8_decode($e->getMessage()));
+		}
+		
+		header('Content-type: application/json');
+		echo json_encode($response);
+		exit;
+
+	}
+
 	public function getDates(){
 		$response = [
 			'status' 	=> false,
@@ -479,7 +535,7 @@ class Ctrl_Permisos extends Sesion {
 		exit;
 	}
 
-	public function getStatusPermisosByUser(){
+    public function getStatusPermisosByUser(){
 		$response = [
 			'status' 	=> false,
 			'message'	=> '',
@@ -756,10 +812,6 @@ class Ctrl_Permisos extends Sesion {
 				$id = $this->security->xss_clean($this->input->get('id'));
 				$idpermiso = $this->security->xss_clean($this->input->get('idpermiso'));
 				$response = $this->Permisos->getPersonalById($id,$idpermiso);
-				if(isset($response['data']->nss)){
-					$responseAdicionales = $this->Permisos->getDocAdicionalesPersona($id);
-					$response['data']->documentos_adicionales = $responseAdicionales['data'];
-				}
 			}else{
 				$response['data'] = 'Petición inválida';
 				throw new Exception('Petición inválida');
@@ -2122,8 +2174,7 @@ class Ctrl_Permisos extends Sesion {
 		echo json_encode($response);
 		exit;
 	}
-
-	public function getInfoDuplicar()
+	public function getFilter()
 	{
 		$response = [
 			'status' 	=> false,
@@ -2138,16 +2189,8 @@ class Ctrl_Permisos extends Sesion {
 					throw new Exception('Petición inválida');
 				}
 
-				$id_permiso = $this->security->xss_clean($this->input->get("idPermiso"));
-				
-				$response["data"]["info"] = 	$this->Permisos->getById($id_permiso);
-				$response["data"]["personal"] = $this->Permisos->getPersonalDuplicar($id_permiso);
-				$response["data"]["equipo"] = 	$this->Permisos->getEquipoDuplicar($id_permiso);
-				$response["data"]["material"] = $this->Permisos->getMateriales($id_permiso);
-				$response["data"]["vehiculo"] = $this->Permisos->getVehiculosDuplicar($id_permiso);
-				foreach ($response["data"]["personal"]["data"] as $value) {
-					$response["data"]["personal"]["adicional"][] = $this->Permisos->getPersonalAdicionalDuplicar($value->id,$id_permiso);
-				}
+				$data = $this->security->xss_clean($this->input->get());
+				$response = $this->Permisos->getDataFilter($data);
 			}else{
 				$response['data'] = 'Petición inválida';
 				throw new Exception('Petición inválida');
@@ -2162,87 +2205,102 @@ class Ctrl_Permisos extends Sesion {
 		exit;
 	}
 
-	public function getByNombrePersona(){
-		$response = [
-			'status' 	=> false,
-			'message'	=> '',
-			'data'		=> null
-		];
-		try {
-			if ($this->input->is_ajax_request()) {
-				/*if (!$this->input->get()){
-					$response['data'] = 'Petición inválida';
-					throw new Exception('Petición inválida');
-				}*/
-				$nombre = $this->security->xss_clean($this->input->get('nombre'));
-				$response = $this->Permisos->getByNombrePersona($nombre);
-			}else{
-				$response['data'] = 'Petición inválida';
-				throw new Exception('Petición inválida');
-			}
-		} 
-		catch (Exception $e) {
-			header("HTTP/1.0 400 " . utf8_decode($e->getMessage()));
-		}
-		
-		header('Content-type: application/json');
-		echo json_encode($response);
-		exit;
-	}
+	//SOLICITUDES DE PERMISOS DE CABOTAJE
 
-	public function FechasExtenderPermiso(){
-		$response = [
-			'status' 	=> false,
-			'message'	=> '',
-			'data'		=> null
-		];
-		try {
-			if ($this->input->is_ajax_request()) {
-				if (!$this->input->post()){
-					$response['data'] = 'Petición inválida';
-					throw new Exception('Petición inválida');
-				}
-				$datos = $this->security->xss_clean($this->input->post());
-				$response = $this->Permisos->FechasExtenderPermiso($datos);
-			}else{
-				$response['data'] = 'Petición inválida';
-				throw new Exception('Petición inválida');
-			}
-		} 
-		catch (Exception $e) {
-			header("HTTP/1.0 400 " . utf8_decode($e->getMessage()));
-		}
-		
-		header('Content-type: application/json');
-		echo json_encode($response);
-		exit;
-	}
+	public function index_solicitud_cabotaje(){
+		$this->carabiner->js(
+			array(
+				array('utilidades/validaciones.js'),
+				array('permisos/solicitudes_permiso_cabotaje/index.js')
+			)
+		);
 
-	public function ExtenderPermiso(){
-		$response = [
-			'status' 	=> false,
-			'message'	=> '',
-			'data'		=> null
-		];
-		try {
-			if ($this->input->is_ajax_request()) {
-				if (!$this->input->post()){
-					$response['data'] = 'Petición inválida';
-					throw new Exception('Petición inválida');
-				}
-				$datos = $this->security->xss_clean($this->input->post());
-				$response = $this->Permisos->ExtenderPermiso($datos);
-			}else{
-				$response['data'] = 'Petición inválida';
-				throw new Exception('Petición inválida');
-			}
-		} 
-		catch (Exception $e) {
-			header("HTTP/1.0 400 " . utf8_decode($e->getMessage()));
-		}
-		
-		header('Content-type: application/json');
-		echo json_encode($response);
-		exit;
+		$Menu['menu'] = array((object)array('id_menu' => 5));
+		$SubMenu['submenu'] = array((object)array('id_submenu' => 18));
+		$value["data"] = (object)array('id_usuario' => 0,'id_menu' => 5,'id_submenu' => 18);
+
+		/*$data['permisos'] = json_decode(json_encode($value['data']), true);
+		$data['permisos']['id_area'] = $this->session->_permiso_rol;*/
+
+		$this->load->view('template/header',$this->titulo);
+		$this->load->view('template/menu', array_merge($Menu, $SubMenu));
+		//$this->load->view('permisos/solicitudes_permiso_cabotaje/index', $data);
+		$this->load->view('permisos/solicitudes_permiso_cabotaje/index');
+		$this->load->view('modales/error');
+		$this->load->view('modales/error_sesion');
+        $this->load->view('modales/confirmar_registro');
+		$this->load->view('modales/registro_exitoso');
+        $this->load->view('modales/confirmar_regresar');
+		$this->load->view('modales/confirmar_baja_motivo');
+		$this->load->view('template/footer');
+	}
+	public function registrar_solicitud_cabotaje(){
+		$this->carabiner->js(
+			array(
+				array('utilidades/validaciones.js'),
+				array('permisos/solicitudes_permiso_cabotaje/registrar.js')
+			)
+		);
+
+		$Menu['menu'] = array((object)array('id_menu' => 5));
+		$SubMenu['submenu'] = array((object)array('id_submenu' => 18));
+		$value["data"] = (object)array('id_usuario' => 0,'id_menu' => 5,'id_submenu' => 18);
+
+		$this->load->view('template/header',$this->titulo);
+		$this->load->view('template/menu', array_merge($Menu, $SubMenu));
+		$this->load->view('permisos/solicitudes_permiso_cabotaje/registrar');
+		$this->load->view('modales/error');
+		$this->load->view('modales/error_sesion');
+        $this->load->view('modales/confirmar_registro');
+		$this->load->view('modales/registro_exitoso');
+        $this->load->view('modales/confirmar_regresar');
+		$this->load->view('modales/confirmar_baja_motivo');
+		$this->load->view('template/footer');
+	}
+	public function consultar_solicitud_cabotaje(){
+		$this->carabiner->js(
+			array(
+				array('utilidades/validaciones.js'),
+				array('permisos/solicitudes_permiso_cabotaje/consultar.js')
+			)
+		);
+
+		$Menu['menu'] = array((object)array('id_menu' => 5));
+		$SubMenu['submenu'] = array((object)array('id_submenu' => 18));
+		$value["data"] = (object)array('id_usuario' => 0,'id_menu' => 5,'id_submenu' => 18);
+
+		$this->load->view('template/header',$this->titulo);
+		$this->load->view('template/menu', array_merge($Menu, $SubMenu));
+		$this->load->view('permisos/solicitudes_permiso_cabotaje/consultar');
+		$this->load->view('modales/error');
+		$this->load->view('modales/error_sesion');
+        $this->load->view('modales/confirmar_registro');
+		$this->load->view('modales/registro_exitoso');
+        $this->load->view('modales/confirmar_regresar');
+		$this->load->view('modales/confirmar_baja_motivo');
+		$this->load->view('template/footer');
+	}
+	public function autorizar_solicitud_cabotaje(){
+		$this->carabiner->js(
+			array(
+				array('utilidades/validaciones.js'),
+				array('permisos/solicitudes_permiso_cabotaje/autorizar.js')
+			)
+		);
+
+		$Menu['menu'] = array((object)array('id_menu' => 5));
+		$SubMenu['submenu'] = array((object)array('id_submenu' => 18));
+		$value["data"] = (object)array('id_usuario' => 0,'id_menu' => 5,'id_submenu' => 18);
+
+		$this->load->view('template/header',$this->titulo);
+		$this->load->view('template/menu', array_merge($Menu, $SubMenu));
+		$this->load->view('permisos/solicitudes_permiso_cabotaje/autorizar');
+		$this->load->view('modales/error');
+		$this->load->view('modales/error_sesion');
+        $this->load->view('modales/confirmar_registro');
+		$this->load->view('modales/registro_exitoso');
+        $this->load->view('modales/confirmar_regresar');
+		$this->load->view('modales/confirmar_baja_motivo');
+		$this->load->view('template/footer');
 	}
 }

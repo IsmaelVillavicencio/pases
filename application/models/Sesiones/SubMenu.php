@@ -106,17 +106,4 @@ class SubMenu extends CI_Model
 			];
 		}
 	}
-
-	public function getPermisosByUser($id_usuario){
-        $query = "SELECT ts.*
-			FROM tbl_Submenu ts 
-			INNER JOIN det_Submenu_Permisos dsp ON ts.id = dsp.id_submenu 
-			WHERE dsp.id_usuario = $id_usuario";
-		return $this->db->query($query)->result();
-	}
-
-	public function addPermisosByUser($id_rol, $id_usuario, $C, $R, $U, $D, $A){
-		$query = "EXEC sp_addPermisosUsuario $id_rol, $id_usuario, $C, $R, $U, $D, $A";
-		return $this->db->query($spSeguimiento)->row();
-	}
 }

@@ -16,7 +16,7 @@
             <div class="modal-body" id="mensaje_confirmar_baja">
                 <form id="formCancelacion">
                     <label>Motivo de cancelación:</label>
-                    <textarea name="MotivoCancelacion" id="MotivoCancelacion" class="form-control req" style="width: 100%;height:150px;text-align: justify;"></textarea>
+                    <textarea name="MotivoCancelacion" id="MotivoCancelacion" class="form-control req" style="width: 100%;height:150px"></textarea>
                     <span id="errorMotivoCancelacion" class="error"></span>
                 </form>    
             </div>

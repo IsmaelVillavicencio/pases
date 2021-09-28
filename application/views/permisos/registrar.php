@@ -38,7 +38,7 @@
         <div class="col-md-4 col-sm-6 col-xs-12" id="divDias" style="display:none;">
             <br>
             <span class="required">*</span><span> Días:</span>
-                <input autocomplete="off" type="text" id="dias" class="form-control reiniciar-pase" value="" required minlength="1" maxlength="2">
+                <input autocomplete="off" type="text" id="dias" class="form-control reiniciar-pase" value="" required minlength="1">
             <span id="errordias" class="error"></span>
         </div>
     </div>
@@ -128,12 +128,6 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-4 col-sm-6 col-xs-12" id="divRFC" style="display:none;">
-                    <br>
-                    <span class="required">*</span><span> RFC:</span>
-                        <input autocomplete="off" type="text" id="empresa_rfc" class="form-control reiniciar-personal" value="" required>
-                    <span id="errorempresa_rfc" class="error"></span>
-                </div>
                 <div class="col-md-4 col-sm-6 col-xs-12" id="divClavePatronal" style="display:none;">
                     <br>
                     <span class="required">*</span><span> Clave patronal:</span>
@@ -156,11 +150,10 @@
                     <input autocomplete="off" type="text" id="curp" class="form-control reiniciar-personal" value="" maxlength="18" required>
                     <span id="errorcurp" class="error"></span>
                 </div>
-                <div class="col-xs-1" id="spinnerCURP" hidden><br><br><span class="spinner-border-button"></span></div>
-                <div class="col-md-4 col-sm-5 col-xs-11 mt-md-5" id="divbtnCurp">
+                <div class="col-md-4 col-sm-6 col-xs-12 mt-md-5" style="display: none;">
                     <br>
                     <button class="btn btn-default escanear-camara visible-xs visible-sm">Escanear CURP</button>
-				    <button class="btn btn-default escanear-escaner hidden-xs visible-md visible-lg visible-xl">Escanear CURP</button>
+				    <button class="btn btn-default escanear-escaner visible-md visible-lg visible-xl">Escanear CURP</button>
                 </div>
             </div>
             <div class="row" id="divNombreApellidos" style="display:none;">
@@ -303,30 +296,6 @@
                     <input autocomplete="off" type="button" class="btn btn-default btn-border btn-block" id="btnSubirPersonal" value="Subir foto">
                     <span id="errorSubirPersonal" class="error"></span>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-md-4 col-sm-6 col-xs-12 mt-md-5" id="divSubirAdicional" style="display:none;">
-                    <br>
-                    <input autocomplete="off" type="button" class="btn btn-default btn-border btn-block" id="btnSubirAdicional" value="Subir adicionales">
-                    <span id="errorSubirAdicional" class="error"></span>
-                </div>
-            </div>
-            <br>
-            <div class="row">
-                <div class="col-md-8 col-sm-6 col-xs-12 mt-md-5" id="divDocumentacionAdicional" style="display:none;">
-                    <table id="tabDocumentosAdicionales" class="table table-striped table-bordered" width="100%">
-                        <thead>
-                            <tr>
-                                <th style="width: 80%">Documento</th>
-                                <th style="width: 20%">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="row">
                 <div class="col-xs-12 text-right content" id="divAnadir" style="display:none;">
                     <br>
                     <button class="btn btn-default btn-border" id="anadirPersona">Agregar a la lista</button>
@@ -498,11 +467,6 @@
                     <input autocomplete="off" type="text" id="cantidad" class="form-control" value="" minlength="1" required>
                     <span id="errorcantidad" class="error"></span>
                 </div>
-                <div class="col-md-4 col-sm-6 col-xs-12">
-                    <br>
-                    <input autocomplete="off" type="button" class="btn btn-default btn-border btn-block" id="btnSubirMaterial" value="Subir documento">
-                    <span id="errorSubirMaterial" class="error"></span>
-                </div>
             </div>
             <div class="row">
                 <div class="col-md-8 col-xs-12">
@@ -615,7 +579,7 @@
                     <span id="errorvigenciaTarjeta" class="error"></span>
                 </div-->
             </div>
-            <!--div class="row">
+            <div class="row">
                 <div class="col-md-4 col-sm-6 col-xs-12">
                     <br>
                     <span class="required">*</span><span>Tipo de documento:</span>
@@ -633,7 +597,7 @@
                     <input autocomplete="off" type="button" class="btn btn-default btn-border btn-block" id="btnSubirFacturaVehiculo" value="Subir factura/carta factura">
                     <span id="errorSubirFacturaVehiculo" class="error"></span>
                 </div>
-            </div-->
+            </div>
             <div class="row">
                 <div class="col-md-4 col-sm-6 col-xs-12">
                     <br>
@@ -686,12 +650,12 @@
                     <input autocomplete="off" type="text" id="estatusVehiculo" class="form-control reiniciar-vehiculo" value="" required>
                     <span id="errorestatusVehiculo" class="error"></span>
                 </div-->
-                <!--div class="col-md-4 col-sm-6 col-xs-12">
+                <div class="col-md-4 col-sm-6 col-xs-12">
                     <br>
                     <span class="required">*</span><span> Chofer:</span>
                     <select id="selChofer" class="form-control reiniciar-vehiculo" required></select>
                     <span id="errorselChofer" class="error"></span>
-                </div-->
+                </div>
                 <div class="col-md-4 col-xl-3 col-xl-3">
                     <br>
                     <span class="required">*</span><span> Subir fotografías:</span>
@@ -723,6 +687,7 @@
                                 <th width=15%>Marca</th>
                                 <th width=15%>Año</th>
                                 <th width=15%>Tipo de vehículo</th>
+                                <th width=20%>Chofer</th>
                                 <th width=10%>Acciones</th>
                             </tr>
                         </thead>
@@ -738,7 +703,7 @@
             <input autocomplete="off" type="button" class="btn btn-default btn-border btn-block" id="btnRegresar" value="Regresar">
         </div>
         <div class="col-xs-6 col-sm-4 col-lg-3 col-xl-2">
-            <button autocomplete="off" class="btn btn-primary btn-border btn-block" id="btnGuardar">Enviar solicitud</button>
+            <input autocomplete="off" type="button" class="btn btn-primary btn-border btn-block" id="btnGuardar" value="Enviar solicitud">
         </div>
     </div>
 </div>
@@ -752,10 +717,10 @@
                 </button>
             </div>
             <div class="modal-body">
-				<div class="hidden-md hidden-lg hidden-xl">
+				<div class="d-block d-sm-block d-md-none">
 					<div class="row">
-						<div class="col-md-12">
-							<video class="col-md-12" id="qr-video" width="100%"></video>
+						<div class="col-xs-12">
+							<video class="col-xs-12" id="qr-video"></video>
 						</div>
 					</div>
 					<div class="row">
@@ -763,18 +728,18 @@
 						<span id="cam-qr-result">No permitido</span>
 					</div>
 				</div>
-				<div class="hidden-xs hidden-sm">
+				<div class="d-none d-md-block d-lg-block d-xl-block">
 					<div class="row">
-						<div class="col-md-12">
+						<div class="col-xs-12">
 							<label>Realice el escaneo de la QR</label><br>
-							<input type="text" id="escaneoQR" class="form-control"/>
+							<input autocomplete="off" type="text" id="escaneoQR" class="form-control"/>
 						</div>
 					</div>
 				</div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary visible-xs visible-sm" data-dismiss="modal" id="btnCancelarEscaneo">Cancelar</button>
-				<button type="button" class="btn btn-secondary visible-md visible-lg visible-xl" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-default d-block d-sm-block d-md-none" data-dismiss="modal" id="btnCancelarEscaneo">Cancelar</button>
+				<button type="button" class="btn btn-default d-none d-md-block d-lg-block d-xl-block" data-dismiss="modal">Cancelar</button>
             </div>
         </div>
     </div>
@@ -940,33 +905,7 @@
         </div>
     </div>
 </div>
-<div class="modal" id="modalMaterial" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Documento</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                	<span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-xs-12" id="pdfViewerMaterial"></div>
-                    <div class="col-xs-12" style="margin-top:7px">
-                        <label>Adjuntar fotografía</label><br>
-                        <input autocomplete="off" style="color: transparent" type="file" accept="image/jpg, image/jpeg, image/png, application/pdf" id="adjuntarMaterial" data-id="" data-imagen="" >
-                        <span id="erroradjuntarMaterial" class="error"></span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary ml-4" data-dismiss="modal" id="btnAceptarAdjuntarMaterial">Aceptar</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-            </div>
-        </div>
-    </div>
-</div>
-<!--div class="modal" id="modalVehiculoFactura" role="dialog">
+<div class="modal" id="modalVehiculoFactura" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -992,7 +931,7 @@
             </div>
         </div>
     </div>
-</div-->
+</div>
 <div class="modal" id="modalVehiculo" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -1023,33 +962,6 @@
             <div class="modal-footer">
 				<button type="button" class="btn btn-secondary ml-4" id="btnSiguienteAdjuntarVehiculo" style="display:none;">Siguiente</button>
                 <button type="button" class="btn btn-primary ml-4" data-dismiss="modal" id="btnAceptarAdjuntarVechiculo" style="display:none">Aceptar</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal" id="modalAdicionales" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Documento</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                	<span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-xs-12" id="pdfViewerAdicionales"></div>
-                    <div class="col-xs-12" style="margin-top:7px">
-                        <label>Adjuntar fotografía</label><br>
-                        <input autocomplete="off" style="color: transparent" type="file" accept="image/jpg, image/jpeg, image/png, application/pdf" id="adjuntarAdicional" data-id="" data-imagen="" >
-                        <span>Archivos permitidos: PDF, PNG y JPG</span>
-                        <span id="erroradjuntarAdicional" class="error"></span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary ml-4" data-dismiss="modal" id="btnAceptarAdjuntarAdicional">Aceptar</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
             </div>
         </div>

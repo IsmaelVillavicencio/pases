@@ -143,7 +143,7 @@
                     <input type="text" id="curp" class="form-control reiniciar-personal" value="" maxlength="18" required>
                     <span id="errorcurp" class="error"></span>
                 </div>
-                <div class="col-md-4 col-sm-6 col-xs-12 mt-md-5">
+                <div class="col-md-4 col-sm-6 col-xs-12 mt-md-5" style="display: none;">
                     <br>
                     <button class="btn btn-default escanear-camara visible-xs visible-sm">Escanear CURP</button>
 				    <button class="btn btn-default escanear-escaner visible-md visible-lg visible-xl">Escanear CURP</button>

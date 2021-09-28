@@ -204,7 +204,6 @@
                                 <th width=30%>Descripción</th>
                                 <th width=20%>Cantidad</th>
                                 <th width=20%>Tipo de medida</th>
-                                <th width=20%>Documento</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -261,7 +260,7 @@
         <div class="p-4">
             <button class="btn btn-danger" id="rechazar_permiso">Rechazar permiso</button>
             <button class="btn btn-primary" id="validar_permiso" data-columna="autorizacion" disabled>Autorizar permiso</button>
-            <!--<label id="labelEnviarMigracion"><input type="checkbox" id="enviar_migracion"> Enviar Migracion</label>-->
+            <label id="labelEnviarMigracion"><input type="checkbox" id="enviar_migracion"> Enviar Migracion</label>
         </div>
         <div class="p-4">
             <button class="btn btn-default anterior" style="display: none;">Anterior</button>

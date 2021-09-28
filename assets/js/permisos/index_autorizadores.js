@@ -7,7 +7,6 @@ class Permisos{
         this.obtenerDatosTabla();
         this.obtener_estatus_permisos();
         this.obtener_tipos_permisos();
-        this.obtener_personas();
         this.obtener_empresa();
 	}
 	inicio(){
@@ -51,6 +50,7 @@ class Permisos{
             })
         }
     }
+
     obtener_empresa(){
         $.ajax({
             url: base_url + 'Usuarios/Ctrl_Empresas/getByUsuario',
@@ -60,17 +60,12 @@ class Permisos{
                 estatus : 1
             },
             beforeSend: function () {
-    //              $(f_entidad).append('<option value="">Seleccione</option>');
             },
             success: function (response) {
-                    response.data.forEach(element => {
-                        $(f_entidad).append('<option value="' + element.id + '">' + element.nombre + '</option>');
-                        f_entidad.disabled = true;
-                    });
-                /*}else{
-                    $(f_entidad).append('<option value="' + response.data.id + '" selected>' + response.data.nombre + '</option>');
+                response.data.forEach(element => {
+                    $(f_entidad).append('<option value="' + element.id + '">' + element.nombre + '</option>');
                     f_entidad.disabled = true;
-                }*/
+                });
             },
         });
     }
@@ -93,27 +88,7 @@ class Permisos{
             },
         });
     }
-    obtener_personas(){    
-        $('#f_usuario').select2({
-            ajax: {
-                url: function () {
-                    return base_url+'Permisos/Ctrl_Permisos/getByNombrePersona'
-                },
-                data: function(params){
-                    nombre : params.term
-                },
-                processResults: function (data) {
-                    console.log(data.data)
-                    return {
-                        results: $.map(data.data, function(obj) {
-                            return { id: obj.id, text: obj.nombre };
-                        })
-                    };
-                }
-            },        
-        })
-    }
-    obtener_tipos_permisos() {
+    obtener_tipos_permisos(){
         $.ajax({
             url: base_url + 'Permisos/Ctrl_Permisos/getAllTipoPermiso',
             type: 'GET',
@@ -131,6 +106,7 @@ class Permisos{
             },
         });
     }
+
     obtenerDatosTabla(){
         DTPermisos.clear().draw();
         $.ajax({
@@ -171,20 +147,20 @@ class Permisos{
                                     '</div>';
                                 }
                                 if(element.id_estatus_pase != 1 && element.id_estatus_pase != 2 && element.id_estatus_pase != 3 && element.id_estatus_pase != 4){
-                                    duplicar = '<div class="p-1">'+
+                                    /*duplicar = '<div class="p-1">'+
                                         '<a href="#!"  title="Duplicar">'+
                                             '<span class="glyphicon glyphicon-repeat duplicar" data-id="'+element.id+'"></span>'+
                                         '</a>'+
-                                    '</div>';
+                                    '</div>';*/
                                 }
                                 if(element.id_estatus_pase == 11){
-                                    if(element.bext){
+                                    /*if(element.bext){
                                         extender = '<div class="p-1">'+
                                         '<a href="#!" title="Extender">'+
                                             '<span class="icon-calendar extender" data-id="'+element.id+'"></span>'+
                                         '</a>'+
                                     '</div>';
-                                    }
+                                    }*/
                                     imprimir = '<div class="p-1">'+
                                         '<a href="#!" title="Imprimir">'+
                                             '<span class="glyphicon glyphicon-print imprimir" data-id="'+element.id+'"></span>'+
@@ -283,7 +259,6 @@ class Permisos{
     }
     extender_registro(ev){
         localStorage.setItem("id_permiso", ev.target.dataset.id);
-        localStorage.setItem("url_regreso", 'Permisos/Ctrl_Permisos/index_autorizadores');
         window.location.href= base_url + "Permisos/Ctrl_Permisos/extender";
     }
     duplicar_registro(ev){
@@ -306,7 +281,6 @@ class Permisos{
             success: (data) => {
                 csrf.value = data.token;
                 if(data.status == true){
-                    observacionMotivo.value = ''
                     registro_exitoso(data.message);
                     Permisos.prototype.obtenerDatosTabla();
                 }

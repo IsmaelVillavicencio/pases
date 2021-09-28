@@ -85,7 +85,7 @@
                 <div class="form-group">
                     <label for="f_noSolicitud" class="col-sm-5 control-label">Número de solicitud:</label>
                     <div class="col-sm-7">
-                        <input type="number" class="form-control" id="f_noSolicitud" name="f_noSolicitud" >
+                        <input type="text" class="form-control" id="f_noSolicitud" name="f_noSolicitud" >
                     </div>
                 </div>
             </div>

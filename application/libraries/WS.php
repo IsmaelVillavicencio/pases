@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class WS {
     public $url = 'https://pis-rest.kioscoweb.mx/api_puertov1/public/';
-    //private $usuarioREST = array('usuario' => 'gosorio', 'password' => 'gosorio');
+    private $usuarioREST = array('usuario' => 'gosorio', 'password' => 'gosorio');
     public $token;
 
     public $parametros;
@@ -13,7 +13,7 @@ class WS {
         set_time_limit(120);
     }
 
-    /*public function login(){
+    public function login(){
         $urlREST = $this->url."Usuario/login";
         $dataString = json_encode($this->usuarioREST);
 
@@ -28,7 +28,7 @@ class WS {
             CURLOPT_HTTPHEADER => array(
                 'Content-type: application/json', 
                 'Content-length: '.strlen($dataString),
-                'Accept: * / *',
+                'Accept: */*',
                 'Accept-Encoding: gzip, deflate, br',
                 'Connection: keep-alive'
             ),
@@ -54,7 +54,7 @@ class WS {
             CURLOPT_HTTPHEADER => array(
                 'Content-type: application/json', 
                 'Content-length: '.strlen($dataString),
-                'Accept: * /*',
+                'Accept: */*',
                 'Accept-Encoding: gzip, deflate, br',
                 'Connection: keep-alive'
             ),
@@ -64,7 +64,7 @@ class WS {
         $error = curl_error($curl);
         curl_close($curl);
         return $response;
-    }*/
+    }
 
     public function obtener_datos(){
         $urlREST = $this->url.$this->endpoint;

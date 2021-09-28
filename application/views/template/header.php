@@ -28,7 +28,7 @@
 	<!--Excel-->
 	<script src="<?php echo base_url("assets/librerias/excel/xlsx.full.min.js"); ?>"></script>
 	<!--PDF-->
-	<!--script src="< ?php echo base_url("assets/librerias/jsPDF-1-3-2/dist/jspdf.min.js"); ?>"></script-->
+	<script src="<?php echo base_url("assets/librerias/jsPDF-1-3-2/dist/jspdf.min.js"); ?>"></script>
 
 	<!--Scripts del bootstrap-->
 	<!-- Latest compiled and minified CSS -->
@@ -39,10 +39,8 @@
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment.js"></script>
 	<!-- Select2-->
-	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-	<!-- Libreria español -->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.0/js/i18n/es.js"></script>
+	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 	<!--Datetimepicker -->
 		<link href="https://pis-contratos-qa.kioscoweb.mx/assets/librerias/datetimepicker/bootstrap-datetimepicker.min.css" rel="stylesheet">
 		<script src="https://pis-contratos-qa.kioscoweb.mx/assets/librerias/datetimepicker/bootstrap-datetimepicker.min.js"></script>
@@ -80,7 +78,6 @@
 </head>
 
 <body>
-	
 	<input type="hidden" id="application_url" value="<?php echo APPPATH; ?>">
 	<input type="hidden" id="base_url" value="<?php echo base_url(); ?>">
 	<input type="hidden" id="base_url_rest" value="<?php echo BASE_URL_REST; ?>">
@@ -88,9 +85,6 @@
 	<input type="hidden" id="ip_address" value="<?php echo IP_ADDRESS; ?>">
 	<input type="hidden" id="idcontratovigenteusuario" value="<?php echo $this->session->_id_contrato ?>">
 	<input type="hidden" id="idempresavigenteusuario" value="<?php echo $this->session->_id_empresa ?>">
-	<input type="hidden" id="token" value="<?php echo $this->session->_token; ?>"> 
-	<input type="hidden" id="empresa" value="<?php echo $this->session->_empresa; ?>"> 
-	<input type="hidden" id="numerocontrato" value="<?php echo $this->session->_numero_contrato; ?>"> 
 	<input type="hidden" id="id_rol" value="<?php echo $this->session->_permiso_rol; ?>"> 
 	<input type="hidden" id="csrf" name="<?php echo $this->security->get_csrf_token_name();?>" value="<?php echo $this->security->get_csrf_hash();?>">
 
@@ -143,5 +137,5 @@
 					</div>
 				</nav>
 			</section>-->
-			<section class="flag-banner" id="section-body">
+			<section class="flag-banner">
 				<div class="d-flex">

@@ -5,9 +5,6 @@ const ip_address = $("#ip_address").val();
 const idcontratovigenteusuario = $("#idcontratovigenteusuario").val();
 const idempresavigenteusuario = $("#idempresavigenteusuario").val();
 const app_path = $("#app_path").val();
-const _token = $("#token").val();
-const _empresa = $("#empresa").val();
-const _numero_contrato = $("#numerocontrato").val();
 
 var cambios = 0;
 //FUNCIONES CONSTANTES (modales)

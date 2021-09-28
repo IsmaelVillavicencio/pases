@@ -11,7 +11,7 @@ class VALIDACIONES{
         };
         if(!(/^[A-Z]{1}[AEIOUX]{1}[A-Z]{2}[0-9]{2}(0[1-9]|1[0-2])(0[1-9]|1[0-9]|2[0-9]|3[0-1])[HM]{1}(AS|BC|BS|CC|CS|CH|CL|CM|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)[B-DF-HJ-NP-TV-Z]{3}[0-9A-Z]{1}[0-9]{1}$/.test(valor))){
             resultado.resp = false;
-            resultado.message = 'Información no valida';
+            resultado.message = 'Información no válida';
         }else{
             var anio = valor.substr(4, 2);
 			var mes = valor.substr(6, 2);
@@ -146,13 +146,6 @@ class VALIDACIONES{
     caracteres_validos_sin_acentos(valor,longitud_min){
         let resultado = {resp : true}
         if (!(/^[a-zA-ZñÑ.\s]+$/.test(valor)) || valor.length < longitud_min){
-            resultado.resp = false
-        }
-        return resultado
-    }
-    caracteres_validos_especial_sin_comillas(valor,longitud_min){
-        let resultado = {resp : true}
-        if (!(/^[0-9a-zA-ZáéíóúÁÉÍÓÚñÑ\.,\-\(\)\/\s]+$/.test(valor)) ){
             resultado.resp = false
         }
         return resultado

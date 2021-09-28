@@ -18,7 +18,7 @@ class Permisos extends CI_Model
     /*
     *Nombre:        getStatusPermisos
     *Parámetros:    {}
-    *Descripción:   Retorna todos los registros de
+    *Descripción:   Retorna todos los registros de permisos
     */
     public function getStatusPermisos(){
         $query = "SELECT * FROM cat_estatus_Pases";
@@ -46,35 +46,27 @@ class Permisos extends CI_Model
 			'data'		=> $respuesta
 		];
     }
-
-    public function getGridPermisos($datos){
-        if($this->session->_permiso_rol == 8){
-            $idempresa = $this->session->_id_empresa;
-        }/*else if($datos['permiso_rol'] == 8){
-            $idempresa = $datos['idempresa'];
-        }*/else{
-            $idempresa = ($datos['idempresa'] == '' ? 0 : $datos['idempresa']);
+    /*
+    *Nombre:        getAll
+    *Parámetros:    {}
+    *Descripción:   Retorna todos los registros de permisos
+    */
+    public function getAll($idpermiso){
+        if($idpermiso != ""){
+            $query = "SELECT tp.*, te.nombre as empresa, ctp.nombre as tipo_permiso, cep.nombre as estatus_nombre, tp.autorizacion, tp.autorizacion_aduana
+            FROM tbl_Pases tp
+            left JOIN tbl_Empresas te on tp.id_empresa = te.id
+            LEFT JOIN cat_tipo_Permiso ctp on tp.id_tipo_permiso = ctp.id
+            LEFT JOIN cat_estatus_Pases cep ON tp.id_estatus_pase = cep.id
+            WHERE tp.id > 19999 and tp.id_estatus_pase <> 14 ".($idpermiso  != '' ? " AND tp.id = $idpermiso" : "")."
+            ORDER BY CASE WHEN cep.id = 1 THEN 0 WHEN cep.id = 2 THEN 0 ELSE 1 END, cep.id, cep.nombre";
+        }else{
+            $query = "SELECT * FROM v_getAllPases";
         }
-
-        $idtipovigencia = ($datos['idvigencia'] == '' ? 0 : $datos['idvigencia']);
-        $idtipopermiso = ($datos['idtipopermiso'] == '' ? 0 : $datos['idtipopermiso']);
-        $idestatuspase = ($datos['idestatuspase'] == '' ? 0 : $datos['idestatuspase']);
-        $nosolicitud = ($datos['nosolicitud'] == '' ? 0 : $datos['nosolicitud']);
-
-        $query = "EXEC sp_grdPermisos ".$datos['permiso_rol'].", 
-            $idempresa, 
-            '".$datos['fechainicio']."', 
-            '".$datos['fechatermino']."',
-            $idtipovigencia, 
-            $idtipopermiso, 
-            $idestatuspase, 
-            $nosolicitud, 
-            '".$datos['nombrepersona']."', 
-            '".$datos['noplaca']."'";
         $respuesta = $this->db->query($query)->result();
         return [
 			'status' 	=> true,
-			'message'	=> $idempresa,
+			'message'	=> "",
 			'data'		=> $respuesta
 		];
     }
@@ -82,7 +74,7 @@ class Permisos extends CI_Model
     /*
     *Nombre:        getAllFiltro
     *Parámetros:    {}
-    *Descripción:   Retorna todos los registros de
+    *Descripción:   Retorna todos los registros de permisos
     */
     public function getAllFiltro($datos){
         $query = "SELECT tp.*, te.nombre as empresa, ctp.nombre as tipo_permiso, cep.nombre as estatus_nombre, tp.autorizacion, tp.autorizacion_aduana
@@ -100,7 +92,7 @@ class Permisos extends CI_Model
                 GROUP BY dpp.id_permiso 
             ) z on tp.id = z.id_permiso";
         }
-        $query .= " WHERE 1 = 1";
+        $query .= " WHERE tp.id > 19999 and 1 = 1";
         if($datos["fechainicio"] != "" && $datos["fechatermino"] != ""){
             $query .= " AND tp.fecha_inicio  BETWEEN '".$datos["fechainicio"]."' AND '".$datos["fechatermino"]."'";
             $query .= " AND tp.fecha_termino  BETWEEN '".$datos["fechainicio"]."' AND '".$datos["fechatermino"]."'";
@@ -123,13 +115,339 @@ class Permisos extends CI_Model
 		];
     }
 
+    public function getFiltro($datos){
+
+        $query = "SELECT tp.*, ctp.nombre as tipo_permiso, cep.nombre as estatus_nombre, te.nombre as empresa
+        FROM tbl_Pases tp
+        LEFT JOIN cat_tipo_Permiso ctp ON tp.id_tipo_permiso = ctp.id
+        LEFT JOIN tbl_Empresas te on tp.id_empresa = te.id
+        LEFT JOIN cat_estatus_Pases cep ON tp.id_estatus_pase = cep.id";
+
+        $query .= " WHERE tp.id > 19999 and 1 = 1 ";
+
+        if($datos["fechainicio"] != "" && $datos["fechatermino"] != ""){
+            $query .= " AND tp.fecha_inicio  BETWEEN '".$datos["fechainicio"]."' AND '".$datos["fechatermino"]."'";
+            $query .= " AND tp.fecha_termino  BETWEEN '".$datos["fechainicio"]."' AND '".$datos["fechatermino"]."'";
+        }
+        if($datos["nosolicitud"] != 0){
+            $query .= " AND tp.id = ".$datos["nosolicitud"];
+        }
+        if($datos["idestatuspase"] != 0){
+            if($datos["idestatuspase"] == 7){
+                $query .= " AND tp.autorizacion is not null AND tp.id_estatus_pase not in (11,12,13,14)";
+            }else if ($datos["idestatuspase"] == 5){
+                $query .= " AND tp.autorizacion_aduana is not null AND tp.id_estatus_pase not in (11,12,13,14)";
+            }else if ($datos["idestatuspase"] == 9){
+                $query .= " AND tp.autorizacion_migracion is not null AND tp.id_estatus_pase not in (11,12,13,14)";
+            }else if ($datos["idestatuspase"] == 11 || $datos["idestatuspase"] == 12 || $datos["idestatuspase"] == 13 || $datos["idestatuspase"] == 14){
+                $query .= " AND tp.id_estatus_pase = ".$datos["idestatuspase"];
+            }else if($datos["idestatuspase"] != 5 && $datos["idestatuspase"] != 7 && $datos["idestatuspase"] != 9){
+                $query .= " AND tp.id_estatus_pase = ".$datos["idestatuspase"];
+            }
+        }
+        if($datos["identidad"] != 0){
+            $query .= " AND tp.id_empresa = ".$datos["identidad"];
+        }
+        if($datos["idvigencia"] != 0){
+            $query .= " AND tp.id_tipo_vigencia = ".$datos["idvigencia"];
+        }
+        if($datos["idtipopermiso"] != 0){
+            $query .= " AND tp.id_tipo_permiso = ".$datos["idtipopermiso"];
+        }
+        if($datos["nombrepersona"] != ""){
+            $query .= " AND tp.id in (
+                SELECT dtp.id_permiso
+                FROM det_Pase_Personal dtp
+                INNER JOIN tbl_Personas tp ON dtp.id_personal = tp.id
+                WHERE tp.nombre like '%".$datos["nombrepersona"]."%'
+                GROUP BY dtp.id_permiso
+            )";
+        }
+        if($datos["noplaca"] != ""){
+            $query .= " AND tp.id in (
+                SELECT dtv.id_permiso
+                FROM det_Pase_Vehiculo dtv
+                INNER JOIN tbl_Vehiculos tv on dtv.id_vehiculo = tv.id
+                WHERE tv.numero_placa = '".$datos["noplaca"]."'
+                GROUP BY dtv.id_permiso
+            )";
+        }
+
+        $respuesta = $this->db->query($query)->result();
+        return [
+			'status' 	=> true,
+			'message'	=> '',
+			'data'		=> $respuesta
+		];
+    }
+
+    public function getFiltroByUser($datos){
+        $query = "SELECT tp.*, te.nombre as empresa, ctp.nombre as tipo_permiso, cep.nombre as estatus_nombre, tp.autorizacion, tp.autorizacion_aduana
+        FROM tbl_Pases tp
+        left JOIN tbl_Empresas te on tp.id_empresa = te.id
+        LEFT JOIN cat_tipo_Permiso ctp on tp.id_tipo_permiso = ctp.id
+        LEFT JOIN cat_estatus_Pases cep ON tp.id_estatus_pase = cep.id
+        WHERE tp.id > 19999 and 1 = 1";
+
+        if($datos["fechainicio"] != "" && $datos["fechatermino"] != ""){
+            $query .= " AND tp.fecha_inicio  BETWEEN '".$datos["fechainicio"]."' AND '".$datos["fechatermino"]."'";
+            $query .= " AND tp.fecha_termino  BETWEEN '".$datos["fechainicio"]."' AND '".$datos["fechatermino"]."'";
+        }
+        if($datos["nosolicitud"] != 0){
+            $query .= " AND tp.id = ".$datos["nosolicitud"];
+        }
+        if($datos["idestatuspase"] != 0){
+            if($datos["idestatuspase"] == 7){
+                $query .= " AND tp.autorizacion is not null AND tp.id_estatus_pase not in (11,12,13,14)";
+            }else if ($datos["idestatuspase"] == 5){
+                $query .= " AND tp.autorizacion_aduana is not null AND tp.id_estatus_pase not in (11,12,13,14)";
+            }else if ($datos["idestatuspase"] == 9){
+                $query .= " AND tp.autorizacion_migracion is not null AND tp.id_estatus_pase not in (11,12,13,14)";
+            }else if ($datos["idestatuspase"] == 11 || $datos["idestatuspase"] == 12 || $datos["idestatuspase"] == 13 || $datos["idestatuspase"] == 14){
+                $query .= " AND tp.id_estatus_pase = ".$datos["idestatuspase"];
+            }else if($datos["idestatuspase"] != 5 && $datos["idestatuspase"] != 7 && $datos["idestatuspase"] != 9){
+                $query .= " AND tp.id_estatus_pase = ".$datos["idestatuspase"];
+            }
+        }
+        if($datos["identidad"] != 0){
+            $query .= " AND tp.id_empresa = ".$datos["identidad"];
+        }
+        if($datos["idvigencia"] != 0){
+            $query .= " AND tp.id_tipo_vigencia = ".$datos["idvigencia"];
+        }
+        if($datos["idtipopermiso"] != 0){
+            $query .= " AND tp.id_tipo_permiso = ".$datos["idtipopermiso"];
+        }
+        if($datos["nombrepersona"] != ""){
+            $query .= " AND tp.id in (
+                SELECT dtp.id_permiso
+                FROM det_Pase_Personal dtp
+                INNER JOIN tbl_Personas tp ON dtp.id_personal = tp.id
+                WHERE tp.nombre like '%".$datos["nombrepersona"]."%'
+                GROUP BY dtp.id_permiso
+            )";
+        }
+        if($datos["noplaca"] != ""){
+            $query .= " AND tp.id in (
+                SELECT dtv.id_permiso
+                FROM det_Pase_Vehiculo dtv
+                INNER JOIN tbl_Vehiculos tv on dtv.id_vehiculo = tv.id
+                WHERE tv.numero_placa = '".$datos["noplaca"]."'
+                GROUP BY dtv.id_permiso
+            )";
+        }
+
+        $respuesta = $this->db->query($query)->result();
+        return [
+			'status' 	=> true,
+			'message'	=> '',
+			'data'		=> $respuesta
+		];
+    }
+
+    public function getFiltroAduana($datos){
+        $query = "SELECT tp.*,  te.nombre as empresa, ctp.nombre as tipo_permiso, TT.numequipos, TT2.nummaterial, cep.nombre as estatus_nombre, tp.autorizacion, tp.autorizacion_aduana
+            FROM tbl_Pases tp
+            left JOIN tbl_Empresas te on tp.id_empresa = te.id
+            LEFT JOIN cat_tipo_Permiso ctp on tp.id_tipo_permiso = ctp.id
+            LEFT JOIN cat_estatus_Pases cep ON tp.id_estatus_pase = cep.id
+            LEFT JOIN (SELECT COUNT(id_permiso) as numequipos, id_permiso
+            FROM det_Pase_Equipo
+            GROUP BY id_permiso) as TT
+            ON TT.id_permiso = tp.id
+            LEFT JOIN (SELECT COUNT(id_permiso) as nummaterial, id_permiso
+            FROM det_Pase_Materiales
+            GROUP BY id_permiso) as TT2
+            ON TT2.id_permiso = tp.id
+            WHERE tp.id > 19999 and tp.id_estatus_pase <> 14 and tp.id_recinto <> 3 and ((TT.numequipos is not null or TT2.nummaterial is not null) or (TT.numequipos is null and TT2.nummaterial is null and tp.id_estatus_pase in (2,4)))";
+
+           /* if($datos["idestatuspase"] == 0){
+                $query .= " AND tp.id_estatus_pase <> 14 and ((TT.numequipos is not null or TT2.nummaterial is not null) or (TT.numequipos is null and TT2.nummaterial is null and tp.id_estatus_pase in (2,4)))";
+            }else{
+                $query .= " AND tp.id_estatus_pase = ".$datos["idestatuspase"];
+            }*/
+
+            switch ($datos["idestatuspase"]) {
+                case 5:
+                    $query .= " AND tp.autorizacion is null AND tp.autorizacion_aduana is not null AND tp.id_estatus_pase not in (1,11,12,13,14)";
+                    break;
+                case 4:
+                    $query .= " AND tp.id_estatus_pase = ".$datos["idestatuspase"];
+                    break;
+                case 2:
+                    $query .= " AND tp.id_estatus_pase = ".$datos["idestatuspase"];
+                    break;
+                case 11:
+                    $query .= " AND tp.autorizacion_aduana is not null AND tp.autorizacion is not null AND tp.id_estatus_pase not in (1,12,13,14)";
+                    break;
+                case 12:
+                    $query .= " AND tp.id_estatus_pase = ".$datos["idestatuspase"];
+                    break;
+                case 13:
+                    $query .= " AND tp.id_estatus_pase = ".$datos["idestatuspase"];
+                    break;
+                case 14:
+                    $query .= " AND tp.id_estatus_pase = ".$datos["idestatuspase"];
+                    break;
+                default:
+                
+                    break;
+            }
+
+            /*if($datos["idestatuspase"] != 0){
+               if ($datos["idestatuspase"] == 5){
+                    $query .= " AND tp.autorizacion is null AND tp.autorizacion_aduana is not null AND tp.id_estatus_pase not in (1,11,12,13,14)";
+                }else if($datos["idestatuspase"] == 4){
+                    $query .= " AND tp.id_estatus_pase = ".$datos["idestatuspase"];
+                }else if ($datos["idestatuspase"] == 2){
+                    $query .= " AND tp.id_estatus_pase = ".$datos["idestatuspase"];
+                }else if ($datos["idestatuspase"] == 11){
+                    $query .= " AND tp.autorizacion_aduana is not null AND tp.autorizacion is not null AND tp.id_estatus_pase not in (1,12,13,14)";
+                }else if ($datos["idestatuspase"] == 12){
+                    $query .= " AND tp.id_estatus_pase = ".$datos["idestatuspase"];
+                }else if ($datos["idestatuspase"] == 13){
+                    $query .= " AND tp.id_estatus_pase = ".$datos["idestatuspase"];
+                }else if ($datos["idestatuspase"] == 14){
+                    $query .= " AND tp.id_estatus_pase = ".$datos["idestatuspase"];
+                }
+            }*/
+            if($datos["fechainicio"] != "" && $datos["fechatermino"] != ""){
+                $query .= " AND tp.fecha_inicio  BETWEEN '".$datos["fechainicio"]."' AND '".$datos["fechatermino"]."'";
+                $query .= " AND tp.fecha_termino  BETWEEN '".$datos["fechainicio"]."' AND '".$datos["fechatermino"]."'";
+            }
+            if($datos["nosolicitud"] != 0){
+                $query .= " AND tp.id = ".$datos["nosolicitud"];
+            }
+            if($datos["identidad"] != 0){
+                $query .= " AND tp.id_empresa = ".$datos["identidad"];
+            }
+            if($datos["idvigencia"] != 0){
+                $query .= " AND tp.id_tipo_vigencia = ".$datos["idvigencia"];
+            }
+            if($datos["idtipopermiso"] != 0){
+                $query .= " AND tp.id_tipo_permiso = ".$datos["idtipopermiso"];
+            }
+            if($datos["nombrepersona"] != ""){
+                $query .= " AND tp.id in (
+                    SELECT dtp.id_permiso
+                    FROM det_Pase_Personal dtp
+                    INNER JOIN tbl_Personas tp ON dtp.id_personal = tp.id
+                    WHERE tp.nombre like '%".$datos["nombrepersona"]."%'
+                    GROUP BY dtp.id_permiso
+                )";
+            }
+            if($datos["noplaca"] != ""){
+                $query .= " AND tp.id in (
+                    SELECT dtv.id_permiso
+                    FROM det_Pase_Vehiculo dtv
+                    INNER JOIN tbl_Vehiculos tv on dtv.id_vehiculo = tv.id
+                    WHERE tv.numero_placa = '".$datos["noplaca"]."'
+                    GROUP BY dtv.id_permiso
+                )";
+            }
+            /*WHERE tp.id_estatus_pase <> 14 and ((TT.numequipos is not null or TT2.nummaterial is not null) or (TT.numequipos is null and TT2.nummaterial is null and tp.id_estatus_pase in (2,4)))
+            ORDER BY CASE WHEN cep.id = 1 THEN 0 ELSE 1 END, cep.id, cep.nombre";*/
+        $respuesta = $this->db->query($query)->result();
+        return [
+			'status' 	=> true,
+			'message'	=> '',
+			'data'		=> $respuesta
+		];
+    }
+
+    public function getFiltroMigracion($datos){
+        $query = "SELECT tp.*,  te.nombre as empresa, ctp.nombre as tipo_permiso, cep.nombre as estatus_nombre, tp.autorizacion, tp.autorizacion_aduana, TT.numpersonas
+            FROM tbl_Pases tp
+            left JOIN tbl_Empresas te on tp.id_empresa = te.id
+            LEFT JOIN cat_tipo_Permiso ctp on tp.id_tipo_permiso = ctp.id
+            LEFT JOIN cat_estatus_Pases cep ON tp.id_estatus_pase = cep.id
+            LEFT JOIN (SELECT COUNT(id_permiso) as numpersonas, id_permiso
+            FROM det_Pase_Personal
+            WHERE det_Pase_Personal.estatus_pase_migracion IN (7,8,9)
+            GROUP BY id_permiso) as TT
+            ON TT.id_permiso = tp.id
+            WHERE tp.id > 19999 and (TT.numpersonas > 0 or (TT.numpersonas is null and tp.id_estatus_pase in (3,4)))";
+
+            /*if($datos["idestatuspase"] == 0){
+                $query .= " AND (TT.numpersonas > 0 or (TT.numpersonas is null and tp.id_estatus_pase in (3,4)))";
+            }else{
+                $query .= " AND tp.id_estatus_pase = ".$datos["idestatuspase"];
+            }*/
+            if($datos["idestatuspase"] != 0){
+                if($datos["idestatuspase"] == 3){
+                    $query .= " AND tp.id_estatus_pase = ".$datos["idestatuspase"];
+                }else if ($datos["idestatuspase"] == 4){
+                    $query .= " AND tp.id_estatus_pase = ".$datos["idestatuspase"];
+                }else if ($datos["idestatuspase"] == 11){
+                    $query .= " AND tp.autorizacion_migracion is not null AND tp.autorizacion is not null";
+                }else if ($datos["idestatuspase"] == 9){
+                    $query .= " AND tp.autorizacion_migracion is not null AND tp.autorizacion is null AND tp.id_estatus_pase not in (11,12,13,14)";
+                }else if ($datos["idestatuspase"] == 12 || $datos["idestatuspase"] == 13 || $datos["idestatuspase"] == 14){
+                    $query .= " AND tp.id_estatus_pase = ".$datos["idestatuspase"];
+                }/*else if($datos["idestatuspase"] != 5 && $datos["idestatuspase"] != 7 && $datos["idestatuspase"] != 9){
+                    $query .= " AND tp.id_estatus_pase = ".$datos["idestatuspase"];
+                }*/
+            }
+            if($datos["fechainicio"] != "" && $datos["fechatermino"] != ""){
+                $query .= " AND tp.fecha_inicio  BETWEEN '".$datos["fechainicio"]."' AND '".$datos["fechatermino"]."'";
+                $query .= " AND tp.fecha_termino  BETWEEN '".$datos["fechainicio"]."' AND '".$datos["fechatermino"]."'";
+            }
+            if($datos["nosolicitud"] != 0){
+                $query .= " AND tp.id = ".$datos["nosolicitud"];
+            }
+            if($datos["identidad"] != 0){
+                $query .= " AND tp.id_empresa = ".$datos["identidad"];
+            }
+            if($datos["idvigencia"] != 0){
+                $query .= " AND tp.id_tipo_vigencia = ".$datos["idvigencia"];
+            }
+            if($datos["idtipopermiso"] != 0){
+                $query .= " AND tp.id_tipo_permiso = ".$datos["idtipopermiso"];
+            }
+            if($datos["nombrepersona"] != ""){
+                $query .= " AND tp.id in (
+                    SELECT dtp.id_permiso
+                    FROM det_Pase_Personal dtp
+                    INNER JOIN tbl_Personas tp ON dtp.id_personal = tp.id
+                    WHERE tp.nombre like '%".$datos["nombrepersona"]."%'
+                    GROUP BY dtp.id_permiso
+                )";
+            }
+            if($datos["noplaca"] != ""){
+                $query .= " AND tp.id in (
+                    SELECT dtv.id_permiso
+                    FROM det_Pase_Vehiculo dtv
+                    INNER JOIN tbl_Vehiculos tv on dtv.id_vehiculo = tv.id
+                    WHERE tv.numero_placa = '".$datos["noplaca"]."'
+                    GROUP BY dtv.id_permiso
+                )";
+            }
+            /*WHERE tp.id_estatus_pase <> 14 and ((TT.numequipos is not null or TT2.nummaterial is not null) or (TT.numequipos is null and TT2.nummaterial is null and tp.id_estatus_pase in (2,4)))
+            ORDER BY CASE WHEN cep.id = 1 THEN 0 ELSE 1 END, cep.id, cep.nombre";*/
+        $respuesta = $this->db->query($query)->result();
+        return [
+			'status' 	=> true,
+			'message'	=> '',
+			'data'		=> $respuesta
+		];
+    }
     /*
     *Nombre:        getById
     *Parámetros:    {$id} => id de permiso
-    *Descripción:   Retorna un registro especifico de
+    *Descripción:   Retorna un registro especifico de permisos
     */
     public function getById($id){
-        $query = "EXEC sp_getDatosPase $id";
+        $query = "SELECT te.nombre as empresa,tp.*, ctp.nombre as tipo_permiso, ctp.id as id_tipo_permiso, cta.nombre as actividad,  cta.id as id_actividad,
+		ctv.nombre as vigencia, ctv.id as id_vigencia, ctr.nombre as tipo_recinto, ctr.id as id_tipo_recinto, ctr2.nombre as recinto_fiscalizado, ctr2.id as id_recinto_fiscalizado,
+        tp.autorizacion, tp.autorizacion_aduana
+        FROM tbl_Pases tp
+        left JOIN tbl_Empresas te on tp.id_empresa = te.id
+        LEFT JOIN cat_tipo_Permiso ctp on tp.id_tipo_permiso = ctp.id
+        LEFT JOIN cat_tipo_Actividad cta on tp.id_tipo_actividad = cta.id
+        LEFT JOIN cat_tipo_Vigencia ctv on tp.id_tipo_vigencia = ctv.id
+        LEFT JOIN cat_tipo_Recintos ctr on tp.id_recinto = ctr.id
+        LEFT JOIN cat_tipo_Fiscalizados ctr2 on tp.id_fiscalizado = ctr2.id
+        WHERE tp.id = $id";
         $respuesta = $this->db->query($query)->row();
         return [
 			'status' 	=> true,
@@ -141,7 +459,7 @@ class Permisos extends CI_Model
     /*
     *Nombre:        getByIdContrato
     *Parámetros:    {$id} => id de permiso
-    *Descripción:   Retorna un registro especifico de, se agrego el numero de contrato
+    *Descripción:   Retorna un registro especifico de permisos, se agrego el numero de contrato
     */
     public function getByIdContrato($id){
         $query = "SELECT te.nombre as empresa, tp.*, ctp.nombre as tipo_permiso, cta.nombre as actividad,
@@ -166,7 +484,7 @@ class Permisos extends CI_Model
     /*
     *Nombre:        getByEstatus
     *Parámetros:    {$estatus} => estatus (0 o 1)
-    *Descripción:   Retorna todos los registros de en 
+    *Descripción:   Retorna todos los registros de permisos en 
     *               base a la especificación del estatus recibido
     */
     public function getByEstatus($estatus = 1){
@@ -182,16 +500,16 @@ class Permisos extends CI_Model
     /*
     *Nombre:        getByEstatus
     *Parámetros:    {$estatus} => estatus (0 o 1)
-    *Descripción:   Retorna todos los registros de en 
+    *Descripción:   Retorna todos los registros de permisos en 
     *               base a la especificación del estatus recibido
     */
-    public function getAllByEstatus(){
+    public function getAllByEstatus($idpermiso){
         $query = "SELECT tp.*, te.nombre as empresa, ctp.nombre as tipo_permiso, cep.nombre as estatus_nombre
         FROM tbl_Pases tp
         left JOIN tbl_Empresas te on tp.id_empresa = te.id
         LEFT JOIN cat_tipo_Permiso ctp on tp.id_tipo_permiso = ctp.id
         LEFT JOIN cat_estatus_Pases cep ON tp.id_estatus_pase = cep.id
-        WHERE tp.estatus = 1 OR tp.estatus = 2";
+        WHERE tp.id > 19999 and (tp.estatus = 1 OR tp.estatus = 2) ".($idpermiso  != '' ? " AND tp.id = $idpermiso" : "");
         $respuesta = $this->db->query($query)->result();
         return [
 			'status' 	=> true,
@@ -199,13 +517,153 @@ class Permisos extends CI_Model
 			'data'		=> $respuesta
 		];
     }
+
+    /*
+    *Nombre:        getAllByArea
+    *Parámetros:    {}
+    *Descripción:   Retorna todos los registros de permisos en 
+    *               base a la especificación del estatus recibido
+    */
+    public function getAllByUser($idpermiso){
+        $query = "SELECT TOP 100 tp.*, te.nombre as empresa, ctp.nombre as tipo_permiso, cep.nombre as estatus_nombre, tp.autorizacion, tp.autorizacion_aduana
+        FROM tbl_Pases tp
+        left JOIN tbl_Empresas te on tp.id_empresa = te.id
+        LEFT JOIN cat_tipo_Permiso ctp on tp.id_tipo_permiso = ctp.id
+        LEFT JOIN cat_estatus_Pases cep ON tp.id_estatus_pase = cep.id
+        WHERE tp.id > 19999 and tp.id_empresa = ".$this->idempresa."
+        ORDER BY tp.id desc";
+        $respuesta = $this->db->query($query)->result();
+        return [
+			'status' 	=> true,
+			'message'	=> "",
+			'data'		=> $respuesta,
+            'query'     => $query
+		];
+    }
+
+    /*
+    *Nombre:        getAllAduana
+    *Parámetros:    {}
+    *Descripción:   Retorna todos los registros de permisos en 
+    *               base a la especificación del estatus recibido
+    */
+    public function getAllAduana($idpermiso){
+        $query = "SELECT tp.*,  te.nombre as empresa, ctp.nombre as tipo_permiso, TT.numequipos, TT2.nummaterial, cep.nombre as estatus_nombre, tp.autorizacion, tp.autorizacion_aduana
+            FROM tbl_Pases tp
+            left JOIN tbl_Empresas te on tp.id_empresa = te.id
+            LEFT JOIN cat_tipo_Permiso ctp on tp.id_tipo_permiso = ctp.id
+            LEFT JOIN cat_estatus_Pases cep ON tp.id_estatus_pase = cep.id
+            LEFT JOIN (SELECT COUNT(id_permiso) as numequipos, id_permiso
+            FROM det_Pase_Equipo
+            GROUP BY id_permiso) as TT
+            ON TT.id_permiso = tp.id
+            LEFT JOIN (SELECT COUNT(id_permiso) as nummaterial, id_permiso
+            FROM det_Pase_Materiales
+            GROUP BY id_permiso) as TT2
+            ON TT2.id_permiso = tp.id
+            WHERE tp.id > 19999 and tp.id_estatus_pase <> 14 and ((TT.numequipos is not null or TT2.nummaterial is not null) or (TT.numequipos is null and TT2.nummaterial is null and tp.id_estatus_pase in (2,4))) ".($idpermiso  != '' ? " AND tp.id = $idpermiso" : "")."
+            ORDER BY CASE WHEN cep.id = 1 THEN 0 ELSE 1 END, cep.id, cep.nombre";
+        $respuesta = $this->db->query($query)->result();
+        return [
+			'status' 	=> true,
+			'message'	=> '',
+			'data'		=> $respuesta
+		];
+    }
+
+    /*
+    *Nombre:        getAllMigracion
+    *Parámetros:    {}
+    *Descripción:   Retorna todos los registros de permisos en 
+    *               base a la especificación del estatus recibido
+    */
+    public function getAllMigracion($idpermiso){
+        $query = "SELECT tp.*,  te.nombre as empresa, ctp.nombre as tipo_permiso, cep.nombre as estatus_nombre, tp.autorizacion, tp.autorizacion_aduana, TT.numpersonas
+            FROM tbl_Pases tp
+            left JOIN tbl_Empresas te on tp.id_empresa = te.id
+            LEFT JOIN cat_tipo_Permiso ctp on tp.id_tipo_permiso = ctp.id
+            LEFT JOIN cat_estatus_Pases cep ON tp.id_estatus_pase = cep.id
+            LEFT JOIN (SELECT COUNT(id_permiso) as numpersonas, id_permiso
+            FROM det_Pase_Personal
+            WHERE det_Pase_Personal.estatus_pase_migracion IN (7,8,9)
+            GROUP BY id_permiso) as TT
+            ON TT.id_permiso = tp.id
+            WHERE tp.id > 19999 and (TT.numpersonas > 0 or (TT.numpersonas is null and tp.id_estatus_pase in (3,4))) ".($idpermiso  != '' ? " AND tp.id = $idpermiso" : "")."
+            ORDER BY CASE WHEN cep.id = 1 THEN 0 ELSE 1 END, cep.id, cep.nombre";
+        $respuesta = $this->db->query($query)->result();
+        return [
+			'status' 	=> true,
+			'message'	=> '',
+			'data'		=> $respuesta
+		];
+    }
+
+    public function getGridPermisos($datos){
+        if($this->session->_permiso_rol == 8){
+            $idempresa = $this->session->_id_empresa;
+        }else if($datos['permiso_rol'] == 8){
+            $idempresa = $datos['idempresa'];
+        }else{
+            $idempresa = ($datos['idempresa'] == '' ? 0 : $datos['idempresa']);
+        }
+
+        $idtipovigencia = ($datos['idvigencia'] == '' ? 0 : $datos['idvigencia']);
+        $idtipopermiso = ($datos['idtipopermiso'] == '' ? 0 : $datos['idtipopermiso']);
+        $idestatuspase = ($datos['idestatuspase'] == '' ? 0 : $datos['idestatuspase']);
+        $nosolicitud = ($datos['nosolicitud'] == '' ? 0 : $datos['nosolicitud']);
+
+        $query = "EXEC sp_grdPermisos ".$datos['permiso_rol'].", 
+            $idempresa, 
+            '".$datos['fechainicio']."', 
+            '".$datos['fechatermino']."',
+            $idtipovigencia, 
+            $idtipopermiso, 
+            $idestatuspase, 
+            $nosolicitud, 
+            '".$datos['nombrepersona']."', 
+            '".$datos['noplaca']."'";
+        $respuesta = $this->db->query($query)->result();
+        return [
+			'status' 	=> true,
+			'message'	=> '',
+			'data'		=> $respuesta
+		];
+    }
+    
     /*
     *Nombre:        getPersonal
     *Parámetros:    {$idpermiso} => 
     *Descripción:   Obtiene Personal del pase consultado
     */
     public function getPersonal($idpermiso){
-        $query = "EXEC sp_getPersonasPase $idpermiso";
+        $query = "SELECT tbl_Pases.id as id_pase, cat_tipo_empleado.nombre as tipo_persona,
+            CONCAT(tbl_Personas.nombre,' ',tbl_Personas.primer_apellido,' ',tbl_Personas.segundo_apellido) as nombre,
+            tbl_Personas.nombre as nombre_persona,
+            cat_tipo_Nacionalidad.nombre as nacionalidad,
+            cat_tipo_Nacionalidad.id as id_nacionalidad,
+            det_Persona_Empresa_Puesto.estatus_empleado,
+            cat_tipo_Empleado.id as id_empleado,
+            tbl_Personas.id, x.correo,x.telefono,
+            tbl_Personas.curp
+            FROM tbl_Pases
+            JOIN det_Pase_Personal
+            ON det_Pase_Personal.id_permiso = tbl_Pases.id
+            JOIN det_Persona_Empresa_Puesto
+            ON det_Persona_Empresa_Puesto.id_persona = det_Pase_Personal.id_personal
+            AND det_Persona_Empresa_Puesto.id_empresa = det_Pase_Personal.id_empresa
+            AND det_Persona_Empresa_Puesto.id_puesto = -3
+            JOIN tbl_Personas
+            ON tbl_Personas.id = det_Pase_Personal.id_personal
+            JOIN cat_tipo_Nacionalidad
+            ON cat_Tipo_Nacionalidad.id = tbl_Personas.id_nacionalidad
+            JOIN cat_tipo_Empleado
+            ON cat_tipo_empleado.id = det_pase_personal.id_tipo_persona
+            LEFT JOIN (
+            	SELECT distinct id_persona, correo,telefono
+            	FROM tbl_Contactos
+            	WHERE estatus = 1
+            ) x ON det_Pase_Personal.id_personal = x.id_persona
+            WHERE tbl_Pases.id = $idpermiso";
         $respuesta = $this->db->query($query)->result();
         return [
 			'status' 	=> true,
@@ -277,7 +735,28 @@ class Permisos extends CI_Model
     *Descripción:   Obtiene EquiposHerramientas del pase consultado
     */
     public function getEquiposHerramientas($idpermiso){
-        $query = "EXEC sp_getEquiposPermiso $idpermiso";
+        $query = "SELECT cat_tipo_Equipo.nombre as tipo_equipo,
+            tbl_equipos.modelo,
+            tbl_equipos.marca,
+            tbl_equipos.descripcion,
+            tbl_equipos.numero_serie,
+            tbl_Equipos.id,
+            cat_estatus_Registro_Pases.nombre as estatus,
+            det_Pase_Equipo.estatus_pase,
+            det_Pase_Equipo.id_usuario_registro,
+            CONCAT(tbl_Personas.nombre, ' ', tbl_Personas.primer_apellido, ' ' , tbl_Personas.segundo_apellido) as responsable
+            FROM tbl_Pases
+            JOIN det_Pase_Equipo
+            ON det_Pase_Equipo.id_permiso = tbl_Pases.id
+            JOIN tbl_Equipos
+            ON tbl_Equipos.id = det_Pase_Equipo.id_equipo
+            JOIN tbl_Personas
+            ON tbl_Personas.id = det_Pase_Equipo.id_personal
+            JOIN cat_tipo_Equipo
+            ON cat_Tipo_equipo.id = tbl_Equipos.id_tipo_equipo
+            JOIN cat_estatus_Registro_Pases
+            ON cat_estatus_Registro_Pases.id = det_Pase_Equipo.estatus_pase
+            WHERE tbl_Pases.id = $idpermiso";
         $respuesta = $this->db->query($query)->result();
         return [
 			'status' 	=> true,
@@ -292,8 +771,40 @@ class Permisos extends CI_Model
     *Descripción:   Obtiene Materiales del pase consultado
     */
     public function getMateriales($idpermiso){
-        $query2 = "EXEC sp_getDetMaterialesPermiso $idpermiso";
-        $query = "EXEC sp_getMaterialesPermiso $idpermiso";
+        $query2 = "SELECT det_Pase_Materiales.id_lista,
+            det_Pase_Materiales.estatus_pase,
+            det_Pase_Materiales.observacion,
+            det_Pase_Materiales.estatus_pase,
+            det_Pase_Materiales.id_usuario_registro,
+            cat_estatus_Registro_Pases.nombre as estatus,
+            concat(tbl_Personas.nombre,' ', tbl_Personas.primer_apellido,' ', tbl_Personas.segundo_apellido) as responsable
+            FROM tbl_Pases
+            JOIN det_Pase_Materiales
+            ON det_Pase_Materiales.id_permiso = tbl_Pases.id
+            JOIN tbl_Lista_Material
+            ON tbl_Lista_Material.id = det_Pase_Materiales.id_lista
+            JOIN cat_estatus_Registro_Pases
+            ON cat_estatus_Registro_Pases.id = det_Pase_Materiales.estatus_pase
+            JOIN tbl_Personas
+            On tbl_Personas.id = tbl_Lista_Material.id_personal
+            WHERE tbl_Pases.id = $idpermiso";
+
+        $query = "SELECT det_Lista_Materiales.cantidad,
+        det_Lista_Materiales.descripcion,
+        cat_tipo_Materiales.nombre as tipo_material,
+        cat_tipo_Medidas.nombre as tipo_medida
+        FROM tbl_Pases
+        JOIN det_Pase_Materiales
+        ON det_Pase_Materiales.id_permiso = tbl_Pases.id
+        JOIN tbl_Lista_Material
+        ON tbl_Lista_Material.id = det_Pase_Materiales.id_lista
+        JOIN det_Lista_Materiales
+        ON det_Lista_Materiales.id_lista = tbl_Lista_Material.id
+        JOIN cat_tipo_Materiales
+        ON cat_tipo_Materiales.id = det_Lista_Materiales.id_material
+        LEFT JOIN cat_tipo_Medidas
+        ON cat_tipo_Medidas.id = det_Lista_Materiales.id_medida
+        WHERE tbl_Pases.id = $idpermiso";
 
         $respuesta = $this->db->query($query)->result();
         $respuesta2 = $this->db->query($query2)->row();
@@ -333,7 +844,24 @@ class Permisos extends CI_Model
     *Descripción:   Obtiene Vehiculos del pase consultado
     */
     public function getVehiculos($idpermiso){
-        $query = "EXEC sp_getVehiculosPermiso $idpermiso";
+        $query = "SELECT tbl_Vehiculos.id,
+            tbl_Vehiculos.numero_serie,
+            tbl_Vehiculos.numero_placa,
+            tbl_Vehiculos.marca,
+            tbl_Vehiculos.modelo,
+            tbl_Vehiculos.anio,
+            tbl_Vehiculos.color,
+            cat_estatus_Registro_Pases.nombre as estatus,
+            det_Pase_Vehiculo.estatus_pase,
+            det_Pase_Vehiculo.id_usuario_registro
+            FROM tbl_Pases
+            JOIN det_Pase_Vehiculo
+            ON det_Pase_Vehiculo.id_permiso = tbl_Pases.id
+            JOIN tbl_Vehiculos
+            ON tbl_Vehiculos.id = det_Pase_Vehiculo.id_vehiculo
+            JOIN cat_estatus_Registro_Pases
+            ON cat_estatus_Registro_Pases.id = det_Pase_Vehiculo.estatus_pase
+            WHERE tbl_Pases.id = $idpermiso";
         $respuesta = $this->db->query($query)->result();
         return [
 			'status' 	=> true,
@@ -348,20 +876,19 @@ class Permisos extends CI_Model
     *Descripción:   Obtiene Vehiculos del pase consultado recupera el nombre del chofer
     */
     public function getVehiculosChofer($idpermiso){
-        $query = "SELECT tbl_Vehiculos.numero_serie, det_Vehiculo_Empresa.numero_placa, tbl_Vehiculos.marca, tbl_Vehiculos.anio, tbl_Vehiculos.modelo,det_Vehiculo_Empresa.color,
-            CONCAT(tbl_Personas.nombre, ' ', tbl_Personas.primer_apellido, ' ' , tbl_Personas.segundo_apellido) as chofer
-            FROM tbl_Pases
-            JOIN det_Pase_Vehiculo
-            ON det_Pase_Vehiculo.id_permiso = tbl_Pases.id
-            JOIN tbl_Vehiculos
-            ON tbl_Vehiculos.id = det_Pase_Vehiculo.id_vehiculo
-            INNER JOIN det_Vehiculo_Empresa
-            ON det_Vehiculo_Empresa.id_empresa = tbl_Pases.id_empresa
-            AND det_Vehiculo_Empresa.id_vehiculo = tbl_Vehiculos.id
-            LEFT JOIN tbl_Personas
-            ON tbl_Personas.id = det_Pase_Vehiculo.id_chofer
-            WHERE tbl_Pases.id = ".$idpermiso."
-            AND det_Vehiculo_Empresa.estatus = 1";
+        $query = "SELECT numero_serie, numero_placa, marca, anio, modelo,color,
+        CASE CONCAT(tbl_Personas.nombre, ' ', tbl_Personas.primer_apellido, ' ' , tbl_Personas.segundo_apellido) 
+            WHEN '' THEN 'Sin responsable'
+            ELSE CONCAT(tbl_Personas.nombre, ' ', tbl_Personas.primer_apellido, ' ' , tbl_Personas.segundo_apellido)
+        END as chofer 
+        FROM tbl_Pases
+        JOIN det_Pase_Vehiculo
+        ON det_Pase_Vehiculo.id_permiso = tbl_Pases.id
+        JOIN tbl_Vehiculos
+        ON tbl_Vehiculos.id = det_Pase_Vehiculo.id_vehiculo
+        LEFT JOIN tbl_Personas
+        ON tbl_Personas.id = det_Pase_Vehiculo.id_chofer
+        WHERE tbl_Pases.id = $idpermiso";
         $respuesta = $this->db->query($query)->result();
         return [
 			'status' 	=> true,
@@ -380,13 +907,10 @@ class Permisos extends CI_Model
         JOIN det_Pase_Vehiculo ON det_Pase_Vehiculo.id_permiso = tbl_Pases.id
         JOIN tbl_Vehiculos ON tbl_Vehiculos.id = det_Pase_Vehiculo.id_vehiculo
         JOIN tbl_Personas ON det_Pase_Vehiculo.id_chofer = tbl_Personas.id
-        INNER JOIN det_Vehiculo_Empresa
-        ON det_Vehiculo_Empresa.id_empresa = tbl_Pases.id_empresa
-        AND det_Vehiculo_Empresa.id_vehiculo = tbl_Vehiculos.id
         LEFT JOIN cat_tipo_Tarjeta_Circulacion on tbl_Vehiculos.id_tipo_tarjeta_circulacion = cat_tipo_Tarjeta_Circulacion.id
         LEFT JOIN tbl_Imagenes on tbl_Personas.id = tbl_Imagenes.id_personal and tbl_Imagenes.id_tipo_toma = 3 and tbl_Imagenes.estatus = 1
         LEFT JOIN tbl_Imagenes ti on tbl_Vehiculos.id = ti.id_vehiculo and ti.id_tipo_toma = 7 and ti.estatus = 1
-        WHERE tbl_Pases.id = ".$idpermiso." and det_Pase_Vehiculo.id_chofer = ".$idusuario." AND det_Vehiculo_Empresa.estatus = 1";
+        WHERE tbl_Pases.id = $idpermiso and det_Pase_Vehiculo.id_chofer = $idusuario";
         $respuesta = $this->db->query($query)->row();
         return [
 			'status' 	=> true,
@@ -401,7 +925,66 @@ class Permisos extends CI_Model
     *Descripción:   Obtiene Personal del pase consultado
     */
     public function getPersonalById($id,$idpermiso){
-        $query = "EXEC sp_getDatosPersonaPase $id, $idpermiso";
+        $query = "SELECT tbl_Personas.nss,
+        CONCAT(tbl_Personas.nombre, ' ', tbl_Personas.primer_apellido, ' ' , tbl_Personas.segundo_apellido) as nombre,
+            tbl_Personas.curp,
+            tbl_Personas.edad,
+            tbl_Personas.ciudad_nacimiento,
+            tbl_Personas.fecha_nacimiento,
+            tbl_Personas.sexo,
+            tbl_Contactos.correo,
+            tbl_Contactos.telefono,
+            cat_Tipo_Nacionalidad.id as id_nacionalidad,
+            cat_Tipo_Nacionalidad.nombre as nacionalidad,
+            tbl_Empresas.nombre as empresa,
+            tbl_Empresas.clave_patronal,
+            det_Pase_Personal.estatus_pase,
+            det_Pase_Personal.observacion,
+            det_Pase_Personal.estatus_pase_migracion,
+            det_Pase_Personal.observacion_migracion,
+            tbl_Empresas.id as id_empresa,
+            tbl_personas.id as id_persona,
+            F1.licencia,
+            F1.numero_licencia,
+            F1.fecha_expiracion as venceLicencia,
+            F2.numero_identificacion,
+            F2.identificacion,
+            F2.tipo_identificacion,
+            F2.fecha_expiracion as venceIdentificacion,
+            F3.fotopersonal
+            FROM tbl_Pases
+            JOIN det_Pase_Personal
+            ON tbl_Pases.id = det_Pase_Personal.id_permiso 
+            JOIN tbl_Personas 
+            ON det_Pase_Personal.id_personal = tbl_Personas.id 
+            JOIN cat_tipo_Nacionalidad
+            ON cat_Tipo_Nacionalidad.id = tbl_Personas.id_nacionalidad
+            JOIN det_Persona_Empresa_Puesto
+            ON det_Persona_Empresa_Puesto.id_persona = tbl_Personas.id
+            AND det_Persona_Empresa_Puesto.id_puesto = -3
+            AND det_Persona_Empresa_Puesto.id_empresa = det_Pase_Personal.id_empresa
+            left JOIN tbl_Contactos
+            ON tbl_Contactos.id_persona = tbl_personas.id and tbl_Contactos.estatus = 1 --AND tbl_Contactos.id_empresa = det_Persona_Empresa_Puesto.id_empresa
+            JOIN tbl_Empresas
+            ON tbl_Empresas.id = det_Persona_Empresa_Puesto.id_empresa
+            LEFT JOIN (
+                SELECT CONCAT(tbl_Imagenes.link,tbl_Imagenes.nombre) as licencia, id_personal, numero_identificacion as numero_licencia, fecha_expiracion
+                FROM tbl_Imagenes
+                WHERE id_tipo_toma = 1 and estatus = 1) as F1
+            ON F1.id_personal = tbl_personas.id
+            LEFT JOIN (
+                SELECT CONCAT(tbl_Imagenes.link,tbl_Imagenes.nombre) as identificacion, id_personal, cat_tipo_Identificacion.nombre as tipo_identificacion, numero_identificacion, fecha_expiracion
+                FROM tbl_Imagenes
+                JOIN cat_tipo_Identificacion
+                ON cat_tipo_Identificacion.id = tbl_Imagenes.id_tipo_identificacion
+                WHERE id_tipo_toma = 2 and tbl_Imagenes.estatus = 1) as F2
+            ON F2.id_personal = tbl_personas.id
+            LEFT JOIN (
+                SELECT CONCAT(tbl_Imagenes.link,tbl_Imagenes.nombre) as fotopersonal, id_personal
+                FROM tbl_Imagenes
+                WHERE id_tipo_toma = 3 and estatus = 1) as F3
+            ON F3.id_personal = tbl_personas.id
+            WHERE tbl_Personas.id = $id AND det_Pase_personal.id_permiso = $idpermiso";
         $respuesta = $this->db->query($query)->Row();
         return [
 			'status' 	=> true,
@@ -464,39 +1047,46 @@ class Permisos extends CI_Model
     *Descripción:   Obtiene Vehiculos del pase consultado
     */
     public function getVehiculosById($id){
-        $query = "SELECT dve.numero_motor,
-            tv.anio,
+        $query = "SELECT tbl_Vehiculos.numero_motor,
+            tbl_Vehiculos.anio,
             cat_tipo_vehiculo.nombre as tipo_vehiculo,
             cat_tipo_tarjeta_circulacion.nombre as tipo_tarjeta_circulacion,
-            dve.numero_tarjeta_circulacion,
+            tbl_Vehiculos.numero_tarjeta_circulacion,
+            tbl_Vehiculos.vigencia_tarjeta_circulacion,
             cat_tipo_Aseguradoras.nombre as tipo_aseguradora,
-            dve.numero_poliza,
-            dve.fecha_inicio_cobertura,
-            dve.fecha_fin_cobertura,
-            tv.numero_serie as noSerieVehiculo,
-            dve.numero_placa as noPlaca,
-            tv.id,
+            tbl_Vehiculos.numero_poliza,
+            tbl_Vehiculos.fecha_inicio_cobertura,
+            tbl_Vehiculos.fecha_fin_cobertura,
+            CONCAT(tbl_Personas.nombre, ' ', tbl_Personas.primer_apellido, ' ' , tbl_Personas.segundo_apellido) as chofer,
+            tbl_Vehiculos.numero_serie as noSerieVehiculo,
+            tbl_Vehiculos.numero_placa as noPlaca,
+            tbl_Vehiculos.id,
             det_Pase_Vehiculo.observacion,
+            CONCAT(ti.link,'',ti.nombre) as imagen_factura,
+            ctt.nombre as tipo_factura,
+            ti.numero_identificacion as numero_factura,
             CONCAT(ti2.link,'',ti2.nombre) as imagen_lateral, 
             CONCAT(ti3.link,'',ti3.nombre) as imagen_placa
-            FROM tbl_Vehiculos tv
-            INNER JOIN det_Vehiculo_Empresa dve
-            ON dve.id_empresa = (SELECT TOP 1 tp.id_empresa FROM tbl_Pases tp JOIN det_Pase_Vehiculo dpv ON tp.id = dpv.id_permiso WHERE id_vehiculo = $id)
-            AND dve.id_vehiculo = tv.id
-            RIGHT JOIN cat_tipo_Vehiculo
-            ON cat_tipo_vehiculo.id = tv.id_tipo_vehiculo
-            RIGHT JOIN cat_tipo_Tarjeta_Circulacion
-            ON cat_tipo_tarjeta_circulacion.id = dve.id_tipo_tarjeta_circulacion
-            RIGHT JOIN cat_tipo_Aseguradoras
-            ON cat_tipo_Aseguradoras.id = dve.id_tipo_aseguradora
-            RIGHT JOIN det_Pase_Vehiculo
-            ON det_Pase_Vehiculo.id_vehiculo = tv.id
+            FROM tbl_Vehiculos
+            JOIN cat_tipo_Vehiculo
+            ON cat_tipo_vehiculo.id = tbl_Vehiculos.id_tipo_vehiculo
+            JOIN cat_tipo_Tarjeta_Circulacion
+            ON cat_tipo_tarjeta_circulacion.id = tbl_vehiculos.id_tipo_tarjeta_circulacion
+            JOIN cat_tipo_Aseguradoras
+            ON cat_tipo_Aseguradoras.id = tbl_Vehiculos.id_tipo_aseguradora
+            JOIN det_Pase_Vehiculo
+            ON det_Pase_Vehiculo.id_vehiculo = tbl_vehiculos.id
+            LEFT JOIN det_Vehiculo_Verificacion
+            ON det_Vehiculo_Verificacion.id_vehiculo = tbl_Vehiculos.id
+            LEFT JOIN tbl_Imagenes ti ON ti.id_vehiculo = det_Pase_Vehiculo.id_vehiculo AND ti.id_tipo_toma = 6 AND ti.estatus = 1
             LEFT JOIN tbl_Imagenes ti2 ON ti2.id_vehiculo = det_Pase_Vehiculo.id_vehiculo AND ti2.id_tipo_toma = 7 AND ti2.estatus = 1
             LEFT JOIN tbl_Imagenes ti3 ON ti3.id_vehiculo = det_Pase_Vehiculo.id_vehiculo AND ti3.id_tipo_toma = 8 AND ti3.estatus = 1
+            LEFT JOIN cat_tipo_toma ctt ON ctt.id = ti.id_tipo_toma
             LEFT JOIN cat_tipo_toma ctt2 ON ctt2.id = ti2.id_tipo_toma
             LEFT JOIN cat_tipo_toma ctt3 ON ctt3.id = ti3.id_tipo_toma
-            WHERE tv.id = $id
-            AND dve.estatus = 1";
+            LEFT JOIN tbl_Personas
+            ON tbl_Personas.id = det_Pase_Vehiculo.id_chofer
+            WHERE tbl_Vehiculos.id = $id";
         $respuesta = $this->db->query($query)->row();
         return [
 			'status' 	=> true,
@@ -624,6 +1214,8 @@ class Permisos extends CI_Model
 			'data'		=> $respuesta
 		];
     }
+
+
     public function procesarDatos($datos){
         $error = true;
         $idpermiso = 0;
@@ -639,143 +1231,119 @@ class Permisos extends CI_Model
                 //Si todo bien aqui sigue el proceso para mandar llamar los metodos para almacenar los datos de personas, equipos, vehiculos,materiales 
                 //y hacer el almacenamiento de imagenes y todo el rollo
                 for($i = 0; $i < sizeof($datos['persona']); $i++){
-                    if($datos['persona'][$i]['opcion'] != 3){
-                        /*if($datos['persona'][$i]['id_personal_rest'] == 0){
-                            $datosREST =  array(
-                                "nombre"        => $datos['persona'][$i]['nombre'],
-                                "apellido1"     => $datos['persona'][$i]['primerApellido'],
-                                "apellido2"     => $datos['persona'][$i]['segundoApellido'],
-                                "curp"          => $datos['persona'][$i]['curp'],
-                                "rfc"           => "",
-                                "ssno"          => $datos['persona'][$i]['numSeguroSocial'],
-                                "tipoSanguineo" => "",
-                                "idLenel"       => 0,
-                                "foto"          => "",
-                                "idEmpresa"     => $datos['persona'][$i]['idempresa'],
-                                "empresa"       => "",
-                                "enrolar"       => false
-                            );
-                            $dataRESTPersona = $this->addPersonaGeneral($datosREST);
+                    /*if($datos['persona'][$i]['id_personal_rest'] == 0){
+                        $datosREST =  array(
+                            "nombre"        => $datos['persona'][$i]['nombre'],
+                            "apellido1"     => $datos['persona'][$i]['primerApellido'],
+                            "apellido2"     => $datos['persona'][$i]['segundoApellido'],
+                            "curp"          => $datos['persona'][$i]['curp'],
+                            "rfc"           => "",
+                            "ssno"          => $datos['persona'][$i]['numSeguroSocial'],
+                            "tipoSanguineo" => "",
+                            "idLenel"       => 0,
+                            "foto"          => "",
+                            "idEmpresa"     => $datos['persona'][$i]['idempresa'],
+                            "empresa"       => "",
+                            "enrolar"       => false
+                        );
+                        $dataRESTPersona = $this->addPersonaGeneral($datosREST);
 
-                            if(isset($dataRESTPersona["respuesta_rest"]->datos->id)){
-                                $datos['persona'][$i]['id_personal_rest'] = $dataRESTPersona["respuesta_rest"]->datos->id;
-                            }else{
-                                $error = false;
-                            }
-                            array_push($personalWS,$dataRESTPersona);
-                        }*/
+                        if(isset($dataRESTPersona["respuesta_rest"]->datos->id)){
+                            $datos['persona'][$i]['id_personal_rest'] = $dataRESTPersona["respuesta_rest"]->datos->id;
+                        }else{
+                            $error = false;
+                        }
+                        array_push($personalWS,$dataRESTPersona);
+                    }*/
 
-                        if($error){
-                            $datos['persona'][$i]["tiposeguro"] = 3;
-                            $datos['persona'][$i]["numeroseguro"] = ($datos['persona'][$i]["noSeguro"] != "") ? $datos['persona'][$i]["noSeguro"] : '';
+                    if($error){
+                        $datos['persona'][$i]["tiposeguro"] = 3;
+                        $datos['persona'][$i]["numeroseguro"] = ($datos['persona'][$i]["noSeguro"] != "") ? $datos['persona'][$i]["noSeguro"] : '';
 
-                            if($datos['persona'][$i]["numSeguroSocial"] != ""){
-                                $datos['persona'][$i]["tiposeguro"] = 1;
-                                $datos['persona'][$i]["numeroseguro"] = $datos['persona'][$i]["numSeguroSocial"];
-                            }else if($datos['persona'][$i]["noIssste"] != ""){
-                                $datos['persona'][$i]["tiposeguro"] = 2;
-                                $datos['persona'][$i]["numeroseguro"] = $datos['persona'][$i]["noIssste"];
-                            }
+                        if($datos['persona'][$i]["numSeguroSocial"] != ""){
+                            $datos['persona'][$i]["tiposeguro"] = 1;
+                            $datos['persona'][$i]["numeroseguro"] = $datos['persona'][$i]["numSeguroSocial"];
+                        }else if($datos['persona'][$i]["noIssste"] != ""){
+                            $datos['persona'][$i]["tiposeguro"] = 2;
+                            $datos['persona'][$i]["numeroseguro"] = $datos['persona'][$i]["noIssste"];
+                        }
 
-                            $respuestaPersonal = $this->addPersonal($idpermiso,$datos['persona'][$i],$datos['permiso']["estatus"]);
-                            if($respuestaPersonal->Error == 0){
-                                array_push($personal,$respuestaPersonal->id_personal);
-                                //Cargar imagenes al servidor
-                                //licencia
-                                if($datos['persona'][$i]["chofer"] == 1){
-                                    if($datos['persona'][$i]["fotografiaLicencia"] != ""){
-                                        $datoLic = array(
-                                            'idpersonal'            => $respuestaPersonal->id_personal,
-                                            'idtipoidentificacion'  => 'null',
-                                            'numeroidentificacion'  => $datos['persona'][$i]["noLicencia"],
-                                            'fechaexpiracion'       => $datos['persona'][$i]["fechaVenciminetoLic"],
-                                            'tipo'                  => 1//Licencia
-                                        );
-            
-                                        $datoLic['nombrearchivo'] = $datos['persona'][$i]["fotografiaLicencia"];
-                                        $datoLic['link'] = 'assets/uploads/permisos/personal/';
-                                        $respuestaImgLicencia = $this->addImagenesPersonal($datoLic);
-                                        if(!$respuestaImgLicencia['status']){
-                                            $error = false;
-                                        }
-                                    }
-                                }
-                                //Identificacion
-                                if($datos['persona'][$i]["fotografiaIdentificacion"] != ""){
-                                    $datoIdent = array(
+                        $respuestaPersonal = $this->addPersonal($idpermiso,$datos['persona'][$i],$datos['permiso']["estatus"]);
+                        if($respuestaPersonal->Error == 0){
+                            array_push($personal,$respuestaPersonal->id_personal);
+                            //Cargar imagenes al servidor
+                            //licencia
+                            if($datos['persona'][$i]["chofer"] == 1){
+                                if($datos['persona'][$i]["fotografiaLicencia"] != ""){
+                                    $datoLic = array(
                                         'idpersonal'            => $respuestaPersonal->id_personal,
-                                        'idtipoidentificacion'  => $datos['persona'][$i]["tipoIdentificacion"],
-                                        'numeroidentificacion'  => '',
-                                        'fechaexpiracion'       => $datos['persona'][$i]["fechaVenciminetoIdent"],
-                                        'tipo'                  => 2//Identificacion
+                                        'idimagen'              => $datos['persona'][$i]["idimagenlicencia"],
+                                        'idtipoidentificacion'  => 'null',
+                                        'numeroidentificacion'  => $datos['persona'][$i]["noLicencia"],
+                                        'fechaexpiracion'       => $datos['persona'][$i]["fechaVenciminetoLic"],
+                                        'tipo'                  => 1//Licencia
                                     );
-            
-                                    if($datos['persona'][$i]["claveElector"] != ""){
-                                        $datoIdent['numeroidentificacion'] = $datos['persona'][$i]["claveElector"];
-                                    }
-                                    if($datos['persona'][$i]["noPasaporte"] != ""){
-                                        $datoIdent['numeroidentificacion'] = $datos['persona'][$i]["noPasaporte"];
-                                    }
-                                    if($datos['persona'][$i]["libretaMar"] != ""){
-                                        $datoIdent['numeroidentificacion'] = $datos['persona'][$i]["libretaMar"];
-                                    }
-                                    if($datos['persona'][$i]["itinerario"] != ""){
-                                        $datoIdent['numeroidentificacion'] = $datos['persona'][$i]["itinerario"];
-                                    }
-
-                                    $datoIdent['nombrearchivo'] = $datos['persona'][$i]["fotografiaIdentificacion"];
-                                    $datoIdent['link'] = 'assets/uploads/permisos/personal/';
-                                    $respuestaImgIdentificacion = $this->addImagenesPersonal($datoIdent);
-                                    if(!$respuestaImgIdentificacion['status']){
+        
+                                    $datoLic['nombrearchivo'] = $datos['persona'][$i]["fotografiaLicencia"];
+                                    $datoLic['link'] = 'assets/uploads/permisos/personal/';
+                                    $respuestaImgLicencia = $this->addImagenesPersonal($datoLic);
+                                    if(!$respuestaImgLicencia['status']){
                                         $error = false;
                                     }
                                 }
-                                //Fotografia
-                                if($datos['persona'][$i]["fotografiapersona"] != ""){
-                                    $datpPer = array(
-                                        'idpersonal'            => $respuestaPersonal->id_personal,
-                                        'idtipoidentificacion'  => $datos['persona'][$i]["tipoIdentificacion"],
-                                        'numeroidentificacion'  => '',
-                                        'fechaexpiracion'       => null,
-                                        'tipo'                  => 3//Fotografia personal
-                                    );
-
-                                    $datpPer['nombrearchivo'] = $datos['persona'][$i]["fotografiapersona"];
-                                    $datpPer['link'] = 'assets/uploads/permisos/personal/';
-                                    $respuestaImgFotografia = $this->addImagenesPersonal($datpPer);
-                                    if(!$respuestaImgFotografia['status']){
-                                        $error = false;
-                                    }
-                                }
-
-                                //Adicionales
-                                if($datos['persona'][$i]['idseliminar'] != ''){
-                                    $respuestaDocAdicionalesEliminar = $this->delImagenesPersonal($datos['persona'][$i]['idseliminar']);
-                                    if(!$respuestaDocAdicionalesEliminar['status']){
-                                        $error = false;
-                                    }
-                                }
-
-                                for($j = 0; $j < sizeof($datos['persona'][$i]['fotografiasAdicionales']); $j++){
-                                    $datAdicionales = array(
-                                        'idpersonal'            => $respuestaPersonal->id_personal,
-                                        'idtipoidentificacion'  => 0,
-                                        'numeroidentificacion'  => '',
-                                        'fechaexpiracion'       => null,
-                                        'tipo'                  => 12//documentos adicionales
-                                    );
-
-                                    $datAdicionales['nombrearchivo'] = $datos['persona'][$i]['fotografiasAdicionales'][$j]["fotografia"];
-                                    $datAdicionales['link'] = 'assets/uploads/permisos/personal/';
-                                    $respuestaDocAdicionales = $this->addImagenesPersonal($datAdicionales);
-                                    if(!$respuestaDocAdicionales['status']){
-                                        $error = false;
-                                    }
-                                }
-                            }else{
-                                $this->sendTelegram("Registro personal: ".json_encode($respuestaPersonal));
-                                $error = false;
                             }
+                            //Identificacion
+                            if($datos['persona'][$i]["fotografiaIdentificacion"] != ""){
+                                $datoIdent = array(
+                                    'idpersonal'            => $respuestaPersonal->id_personal,
+                                    'idimagen'              => $datos['persona'][$i]["idimagenidentificacion"],
+                                    'idtipoidentificacion'  => $datos['persona'][$i]["tipoIdentificacion"],
+                                    'numeroidentificacion'  => '',
+                                    'fechaexpiracion'       => $datos['persona'][$i]["fechaVenciminetoIdent"],
+                                    'tipo'                  => 2//Identificacion
+                                );
+        
+                                if($datos['persona'][$i]["claveElector"] != ""){
+                                    $datoIdent['numeroidentificacion'] = $datos['persona'][$i]["claveElector"];
+                                }
+                                if($datos['persona'][$i]["noPasaporte"] != ""){
+                                    $datoIdent['numeroidentificacion'] = $datos['persona'][$i]["noPasaporte"];
+                                }
+                                if($datos['persona'][$i]["libretaMar"] != ""){
+                                    $datoIdent['numeroidentificacion'] = $datos['persona'][$i]["libretaMar"];
+                                }
+                                if($datos['persona'][$i]["itinerario"] != ""){
+                                    $datoIdent['numeroidentificacion'] = $datos['persona'][$i]["itinerario"];
+                                }
+
+                                $datoIdent['nombrearchivo'] = $datos['persona'][$i]["fotografiaIdentificacion"];
+                                $datoIdent['link'] = 'assets/uploads/permisos/personal/';
+                                $respuestaImgIdentificacion = $this->addImagenesPersonal($datoIdent);
+                                if(!$respuestaImgIdentificacion['status']){
+                                    $error = false;
+                                }
+                            }
+                            //Fotografia
+                            if($datos['persona'][$i]["fotografiapersona"] != ""){
+                                $datpPer = array(
+                                    'idpersonal'            => $respuestaPersonal->id_personal,
+                                    'idimagen'              => $datos['persona'][$i]["idimagenpersona"],
+                                    'idtipoidentificacion'  => $datos['persona'][$i]["tipoIdentificacion"],
+                                    'numeroidentificacion'  => '',
+                                    'fechaexpiracion'       => null,
+                                    'tipo'                  => 3//Fotografia personal
+                                );
+
+                                $datpPer['nombrearchivo'] = $datos['persona'][$i]["fotografiapersona"];
+                                $datpPer['link'] = 'assets/uploads/permisos/personal/';
+                                $respuestaImgFotografia = $this->addImagenesPersonal($datpPer);
+                                if(!$respuestaImgFotografia['status']){
+                                    $error = false;
+                                }
+                            }
+                        }else{
+                            $this->sendTelegram("Registro personal: ".json_encode($respuestaPersonal));
+                            $error = false;
                         }
                     }
                 }
@@ -783,168 +1351,150 @@ class Permisos extends CI_Model
                 if($error){
                     if(isset($datos['equipo'])){
                         for($i = 0; $i < sizeof($datos['equipo']); $i++){
-                            if($datos['equipo'][$i]['opcion'] != 3){
-                                $respuestaEquipo = $this->addEquipos($idpermiso,$personal,$datos['equipo'][$i]);
-                                if($respuestaEquipo->Error == 0){
-                                    //Cargar imagenes al servidor
-                                    //Factura
-                                    if($datos['equipo'][$i]["fotografiaFactura"] != ""){
-                                        $datEqFac = array(
-                                            'idequipo'                  => $respuestaEquipo->id_equipo,
-                                            'tipoDocumento'             => $datos['equipo'][$i]["tipoDocumento"],
-                                            'noFactura'                 => $datos['equipo'][$i]["noFactura"],
-                                            'tipo'                      => 4//Herramienta/Equipo
-                                        );
+                            $respuestaEquipo = $this->addEquipos($idpermiso,$personal,$datos['equipo'][$i]);
+                            if($respuestaEquipo->Error == 0){
+                                //Cargar imagenes al servidor
+                                //Factura
+                                if($datos['equipo'][$i]["fotografiaFactura"] != ""){
+                                    $datEqFac = array(
+                                        'idequipo'                  => $respuestaEquipo->id_equipo,
+                                        'idimagen'                  => $datos['equipo'][$i]["idimagenfactura"],
+                                        'idtipodocumentovehiculo'   => $datos['equipo'][$i]["tipoDocumento"],
+                                        'numerodocumentovehiculo'   => $datos['equipo'][$i]["noFactura"],
+                                        'fechaexpiracion'           => null,
+                                        'tipo'                      => 4//Herramienta/Equipo
+                                    );
 
-                                        $datEqFac['nombre'] = $datos['equipo'][$i]["fotografiaFactura"];
-                                        $datEqFac['link'] = 'assets/uploads/permisos/equipos/';
-                                        $datEqFac['idpermiso'] = $idpermiso;
-                                        $respuestaImgLicencia = $this->addImagenesEquipo($datEqFac);
-                                        if(!$respuestaImgLicencia['status']){
-                                            $error = false;
-                                        }
+                                    $datEqFac['nombre'] = $datos['equipo'][$i]["fotografiaFactura"];
+								    $datEqFac['link'] = 'assets/uploads/permisos/equipos/';
+                                    $respuestaImgLicencia = $this->addImagenesEquipo($datEqFac);
+                                    if(!$respuestaImgLicencia['status']){
+                                        $error = false;
                                     }
-                                    //Anexxo
-                                    if($datos['equipo'][$i]["fotografiaAnexo"] != ""){
-                                        $datEqFac = array(
-                                            'idequipo'                  => $respuestaEquipo->id_equipo,
-                                            'tipoDocumento'             => 0,
-                                            'noFactura'                 => '',
-                                            'tipo'                      => 9//Herramienta/Equipo Anexo
-                                        );
-
-                                        $datEqFac['nombre'] = $datos['equipo'][$i]["fotografiaAnexo"];
-                                        $datEqFac['link'] = 'assets/uploads/permisos/equipos/';
-                                        $datEqFac['idpermiso'] = $idpermiso;
-                                        $respuestaImgLicencia = $this->addImagenesEquipo($datEqFac);
-                                        if(!$respuestaImgLicencia['status']){
-                                            $error = false;
-                                        }
-                                    }
-                                    //RF
-                                    if($datos['equipo'][$i]["fotografiaRF"] != ""){
-                                        $datEqFac = array(
-                                            'idequipo'                  => $respuestaEquipo->id_equipo,
-                                            'tipoDocumento'             => 0,
-                                            'noFactura'                 => '',
-                                            'tipo'                      => 10//Herramienta/Equipo RF
-                                        );
-
-                                        $datEqFac['nombre'] = $datos['equipo'][$i]["fotografiaRF"];
-                                        $datEqFac['link'] = 'assets/uploads/permisos/equipos/';
-                                        $datEqFac['idpermiso'] = $idpermiso;
-                                        $respuestaImgLicencia = $this->addImagenesEquipo($datEqFac);
-                                        if(!$respuestaImgLicencia['status']){
-                                            $error = false;
-                                        }
-                                    }
-                                }else{
-                                    $this->sendTelegram("Registro equipos: ".json_encode($respuestaEquipo));
-                                    $error = false;
                                 }
+                                //Anexxo
+                                if($datos['equipo'][$i]["fotografiaAnexo"] != ""){
+                                    $datEqFac = array(
+                                        'idequipo'                  => $respuestaEquipo->id_equipo,
+                                        'idimagen'                  => $datos['equipo'][$i]["idimagenAnexo"],
+                                        'idtipodocumentovehiculo'   => 9,
+                                        'numerodocumentovehiculo'   => $datos['equipo'][$i]["noFactura"],
+                                        'fechaexpiracion'           => null,
+                                        'tipo'                      => 9//Herramienta/Equipo Anexo
+                                    );
+
+                                    $datEqFac['nombre'] = $datos['equipo'][$i]["fotografiaAnexo"];
+								    $datEqFac['link'] = 'assets/uploads/permisos/equipos/';
+                                    $respuestaImgLicencia = $this->addImagenesEquipo($datEqFac);
+                                    if(!$respuestaImgLicencia['status']){
+                                        $error = false;
+                                    }
+                                }
+                                //RF
+                                if($datos['equipo'][$i]["fotografiaRF"] != ""){
+                                    $datEqFac = array(
+                                        'idequipo'                  => $respuestaEquipo->id_equipo,
+                                        'idimagen'                  => $datos['equipo'][$i]["idimagenAnexo"],
+                                        'idtipodocumentovehiculo'   => 9,
+                                        'numerodocumentovehiculo'   => $datos['equipo'][$i]["noFactura"],
+                                        'fechaexpiracion'           => null,
+                                        'tipo'                      => 10//Herramienta/Equipo RF
+                                    );
+
+                                    $datEqFac['nombre'] = $datos['equipo'][$i]["fotografiaRF"];
+								    $datEqFac['link'] = 'assets/uploads/permisos/equipos/';
+                                    $respuestaImgLicencia = $this->addImagenesEquipo($datEqFac);
+                                    if(!$respuestaImgLicencia['status']){
+                                        $error = false;
+                                    }
+                                }
+                            }else{
+                                $this->sendTelegram("Registro equipos: ".json_encode($respuestaEquipo));
+                                $error = false;
                             }
                         }
                     }
 
                     if(isset($datos['material'])){
                         for($i = 0; $i < sizeof($datos['material']); $i++){
-                            if($datos['material'][$i]['opcion'] != 3){
-                                $respuestaListaMaterial = $this->Permisos->addListaMateriales($idpermiso,$personal,$datos['material'][0]);
-                                if(isset($respuestaListaMaterial->id_registro)){
-                                    $lista = $respuestaListaMaterial->id_registro;
-                                    for ($i=0; $i < sizeof($datos['material']); $i++) {
-                                        $respuestaMaterial = $this->Permisos->addMateriales($idpermiso,$datos['material'][$i],$lista);
-                                        if($respuestaMaterial->Error == 0){
-                                            if($datos['material'][$i]["fotografiaMaterial"] != ""){
-                                                $datMaterial = array(
-                                                    'idmaterial'                => $respuestaMaterial->id_registro,
-                                                    'idimagen'                  => $datos['material'][$i]["idimagen"],
-                                                    'tipo'                      => 11//Material a granel
-                                                );
-            
-                                                $datMaterial['nombre'] = $datos['material'][$i]["fotografiaMaterial"];
-                                                $datMaterial['link'] = 'assets/uploads/permisos/materiales/';
-                                                $respuestaImgMaterial = $this->addImagenesMaterial($datMaterial);
-                                                if(!$respuestaImgMaterial['status']){
-                                                    $error = false;
-                                                }
-                                            }
-                                        }else{
-                                            $error = false;
-                                        }
+                            $respuestaEquipo = $this->Permisos->addListaMateriales($idpermiso,$personal,$datos['material'][0]);
+                            if(isset($respuestaEquipo->id_registro)){
+                                $lista = $respuestaEquipo->id_registro;
+                                for ($i=0; $i < sizeof($datos['material']); $i++) {
+                                    $respuestaEquipo = $this->Permisos->addMateriales($idpermiso,$datos['material'][$i],$lista);
+                                    if($respuestaEquipo->Error == 1){
+                                        $error = false;
                                     }
-                                }else{
-                                    $this->sendTelegram("Registro material: ".json_encode($respuestaListaMaterial));
-                                    $error = false;
                                 }
+                            }else{
+                                $this->sendTelegram("Registro material: ".json_encode($respuestaEquipo));
+                                $error = false;
                             }
                         }
                     }
 
                     if(isset($datos['vehiculo'])){
                         for($i = 0; $i < sizeof($datos['vehiculo']); $i++){
-                            if($datos['vehiculo'][$i]['opcion'] != 3){
-                                $respuestaVehisulo = $this->Permisos->addVehiculos($idpermiso,$personal,$datos['permiso'],$datos['vehiculo'][$i]);
-                                if(isset($respuestaVehisulo->id_vehiculo)){
-                                    //Cargar imagenes al servidor
-                                    /*if($datos['vehiculo'][$i]["documentoFactura"] != ""){
-                                        //Factura Vehiculo
-                                        $datVehFact = array(
-                                            'idvehiculo' => $respuestaVehisulo->id_vehiculo,
-                                            'idimagen' => 0,
-                                            'idtipodocumentovehiculo' => $datos['vehiculo'][$i]["tipoDocumento"],
-                                            'numerodocumentovehiculo' => $datos['vehiculo'][$i]["noFactura"],
-                                            'fechaexpiracion' => null,
-                                            'tipo' => 6//Factura vehiculo
-                                        );
-                
-                                        $datVehFact['nombre'] = $datos['vehiculo'][$i]["documentoFactura"];
-                                        $datVehFact['link'] = 'assets/uploads/permisos/vehiculos/';
-                                        $respuestaImgFactVehiculo = $this->Permisos->addImagenesVehiculo($datVehFact);
-                                        if(!$respuestaImgFactVehiculo['status']){
-                                            $error = false;
-                                        }
-                                    }*/
-                
-                                    if($datos['vehiculo'][$i]["fotografiaLateral"] != ""){
-                                        $datVehLat = array(
-                                            'idvehiculo' => $respuestaVehisulo->id_vehiculo,
-                                            //'idimagen' => 0,
-                                            //'idtipodocumentovehiculo' => 'null',
-                                            //'numerodocumentovehiculo' => null,
-                                            //'fechaexpiracion' => null,
-                                            'tipo' => 7//Vehiculo lateral
-                                        );
-                
-                                        $datVehLat['nombre'] = $datos['vehiculo'][$i]["fotografiaLateral"];
-                                        $datVehLat['link'] = 'assets/uploads/permisos/vehiculos/';
-                                        $respuestaImgLateral = $this->Permisos->addImagenesVehiculo($datos['permiso'],$datVehLat);
-                                        if(!$respuestaImgLateral['status']){
-                                            $error = false;
-                                        }
+                            $respuestaVehisulo = $this->Permisos->addVehiculos($idpermiso,$personal,$datos['permiso'],$datos['vehiculo'][$i]);
+                            if(isset($respuestaVehisulo->id_vehiculo)){
+                                //Cargar imagenes al servidor
+                                if($datos['vehiculo'][$i]["documentoFactura"] != ""){
+                                    //Factura Vehiculo
+                                    $datVehFact = array(
+                                        'idvehiculo' => $respuestaVehisulo->id_vehiculo,
+                                        'idimagen' => 0,
+                                        'idtipodocumentovehiculo' => $datos['vehiculo'][$i]["tipoDocumento"],
+                                        'numerodocumentovehiculo' => $datos['vehiculo'][$i]["noFactura"],
+                                        'fechaexpiracion' => null,
+                                        'tipo' => 6//Factura vehiculo
+                                    );
+            
+                                    $datVehFact['nombre'] = $datos['vehiculo'][$i]["documentoFactura"];
+                                    $datVehFact['link'] = 'assets/uploads/permisos/vehiculos/';
+                                    $respuestaImgFactVehiculo = $this->Permisos->addImagenesVehiculo($datVehFact);
+                                    if(!$respuestaImgFactVehiculo['status']){
+                                        $error = false;
                                     }
-                
-                                    if($datos['vehiculo'][$i]["fotografiaPlaca"] != ""){
-                                        $datVehPlaca = array(
-                                            'idvehiculo' => $respuestaVehisulo->id_vehiculo,
-                                            //'idimagen' => 0,
-                                            //'idtipodocumentovehiculo' => 'null',
-                                            //'numerodocumentovehiculo' => null,
-                                            //'fechaexpiracion' => null,
-                                            'tipo' => 8//Vehiculo placa
-                                        );
-                
-                                        $datVehPlaca['nombre'] = $datos['vehiculo'][$i]["fotografiaPlaca"];
-                                        $datVehPlaca['link'] = 'assets/uploads/permisos/vehiculos/';
-                                        $respuestaImgPlaca = $this->Permisos->addImagenesVehiculo($datos['permiso'],$datVehPlaca);
-                                        if(!$respuestaImgPlaca['status']){
-                                            $error = false;
-                                        }
-                                    }
-                                }else{
-                                    $this->sendTelegram("Registro material: ".json_encode($respuestaVehisulo));
-                                    $error = false;
                                 }
+            
+                                if($datos['vehiculo'][$i]["fotografiaLateral"] != ""){
+                                    $datVehLat = array(
+                                        'idvehiculo' => $respuestaVehisulo->id_vehiculo,
+                                        'idimagen' => 0,
+                                        'idtipodocumentovehiculo' => 'null',
+                                        'numerodocumentovehiculo' => null,
+                                        'fechaexpiracion' => null,
+                                        'tipo' => 7//Vehiculo lateral
+                                    );
+            
+                                    $datVehLat['nombre'] = $datos['vehiculo'][$i]["fotografiaLateral"];
+                                    $datVehLat['link'] = 'assets/uploads/permisos/vehiculos/';
+                                    $respuestaImgLateral = $this->Permisos->addImagenesVehiculo($datVehLat);
+                                    if(!$respuestaImgLateral['status']){
+                                        $error = false;
+                                    }
+                                }
+            
+                                if($datos['vehiculo'][$i]["fotografiaPlaca"] != ""){
+                                    $datVehPlaca = array(
+                                        'idvehiculo' => $respuestaVehisulo->id_vehiculo,
+                                        'idimagen' => 0,
+                                        'idtipodocumentovehiculo' => 'null',
+                                        'numerodocumentovehiculo' => null,
+                                        'fechaexpiracion' => null,
+                                        'tipo' => 8//Vehiculo placa
+                                    );
+            
+                                    $datVehPlaca['nombre'] = $datos['vehiculo'][$i]["fotografiaPlaca"];
+                                    $datVehPlaca['link'] = 'assets/uploads/permisos/vehiculos/';
+                                    $respuestaImgPlaca = $this->Permisos->addImagenesVehiculo($datVehPlaca);
+                                    if(!$respuestaImgPlaca['status']){
+                                        $error = false;
+                                    }
+                                }
+                            }else{
+                                $this->sendTelegram("Registro material: ".json_encode($respuestaVehisulo));
+                                $error = false;
                             }
                         }
                     }
@@ -1004,7 +1554,7 @@ class Permisos extends CI_Model
             ".$datos['idcontratos'].",
             ".$this->idusuario.",
             ".$datos['idtipopermiso'].",
-            ".$this->db->escape($datos['visita']).",
+            '".$datos['visita']."',
             ".$datos['idtipoactividad'].",
             ".$datos['idtipovigencia'].",
             ".$datos['dias'].",
@@ -1014,7 +1564,7 @@ class Permisos extends CI_Model
             ".$datos['idfiscalizado'].",
             ".$this->db->escape($datos['motivo']).",
             ".$datos['permisogrupal'].",
-            ".$this->db->escape($datos['curpresponsable']).",
+            '".$datos['curpresponsable']."',
             ".$datos['estatus'];
         return $this->db->query($sp)->row();
     }
@@ -1068,27 +1618,27 @@ class Permisos extends CI_Model
             ".$datos['tipoEmpleado'].",
             ".$datos['entidadGobierno'].",
             ".$datos['idempresa'].",
+            ".$this->session->_id_empresa_rest.",
             ".$estatus.",
-            ".$this->db->escape($datos['rfc']).",
-            ".$this->db->escape($datos['empresa']).",
-            ".$this->db->escape($datos['clavePatronal']).",
+            '".$datos['empresa']."',
+            '".$datos['clavePatronal']."',
             ".$datos['idpersona'].",
             ".$datos['id_personal_rest'].",
-            ".$this->db->escape($datos['nombre']).",
-            ".$this->db->escape($datos['primerApellido']).",
-            ".$this->db->escape($datos['segundoApellido']).",
-            ".$this->db->escape($datos['curp']).",
+            '".$datos['nombre']."',
+            '".$datos['primerApellido']."',
+            '".$datos['segundoApellido']."',
+            '".$datos['curp']."',
             null,
             null,
             ".$datos['nacionalidad'].",
             ".$datos['tiposeguro'].",
-            ".$this->db->escape($datos['numeroseguro']).",
+            '".$datos['numeroseguro']."',
             ".$datos['aseguradora'].",
             null,
             null,
             ".$datos['idcontacto'].",
-            ".$this->db->escape($datos['correo']).",
-            ".$this->db->escape($datos['numtelefono']).",
+            '".$datos['correo']."',
+            '".$datos['numtelefono']."',
             ".$this->idusuario;
         return $this->db->query($sp)->row();
     }
@@ -1101,8 +1651,9 @@ class Permisos extends CI_Model
         $respuestaLog = $this->addRespaldoInformacion($datosLOG);
 
         $sp = "EXEC sp_addImagenesPersonal ".$datos['idpersonal'].",
+            ".$datos['idimagen'].",
             ".$datos['idtipoidentificacion'].",
-            ".$this->db->escape($datos['numeroidentificacion']).",
+            '".$datos['numeroidentificacion']."',
             '".$datos['fechaexpiracion']."',
             '".$datos['nombrearchivo']."',
             '".$datos['link']."',
@@ -1128,34 +1679,6 @@ class Permisos extends CI_Model
         return $response;
     }
 
-    public function delImagenesPersonal($ids){
-        $datosLOG = array(
-            'tiposp'    => 'IMAGEN PERSONA ADICIONAL',
-            'idlog'     => $this->idLogEventos,
-            'idusuario' => $this->idusuario
-        );
-        $respuestaLog = $this->addRespaldoInformacion($datosLOG);
-
-        $sp = "EXEC sp_delImagenesPersonalOtros '$ids',".$this->idusuario;
-        $respuesta = $this->db->query($sp)->row();
-        if($respuesta->Error == 1){
-            $response = [
-                'status' 	=> false,
-                'message'	=> 'No fue posible realizar el registro',
-                'data'		=> null,
-                'token' 	=> $this->security->get_csrf_hash()
-            ];
-        }else{
-            $response = [
-                'status' 	=> true,
-                'message'	=> 'Registro Exitoso',
-                'data'		=> ['ids' => $respuesta->ids_imagenes],
-                'token' 	=> $this->security->get_csrf_hash()
-            ];
-        }
-        return $response;
-    }
-
     /*
     *Nombre:        addEquipos
     *Parámetros:    {$datos} => 
@@ -1173,11 +1696,11 @@ class Permisos extends CI_Model
         $sp = "EXEC sp_addEquipoPermisos ".$idpermiso.",
             ".$datos['idequipo'].",
             ".$datos['tipoEquipo'].",
-            ".$this->db->escape($datos['modelo']).",
-            ".$this->db->escape($datos['marca']).",
-            ".$this->db->escape($datos['noSerie']).",
+            '".$datos['modelo']."',
+            '".$datos['marca']."',
+            '".$datos['noSerie']."',
             ".$personal[$datos['resguardo']].",
-            ".$this->db->escape($datos['anexo29']).",
+            '".$datos['anexo29']."',
             ".$this->db->escape($datos['descripcionEquipo']).",
             ".$this->idusuario;
         return $this->db->query($sp)->row();
@@ -1191,11 +1714,12 @@ class Permisos extends CI_Model
         $respuestaLog = $this->addRespaldoInformacion($datosLOG);
 
         $sp = "EXEC sp_addImagenesEquipo ".$datos['idequipo'].",
-            ".$datos['idpermiso'].",
+            ".$datos['idimagen'].",
             '".$datos['nombre']."',
             '".$datos['link']."',
-            ".$datos['tipoDocumento'].",
-            ".$this->db->escape($datos['noFactura']).",
+            ".$datos['idtipodocumentovehiculo'].",
+            '".$datos['numerodocumentovehiculo']."',
+            '".$datos['fechaexpiracion']."',
             ".$datos['tipo'].",
             ".$this->idusuario;
         $respuesta = $this->db->query($sp)->row();
@@ -1276,65 +1800,35 @@ class Permisos extends CI_Model
         $datosLOG['idusuario']      = $this->idusuario;
         $datosLOG['idpermiso']      = $idpermiso;
         $datosLOG['idempresa']      = (isset($permiso['idempresa']) ? $permiso['idempresa'] : '');
-        //$datosLOG['chofer']         = (isset($personal[$datos['chofer']]) ? $personal[$datos['chofer']] : '');
+        $datosLOG['chofer']         = (isset($personal[$datos['chofer']]) ? $personal[$datos['chofer']] : '');
         $respuestaLog = $this->addRespaldoInformacion($datosLOG);
 
         $sp = "EXEC sp_addVehiculosPermisos ".$permiso['idempresa'].",
+            0,
             ".$datos['idvehiculo'].",
-            ".$this->db->escape($datos['noPlaca']).",
-            ".$this->db->escape($datos['noSerie']).",
-            ".$this->db->escape($datos['noMotor']).",
-            ".$this->db->escape($datos['marca']).",
-            ".$this->db->escape($datos['modelo']).",
+            '".$datos['noPlaca']."',
+            '".$datos['noSerie']."',
+            '".$datos['noMotor']."',
+            '".$datos['marca']."',
+            '".$datos['modelo']."',
             ".$datos['anio'].",
-            ".$this->db->escape($datos['color']).",
+            '".$datos['color']."',
             ".$datos['tipoVehiculo'].",
             ".$datos['tipoTarCircu'].",
-            ".$this->db->escape($datos['noTarjeta']).",
+            '".$datos['noTarjeta']."',
             ".$datos['aseguradora'].",
-            ".$this->db->escape($datos['noPoliza']).",
-            ".$this->db->escape($datos['vigenciaPoliza']).",
+            '".$datos['noPoliza']."',
+            '".$datos['vigenciaPoliza']."',
             ".$datos['periodoPago'].",
-            ".$this->db->escape($datos['periodoFechaInicio']).",
-            ".$this->db->escape($datos['periodoFechaFin']).",
+            '".$datos['periodoFechaInicio']."',
+            '".$datos['periodoFechaFin']."',
             ".$idpermiso.",
+            ".$personal[$datos['chofer']].",
             ".$this->idusuario;
         return $this->db->query($sp)->row();
     }
 
-    public function addImagenesMaterial($datos){
-        $datosLOG = $datos;
-        $datosLOG['tiposp']         = "IMAGENES MATERIAL";
-        $datosLOG['idlog']          = $this->idLogEventos;
-        $datosLOG['idusuario']      = $this->idusuario;
-        $respuestaLog = $this->addRespaldoInformacion($datosLOG);
-
-        $sp = "EXEC sp_addImagenesMaterial ".$datos['idmaterial'].",
-            ".$datos['idimagen'].",
-            '".$datos['nombre']."',
-            '".$datos['link']."',
-            ".$datos['tipo'].",
-            ".$this->idusuario;
-        $respuesta = $this->db->query($sp)->row();
-        if($respuesta->Error == 1){
-            $response = [
-                'status' 	=> false,
-                'message'	=> 'No fue posible realizar el registro',
-                'data'		=> null,
-                'token' 	=> $this->security->get_csrf_hash()
-            ];
-        }else{
-            $response = [
-                'status' 	=> true,
-                'message'	=> 'Registro Exitoso',
-                'data'		=> ['id' => $respuesta->id_imagen],
-                'token' 	=> $this->security->get_csrf_hash()
-            ];
-        }
-        return $response;
-    }
-
-    public function addImagenesVehiculo($permiso,$datos){
+    public function addImagenesVehiculo($datos){
         $datosLOG = $datos;
         $datosLOG['tiposp']         = "IMAGENES VEHICULOS";
         $datosLOG['idlog']          = $this->idLogEventos;
@@ -1342,9 +1836,12 @@ class Permisos extends CI_Model
         $respuestaLog = $this->addRespaldoInformacion($datosLOG);
 
         $sp = "EXEC sp_addImagenesVehiculo ".$datos['idvehiculo'].",
-            ".$permiso['idempresa'].",
+            ".$datos['idimagen'].",
             '".$datos['nombre']."',
             '".$datos['link']."',
+            ".$datos['idtipodocumentovehiculo'].",
+            '".$datos['numerodocumentovehiculo']."',
+            '".$datos['fechaexpiracion']."',
             ".$datos['tipo'].",
             ".$this->idusuario;
         $respuesta = $this->db->query($sp)->row();
@@ -1401,7 +1898,7 @@ class Permisos extends CI_Model
 		$sp = "EXEC sp_upPersonalVerificacion ".$datos['id_permiso'].",
             ".$datos['id_empleado'].",
             ".$datos['estatus_empleado'].",
-            ".$this->db->escape($datos['observaciones']).",
+            '".$datos['observaciones']."',
             ".$this->idusuario."";
         $respuesta = $this->db->query($sp)->row();
         if($respuesta->Error == 1){
@@ -1431,7 +1928,7 @@ class Permisos extends CI_Model
 		$sp = "EXEC sp_upPersonalVerificacionMigracion ".$datos['id_permiso'].",
             ".$datos['id_empleado'].",
             ".$datos['estatus_empleado'].",
-            ".$this->db->escape($datos['observaciones']).",
+            '".$datos['observaciones']."',
             ".$this->idusuario."";
         $respuesta = $this->db->query($sp)->row();
         if($respuesta->Error == 1){
@@ -1461,7 +1958,7 @@ class Permisos extends CI_Model
 		$sp = "EXEC sp_upEquipoVerificacion  ".$datos['id_permiso'].",
             ".$datos['id_equipo'].",
             ".$datos['estatus_equipo'].",
-            ".$this->db->escape($datos['observaciones']).",
+            '".$datos['observaciones']."',
             ".$this->idusuario."";
         $respuesta = $this->db->query($sp)->row();
         if($respuesta->Error == 1){
@@ -1521,7 +2018,7 @@ class Permisos extends CI_Model
 		$sp = "EXEC sp_upVehiculosVerificacion  ".$datos['id_permiso'].",
             ".$datos['id_vehiculo'].",
             ".$datos['estatus_vehiculo'].",
-            ".$this->db->escape($datos['observaciones']).",
+            '".$datos['observaciones']."',
             ".$this->idusuario."";
         $respuesta = $this->db->query($sp)->row();
         if($respuesta->Error == 1){
@@ -1564,7 +2061,7 @@ class Permisos extends CI_Model
     *Descripción:   Realiza la inactivacion de permiso
     */
     public function del($id, $observacion){
-        $sp = "EXEC sp_delPases $id,".$this->db->escape($observacion)." ,".$this->idusuario."";
+        $sp = "EXEC sp_delPases $id,'".$observacion."' ,".$this->idusuario."";
         $respuesta = $this->db->query($sp)->row();
         if($respuesta->Error == 1){
             $response = [
@@ -1643,7 +2140,7 @@ class Permisos extends CI_Model
     *Descripción:   Realiza la actualización de la revisión en una solicitud
     */
     public function rechazoMotivo($datos){
-        $sp = "EXEC sp_upPaseEstatusMotivo ".$datos['idpermiso'].", ".$datos['idarea'].", ".$this->db->escape($datos['observacion']).", ".$this->idusuario."";
+        $sp = "EXEC sp_upPaseEstatusMotivo ".$datos['idpermiso'].", ".$datos['idarea'].", '".$datos['observacion']."', ".$this->idusuario."";
         $respuesta = $this->db->query($sp)->row();
         if($respuesta->Error == 1){
             $response = [
@@ -1743,19 +2240,42 @@ class Permisos extends CI_Model
     }
 
     public function getPersonalValidacion($idpermiso){
-        $query = "EXEC sp_getPersonalValidacion $idpermiso";
-        $respuesta = $this->db->query($query)->result();
-        return [
-			'status' 	=> true,
-			'message'	=> '',
-			'data'		=> $respuesta
-		];
-    }
-    
-    public function getDocAdicionalesPersona($idpersona){
-        $query = "SELECT ti.id, ti.nombre, ti.link 
-        FROM tbl_Imagenes ti 
-        where ti.id_personal = $idpersona and ti.id_tipo_toma = 12 and ti.estatus = 1";
+        $query = "SELECT tbl_Pases.id as id_pase,
+        tbl_Personas.id,
+        cat_tipo_empleado.nombre as tipo_persona,
+        CONCAT(tbl_Personas.nombre,' ',tbl_Personas.primer_apellido,' ',tbl_Personas.segundo_apellido) as nombre,
+        tbl_Personas.nombre as nombre_persona,
+        cat_tipo_Nacionalidad.nombre as nacionalidad,
+        det_Pase_Personal.estatus_pase,
+        det_Pase_Personal.id_usuario_registro,
+        det_Pase_Personal.id_usuario_registro_migracion,
+        det_Pase_Personal.estatus_pase_migracion,
+        ISNULL(STUFF((
+            SELECT ', '+convert(varchar,cerp.nombre)
+            FROM det_Pase_Personal dpp
+            INNER JOIN cat_estatus_Registro_Pases cerp
+            ON dpp.estatus_pase = cerp.id or dpp.estatus_pase_migracion = cerp.id
+            WHERE dpp.id_personal = tbl_Personas.id
+            AND dpp.id_permiso = $idpermiso
+            AND dpp.estatus = 1
+            FOR XML PATH('')
+        ), 1, 2, ''),'') as estatus,
+        ISNULL(STUFF((
+            SELECT ', '+convert(varchar, tc.telefono)
+            FROM tbl_Contactos tc
+            WHERE tc.id_persona = tbl_Personas.id
+            FOR XML PATH('')
+        ), 1, 2, ''),'') as telefonos
+        FROM tbl_Pases
+        JOIN det_Pase_Personal
+        ON det_Pase_Personal.id_permiso = tbl_Pases.id
+        JOIN tbl_Personas
+        ON tbl_Personas.id = det_Pase_Personal.id_personal
+        JOIN cat_tipo_Nacionalidad
+        ON cat_Tipo_Nacionalidad.id = tbl_Personas.id_nacionalidad 
+        JOIN cat_tipo_Empleado
+        ON cat_tipo_empleado.id = det_pase_personal.id_tipo_persona
+        WHERE tbl_Pases.id = $idpermiso";
         $respuesta = $this->db->query($query)->result();
         return [
 			'status' 	=> true,
@@ -1836,156 +2356,55 @@ class Permisos extends CI_Model
 		];
     }
 
-    public function getEquipoDuplicar($idpermiso){
-        $query = "SELECT tbl_Equipos.id, tbl_Equipos.id_tipo_equipo,
-            cat_tipo_Equipo.nombre as tipo_equipo,
-            tbl_Equipos.id_personal,
-            det_Pase_Equipo.id_personal as id_responsable,
-            tbl_equipos.modelo,tbl_equipos.marca,tbl_equipos.numero_serie,
-            tbl_Imagenes.id_tipo_identificacion as id_tipo_documento,
-            tbl_Imagenes.numero_identificacion as numero_factura,
-            tbl_Imagenes.id as id_imagen_factura,
-            tbl_Imagenes.nombre AS factura_equipo,
-            ti2.id as id_imagen_anexo,
-            ti2.nombre AS equipo_anexo,
-            ti3.id as id_imagen_rf,
-            ti3.nombre AS equipo_rf
-            FROM tbl_Pases
-            JOIN det_Pase_Equipo ON det_Pase_Equipo.id_permiso = tbl_Pases.id
-            JOIN tbl_Equipos ON tbl_Equipos.id = det_Pase_Equipo.id_equipo
-            JOIN cat_tipo_Equipo ON cat_Tipo_equipo.id = tbl_Equipos.id_tipo_equipo
-            LEFT JOIN tbl_Imagenes ON tbl_Equipos.id = tbl_Imagenes.id_equipo AND tbl_Imagenes.id_tipo_toma = 4 AND tbl_Imagenes.estatus = 1
-            LEFT JOIN tbl_Imagenes ti2 ON tbl_Equipos.id = ti2.id_equipo AND ti2.id_tipo_toma = 9 AND ti2.estatus = 1
-            LEFT JOIN tbl_Imagenes ti3 ON tbl_Equipos.id = ti3.id_equipo AND ti3.id_tipo_toma = 10 AND ti3.estatus = 1
-            WHERE tbl_Pases.id = $idpermiso";
-        $respuesta = $this->db->query($query)->result();
-        return [
-			'status' 	=> true,
-			'message'	=> '',
-			'data'		=> $respuesta
-		];
-    }
-    
-    public function getPersonalDuplicar($idpermiso){
-        $query = "SELECT v_getPersonas.*,
-            tbl_Empresas.id as id_empresa,
-            tbl_Empresas.nombre as nombre_personal_pase_empresa,
-            tbl_Empresas.clave_patronal as clave_personal_pase_empresa,
-            det_Pase_Personal.id_empresa as id_personal_pase_empresa,
-            det_Pase_Personal.id_tipo_entidad_gobierno,
-            det_Pase_Personal.id_tipo_persona as id_tipo_empleado,
-            cat_tipo_Empleado.nombre as tipo_empleado,
-            tbl_Imagenes.nombre AS licencia_fotografia,
-            tbl_Imagenes.numero_identificacion as licencia_numero,
-            tbl_Imagenes.fecha_expiracion as licencia_fecha_expiracion,
-            tbli.nombre AS identificacion_fotografia,
-            tbli.numero_identificacion as identificacion_numero,
-            tbli.fecha_expiracion as identificacion_fecha_expedicion,
-            tbli.id_tipo_identificacion as identificacion_id_tipo,
-            tbli2.nombre AS personal_fotografia
-            FROM tbl_Pases
-            JOIN det_Pase_Personal ON det_Pase_Personal.id_permiso = tbl_Pases.id
-            JOIN v_getPersonas ON v_getPersonas.id = det_Pase_personal.id_personal
-            LEFT JOIN tbl_Empresas ON tbl_Empresas.id = det_Pase_Personal.id_empresa
-            LEFT JOIN cat_tipo_Empleado ON cat_tipo_Empleado.id = det_Pase_Personal.id_tipo_persona
-            LEFT JOIN tbl_Imagenes ON v_getPersonas.id = tbl_Imagenes.id_personal and tbl_Imagenes.id_tipo_toma = 1 and tbl_Imagenes.estatus = 1
-            LEFT JOIN tbl_Imagenes tbli on v_getPersonas.id = tbli.id_personal and tbli.id_tipo_toma = 2 and tbli.estatus = 1
-            LEFT JOIN tbl_Imagenes tbli2 on v_getPersonas.id = tbli2.id_personal and tbli2.id_tipo_toma = 3 and tbli2.estatus = 1
-            WHERE tbl_Pases.id = $idpermiso";
+    public function getDataFilter($data){
 
-        $respuesta = $this->db->query($query)->result();
-        return [
-			'status' 	=> true,
-			'message'	=> '',
-			'data'		=> $respuesta,
-		];
-    }
+        $fecha_inicio = !empty($data['f_fecha_inicio']) ? '\''.$data['f_fecha_inicio'].'\'' : 'null' ;
+        $fecha_final = !empty($data['f_fecha_final']) ? '\''.$data['f_fecha_final'].'\'' : 'null' ;
+        $noSolicitud = !empty($data['f_noSolicitud']) ? $data['f_noSolicitud'] : 'null' ;
+        $usuario = !empty($data['f_usuario']) ? $data['f_usuario'] : 'null' ;
+        $entidad = !empty($data['f_entidad']) ? $data['f_entidad'] : 'null' ;
+        $vigencia = !empty($data['f_vigencia']) ? $data['f_vigencia'] : 'null' ;
+        $tpermiso = !empty($data['f_tpermiso']) ? $data['f_tpermiso'] : 'null' ;
+        $estatus = !empty($data['f_estatus']) ? $data['f_estatus'] : 'null' ;
+        /*$placa = !empty($data['f_placa']) ? $data['f_placa'] : 'null' ;
+        $noSerie = !empty($data['f_noSerie']) ? $data['f_noSerie'] : 'null' ;
+        $marca = !empty($data['f_marca']) ? $data['f_marca'] : 'null' ;*/
+        $mOrde = !empty($data['f_mOrde']) ? $data['f_mOrde'] : 'null' ;
 
-    public function getPersonalAdicionalDuplicar($idpersonal, $idpermiso){
-        $query2 = "SELECT tbl_Imagenes.id AS id_adicional,
-            tbl_Imagenes.nombre AS adicional_fotografia
-            FROM tbl_Pases
-            JOIN det_Pase_Personal ON det_Pase_Personal.id_permiso = tbl_Pases.id
-            LEFT JOIN tbl_Imagenes ON det_Pase_Personal.id_personal = tbl_Imagenes.id_personal and tbl_Imagenes.id_tipo_toma = 12 and tbl_Imagenes.estatus = 1
-            WHERE det_Pase_Personal.id_personal = $idpersonal AND tbl_Pases.id = $idpermiso";
-            
-        $respuesta= $this->db->query($query2)->result();
-        return [
-			'status' 	=> true,
-			'message'	=> '',
-			'data'		=> $respuesta,
-		];
-    }
+        $sp = "EXEC sp_getDatosPasesFiltro 
+        @FechaInicio = $fecha_inicio, 
+        @FechaTermino = $fecha_final,
+        @IdPase = $noSolicitud,
+        @IdUsuario = $usuario,
+        @IdEmpresa = $entidad,
+        @IdTipoVigencia = $vigencia,
+        @IdTipoPermiso = $tpermiso,
+        @IdEstatusPase = $estatus,
+        @OrderBy = $mOrde
+        ";
 
-    /*
-    *Nombre:        getVehiculosByPlaca
-    *Parámetros:    {$placa} => 
-    *Descripción:   Obtiene Vehiculos del pase consultado
-    */
-    public function getVehiculosDuplicar($idpermiso){
-        $query = "SELECT tbl_Vehiculos.id,
-            tbl_vehiculos.numero_serie,
-            tbl_Vehiculos.numero_motor,
-            tbl_Vehiculos.id_tipo_vehiculo,
-            cat_tipo_vehiculo.nombre,
-            tbl_Vehiculos.anio,
-            tbl_Vehiculos.marca,
-            tbl_Vehiculos.modelo,
-            tbl_Vehiculos.id_tipo_tarjeta_circulacion,
-            tbl_Vehiculos.numero_tarjeta_circulacion,
-            tbl_Vehiculos.vigencia_tarjeta_circulacion,
-            tbl_Vehiculos.id_tipo_aseguradora,
-            tbl_Vehiculos.numero_poliza,
-            tbl_Vehiculos.vigencia_poliza,
-            tbl_Vehiculos.id_tipo_periodo,
-            tbl_Vehiculos.fecha_inicio_cobertura,
-            tbl_Vehiculos.fecha_fin_cobertura,
-            tbl_Vehiculos.estatusvehiculo,
-            det_Vehiculo_Empresa.id_empresa as empresa_id_empresa,
-            det_Vehiculo_Empresa.numero_motor as empresa_numero_motor,
-            det_Vehiculo_Empresa.numero_placa as empresa_numero_placa,
-            det_Vehiculo_Empresa.color as empresa_color,
-            det_Vehiculo_Empresa.id_tipo_tarjeta_circulacion as empresa_id_tipo_tarjeta_circulacion,
-            det_Vehiculo_Empresa.numero_tarjeta_circulacion as empresa_numero_tarjeta_circulacion,
-            det_Vehiculo_Empresa.id_tipo_aseguradora as empresa_id_tipo_aseguradora,
-            det_Vehiculo_Empresa.numero_poliza as empresa_numero_poliza,
-            det_Vehiculo_Empresa.vigencia_poliza as empresa_vigencia_poliza,
-            det_Vehiculo_Empresa.id_tipo_periodo as empresa_id_tipo_periodo,
-            det_Vehiculo_Empresa.fecha_inicio_cobertura as empresa_fecha_inicio_cobertura,
-            det_Vehiculo_Empresa.fecha_fin_cobertura as empresa_fecha_fin_cobertura,
-            ti.numero_identificacion as vehiculo_numero_factura,
-            ti.nombre as vehiculo_factura,
-            ti2.nombre as vehiculo_fotografia_lateral,
-            ti3.nombre as vehiculo_fotografia_placa
-            FROM tbl_Pases
-            JOIN det_Pase_Vehiculo ON det_Pase_Vehiculo.id_permiso = tbl_Pases.id
-            LEFT JOIN det_Vehiculo_Empresa ON det_Vehiculo_Empresa.id_vehiculo = det_Pase_vehiculo.id_vehiculo AND det_Vehiculo_Empresa.estatus = 1
-            LEFT JOIN tbl_Vehiculos ON tbl_Vehiculos.id = det_Pase_Vehiculo.id_vehiculo
-            LEFT JOIN cat_tipo_vehiculo ON cat_tipo_vehiculo.id = tbl_Vehiculos.id_tipo_vehiculo
-            LEFT JOIN tbl_Imagenes ti ON ti.id_vehiculo = tbl_Vehiculos.id AND ti.id_tipo_toma = 6 AND ti.estatus = 1
-            LEFT JOIN tbl_Imagenes ti2 ON ti2.id_vehiculo = tbl_Vehiculos.id AND ti2.id_tipo_toma = 7 AND ti2.estatus = 1
-            LEFT JOIN tbl_Imagenes ti3 ON ti3.id_vehiculo = tbl_Vehiculos.id AND ti3.id_tipo_toma = 8 AND ti3.estatus = 1
-            WHERE tbl_Pases.id = $idpermiso";
-        $respuesta = $this->db->query($query)->result();
-        return [
-			'status' 	=> true,
-			'message'	=> '',
-			'data'		=> $respuesta
-		];
-    }
-    public function getByNombrePersona($nombre){
-        $query ="SELECT tp2.id , tp2.nombre 
-        FROM tbl_Pases tp 
-        INNER JOIN det_Pase_Personal dpp on tp.id = dpp.id_permiso 
-        INNER JOIN tbl_Personas tp2 on dpp.id_personal = tp2.id 
-        WHERE tp2.nombre like '%$nombre%'
-        GROUP BY tp2.id , tp2.nombre";
-            $respuesta = $this->db->query($query)->result();
+        /*
+        @Placa= $placa,
+        @NoSerie= $noSerie,
+        @Marca= $marca,
+        */ 
+
+        $query = $this->db->query($sp);
+        if($query->num_rows() > 0){
             return [
                 'status' 	=> true,
                 'message'	=> '',
-                'data'		=> $respuesta
+                'data'		=> $query->result(),
+                'token' 	=> $this->security->get_csrf_hash()
             ];
+        }else {
+            return [
+                'status' 	=> false,
+                'message'	=> 'No existen coincidencias',
+                'data'		=> null,
+                'token' 	=> $this->security->get_csrf_hash()
+            ];
+        }
     }
 
     /*
@@ -2001,51 +2420,5 @@ class Permisos extends CI_Model
 			'message'	=> '',
 			'data'		=> $respuesta
 		];
-    }
-
-    /*
-    *Nombre:        FechasExtenderPermiso
-    *Parámetros:    {$datos} => datos a actualizar
-    *Descripción:   Realiza la actualización de la revisión en una solicitud
-    */
-    public function FechasExtenderPermiso($datos){
-        $newDate = date("Y/m/d", strtotime($datos["fecha"]));  
-        $sp = "select ps20202qaTy0yd.fn_validaExtencion(".$datos["id_permiso"].",".$this->db->escape($newDate).") as validacion";
-        $respuesta = $this->db->query($sp)->row();
-        
-        $response = [
-            'status' 	=> true,
-            'message'	=> 'Registro Exitoso',
-            'data'		=> ['validacion' => $respuesta->validacion],
-            'token' 	=> $this->security->get_csrf_hash()
-        ];
-
-        return $response;
-    }
-
-    /*
-    *Nombre:        ExtenderPermiso
-    *Parámetros:    {$datos} => datos a actualizar
-    *Descripción:   Realiza la actualización de la revisión en una solicitud
-    */
-    public function ExtenderPermiso($datos){
-        $sp = "EXEC sp_ExtiendePase ".$datos['id_permiso'].", ".$this->db->escape($datos['fini']).", ".$this->db->escape($datos['ffin'])."";
-        $respuesta = $this->db->query($sp)->row();
-        if($respuesta->Error == 1){
-            $response = [
-                'status' 	=> false,
-                'message'	=> 'No fue posible realizar la actualización',
-                'data'		=> null,
-                'token' 	=> $this->security->get_csrf_hash()
-            ];
-        }else{
-            $response = [
-                'status' 	=> true,
-                'message'	=> 'Registro Exitoso',
-                'data'		=> ['idpermiso' => $respuesta->id_permiso],
-                'token' 	=> $this->security->get_csrf_hash()
-            ];
-        }
-        return $response;
     }
 }

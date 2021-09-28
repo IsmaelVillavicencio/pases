@@ -5,26 +5,12 @@ class Ses_InicioSesion{
     }
     
     inicio(){
-        usuario.addEventListener('keyup', (ev) => {
-            if (ev.keyCode === 13) {
-                iniciarSesion.click(this.envioDatos)
-            }
-        })
-        contrasena.addEventListener('keyup',  (ev) => {
-            if (ev.keyCode === 13) {
-                iniciarSesion.click(this.envioDatos)
-            }
-        })
-        iniciarSesion.addEventListener('keyup',  (ev) => {
-            if (ev.keyCode === 13) {
-                iniciarSesion.click(this.envioDatos)
-            }
-        })
         iniciarSesion.addEventListener('click', this.envioDatos)
         //spinner.style.visibility="hidden";
     }
 
     envioDatos(){
+
         if(usuario.value==""){
             $(errorUsuario).text("Debe ingresar un usuario")
             $(errorUsuario).show()

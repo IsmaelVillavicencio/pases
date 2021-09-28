@@ -14,7 +14,7 @@
 			margin-bottom: 8.0pt;
 			margin-left: 0cm;
 			line-height: 107%;
-			font-size: 11.0pt;
+			font-size: 10.0pt;
 		}
 		tr.CabeceraTabla{
 			border:none;
@@ -136,10 +136,10 @@
 	</table>
 
 	<p class=FormatoNormal style='margin-bottom:12.0pt;text-align:justify;line-height:normal;'>
-		<span style='font-size:11.0pt;color:#4F5155;text-align:justify;'>
+		<span style='font-size:9.5pt;color:#4F5155;text-align:justify;'>
 			Para que 
             <?php if($numPersonas > 1) echo 'las personas'; else echo 'la persona'; ?>
-            <?php if($numVechiulos > 0 && $numHerramientas > 0) echo ','; else if ($numVechiulos == 0) echo ''; else echo 'y';?>
+            <?php if($numVechiulos > 0 && $numHerramientas > 0) echo ','; else echo 'y';?>
             <?php if($numVechiulos == 0) echo ''; else if($numVechiulos > 1) echo 'vehiculos'; else echo 'vehiculo'; ?>  
             <?php if($numHerramientas > 0) echo 'y'; ?>
             <?php if($numHerramientas == 0) echo ''; else if($numHerramientas > 1) echo 'equipos'; else echo 'equipo'; ?>
