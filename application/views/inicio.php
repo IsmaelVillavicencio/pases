@@ -14,7 +14,7 @@
 							foreach ($submenu as $option) { ?>
 								<div class="col-md-3 col-sm-4 col-xs-6 text-center mt-5">
 									<a id="autorizar" class="btn bg-transparent" href="<?php echo base_url("Permisos/Ctrl_Permisos"); ?>">
-										<img id="autorizar" src="<?php echo base_url('assets/iconos/Autorizar/AutorizarNIV3Recurso21xhdpi.png'); ?>">
+										<img id="autorizar" src="<?php echo base_url('/assets/iconos/AutorizarNIV3/AutorizarNIV3Recurso21xhdpi.png'); ?>">
 										<span class="p-ink" style="height: 228px; width: 228px; top: 46px; left: 1px;"></span>
 									</a>
 									<h5 id="titleautorizar">Autorizar</h5>
@@ -23,7 +23,7 @@
 								<?php if ($this->session->_permiso_rol != 8) { ?>
 									<div class="col-md-3 col-sm-4 col-xs-6 text-center mt-5">
 										<a id="misPermisos" class="btn bg-transparent" href="<?php echo base_url("Permisos/Ctrl_Permisos/index_autorizadores"); ?>">
-											<img id="misPermisos" src="<?php echo base_url('assets/iconos/Mis_permisos/MispermisosNIV3Recurso20xhdpi.png'); ?>">
+											<img id="misPermisos" src="<?php echo base_url('/assets/iconos/MispermisosNIV3/MispermisosNIV3Recurso20xhdpi.png'); ?>">
 											<span class="p-ink" style="height: 228px; width: 228px; top: 46px; left: 1px;"></span>
 										</a>
 										<h5 id="titlemisPermisos">Mis permisos</h5>
