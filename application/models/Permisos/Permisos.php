@@ -1269,7 +1269,7 @@ class Permisos extends CI_Model
                         }
 
                         $respuestaPersonal = $this->addPersonal($idpermiso,$datos['persona'][$i],$datos['permiso']["estatus"]);
-                        if($respuestaPersonal->Error == 0){
+                        /*if($respuestaPersonal->Error == 0){
                             array_push($personal,$respuestaPersonal->id_personal);
                             //Cargar imagenes al servidor
                             //licencia
@@ -1344,7 +1344,7 @@ class Permisos extends CI_Model
                         }else{
                             $this->sendTelegram("Registro personal: ".json_encode($respuestaPersonal));
                             $error = false;
-                        }
+                        }*/
                     }
                 }
                 

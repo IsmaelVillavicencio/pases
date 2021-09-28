@@ -1028,7 +1028,7 @@ class Ctrl_Permisos extends Sesion {
 
         $myWS->endpoint = '/Usuario/v1/'.$userId.'/nombre';
         $dataWS = $myWS->obtener_datos();
-        return json_decode($dataWS, true);;
+        return json_decode($dataWS, true);
     }
 
 	public function addPersonal(){
