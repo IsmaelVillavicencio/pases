@@ -85,8 +85,8 @@ defined('EXIT__AUTO_MIN')      OR define('EXIT__AUTO_MIN', 9); // lowest automat
 defined('EXIT__AUTO_MAX')      OR define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
 
 switch (trim($_SERVER['HTTP_HOST'],'/')) {
-    case 'www.https://pis-contratos-qa.kioscoweb.mx':
-    case 'https://pis-contratos-qa.kioscoweb.mx':    
+    case 'www.https://pis-web-permisos-qa.azurewebsites.net':
+    case 'https://pis-web-permisos-qa.azurewebsites.net':    
         $config = false;
         break;    
     default:
