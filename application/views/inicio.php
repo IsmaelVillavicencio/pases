@@ -14,7 +14,7 @@
 							foreach ($submenu as $option) { ?>
 								<div class="col-md-3 col-sm-4 col-xs-6 text-center mt-5">
 									<a id="autorizar" class="btn bg-transparent" href="<?php echo base_url("Permisos/Ctrl_Permisos"); ?>">
-										<img id="autorizar" src="<?php echo base_url('assets/iconos/Autorizar/AutorizarNIV3Recurso21xhdpi.png'); ?>">
+										<img id="autorizar" src="<?php echo base_url('assets/iconos/Permisos/Autorizar/AutorizarNIV3Recurso21xhdpi.png'); ?>">
 										<span class="p-ink" style="height: 228px; width: 228px; top: 46px; left: 1px;"></span>
 									</a>
 									<h5 id="titleautorizar">Autorizar</h5>
@@ -23,7 +23,7 @@
 								<?php if ($this->session->_permiso_rol != 8) { ?>
 									<div class="col-md-3 col-sm-4 col-xs-6 text-center mt-5">
 										<a id="misPermisos" class="btn bg-transparent" href="<?php echo base_url("Permisos/Ctrl_Permisos/index_autorizadores"); ?>">
-											<img id="misPermisos" src="<?php echo base_url('assets/iconos/Mis_permisos/MispermisosNIV3Recurso20xhdpi.png'); ?>">
+											<img id="misPermisos" src="<?php echo base_url('assets/iconos/Permisos/Mis_permisos/MispermisosNIV3Recurso20xhdpi.png'); ?>">
 											<span class="p-ink" style="height: 228px; width: 228px; top: 46px; left: 1px;"></span>
 										</a>
 										<h5 id="titlemisPermisos">Mis permisos</h5>
@@ -33,7 +33,7 @@
 								if ($this->session->_permiso_rol == 5) { ?>
 									<div class="col-md-3 col-sm-4 col-xs-6 text-center mt-5">
 										<a id="permisosCabotaje" class="btn bg-transparent" href="<?php echo base_url("Permisos/Ctrl_Cabotaje/index"); ?>">
-											<img id="permisosCabotaje" src="<?php echo base_url('assets/iconos/Permisos_cabotaje/PermisosdecabotajeNIV3Recurso22xhdpi.png'); ?>">
+											<img id="permisosCabotaje" src="<?php echo base_url('assets/iconos/Permisos/Permisos_cabotaje/PermisosdecabotajeNIV3Recurso22xhdpi.png'); ?>">
 											<span class="p-ink" style="height: 228px; width: 228px; top: 46px; left: 1px;"></span>
 										</a>
 										<h5 id="titlepermisosCabotaje">Permisos cabotaje</h5>
