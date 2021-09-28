@@ -28,7 +28,7 @@
 	<!--Excel-->
 	<script src="<?php echo base_url("assets/librerias/excel/xlsx.full.min.js"); ?>"></script>
 	<!--PDF-->
-	<script src="<?php echo base_url("assets/librerias/jsPDF-1-3-2/dist/jspdf.min.js"); ?>"></script>
+	<!--script src="< ?php echo base_url("assets/librerias/jsPDF-1-3-2/dist/jspdf.min.js"); ?>"></script-->
 
 	<!--Scripts del bootstrap-->
 	<!-- Latest compiled and minified CSS -->
