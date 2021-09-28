@@ -7,7 +7,7 @@ class Permisos extends CI_Model
 	function __construct(){
 		parent:: __construct();
         $this->idusuario = $this->session->_id_user;
-        $this->idempresa = $this->session->_id_empresa;
+        $this->idempresa = $this->session->_id_empresa_rest;
 
         ini_set('memory_limit','256M');
 		ini_set('sqlsrv.ClientBufferMaxKBSize','524288');
@@ -49,7 +49,7 @@ class Permisos extends CI_Model
 
     public function getGridPermisos($datos){
         if($this->session->_permiso_rol == 8){
-            $idempresa = $this->session->_id_empresa;
+            $idempresa = $this->session->_id_empresa_rest;
         }else if($datos['permiso_rol'] == 8){
             $idempresa = $datos['idempresa'];
         }else{
@@ -74,7 +74,7 @@ class Permisos extends CI_Model
         $respuesta = $this->db->query($query)->result();
         return [
 			'status' 	=> true,
-			'message'	=> '',
+			'message'	=> $idempresa,
 			'data'		=> $respuesta
 		];
     }
