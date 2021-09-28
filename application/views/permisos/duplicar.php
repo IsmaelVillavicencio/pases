@@ -145,7 +145,7 @@
                     <span class="required">*</span><span> Empresa:</span>
                         <input type="hidden" id="idempresa" value="0">
                         <input autocomplete="off" type="text" id="empresa" class="form-control reiniciar-personal" value="" required>
-                    <span id="errorempresa" class="error"></span>
+                    <span id="errorempresa_rfc" class="error"></span>
                 </div>
             </div>
             <div class="row" id="divCURP" style="display:none;">
