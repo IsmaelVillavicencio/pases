@@ -11,6 +11,7 @@ class Ctrl_Credencial extends CI_Controller {
 		$this->load->model('Permisos/Permisos');
 		$this->load->model('PDF/PDFpermisos_acceso');
 		$this->load->library('QR');
+		$this->load->library('WS');
 	}
 
     /*public function permiso(){
@@ -43,6 +44,16 @@ class Ctrl_Credencial extends CI_Controller {
 			'herramientas'=> $this->Permisos->getEquiposHerramientas($id),
 			'materiales' => $this->Permisos->getMateriales($id),
 		);
+
+		$empresa_name = '';
+		$empresa_clave = '';
+			if($data["datos"]["data"]->id_empresa != null){
+				$dataWS = $this->getEmpressName($data["datos"]["data"]->id_empresa);
+				$empresa_name = $dataWS['data']['nombre'];
+				$empresa_clave = ($dataWS['data']['clave_patronal'] != null ? $dataWS['data']['clave_patronal'] : '');
+			}
+		$data["datos"]["data"]->empresa = $empresa_name;
+		$data["datos"]["data"]->clave_patronal = $empresa_clave;
 		
 		$rowPersonal = "";
 		foreach ($data["personal"]["data"] as $valor) {
@@ -146,6 +157,16 @@ class Ctrl_Credencial extends CI_Controller {
 			'vehiculo' => $this->Permisos->getVehiculosByPermiso($idpermiso,$idpersona),
 			'QRCode'	=> null
 		);
+		
+		$empresa_name = '';
+		$empresa_clave = '';
+		if($data["permiso"]["data"]->id_empresa != null){
+			$dataWS = $this->getEmpressName($data["permiso"]["data"]->id_empresa);
+			$empresa_name = $dataWS['data']['nombre'];
+			$empresa_clave = ($dataWS['data']['clave_patronal'] != null ? $dataWS['data']['clave_patronal'] : '');
+		}
+		$data["permiso"]["data"]->empresa = $empresa_name;
+		$data["permiso"]["data"]->clave_patronal = $empresa_clave;
 
 		//eP|<?php echo $permiso["data"]->id."|".$persona["data"]->id_persona."|".$permiso["data"]->fecha_termino."|458913|658712|".$permiso["data"]->permiso_grupal
 		$QRCode = 'eP|'.$data['permiso']['data']->id.'|'.$data['persona']['data']->id_persona.'|'.$data['permiso']['data']->fecha_termino.'|458913|658712|'.$data['permiso']['data']->permiso_grupal;
@@ -154,5 +175,16 @@ class Ctrl_Credencial extends CI_Controller {
 		$data['QRCode'] = $QRCode->mensaje;
 
 		$this->load->view('permisos/vista_previa_credenciales',$data);
+    }
+
+	public function getEmpressName($userId){
+        $myWS = new WS();
+        $myWS->url = BASE_URL_REST;
+		$myWS->token = $this->session->_token;
+        //$resp = $myWS->login();
+
+        $myWS->endpoint = 'empresas/'.$userId;
+        $dataWS = $myWS->obtener_datos();
+        return json_decode($dataWS, true);
     }
 }
