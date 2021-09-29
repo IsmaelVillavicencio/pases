@@ -235,6 +235,15 @@ class Permisos {
                 }
             }
         })
+        empresa_rfc.addEventListener("keydown", (ev) => {
+            if (ev.keyCode != 16) {
+                this.validaciones = new VALIDACIONES();
+                let resultado = this.validaciones.caracteres_validos_sin_acentos_con_numero(ev.key, 1);
+                if (!resultado.resp) {
+                    ev.preventDefault();
+                }
+            }
+        })
         nombre.addEventListener("keydown", (ev) => {
             if (ev.keyCode != 16) {
                 this.validaciones = new VALIDACIONES();
