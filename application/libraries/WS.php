@@ -183,4 +183,33 @@ class WS {
         )));
         return json_decode($result);
     }
+
+    public function peticion_post_rest(){
+        $urlREST = $this->url.$this->endpoint;
+        $dataString = json_encode($this->parametros);
+
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $urlREST,
+            CURLOPT_ENCODING => "",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_POSTFIELDS => $dataString,
+            CURLOPT_HTTPHEADER => array(
+                'Content-type: application/json', 
+                'Content-length: '.strlen($dataString),
+                'Accept: */*',
+                'Accept-Encoding: gzip, deflate, br',
+                'Connection: keep-alive',
+                'Authorization: Bearer '.$this->token
+            ),
+        ));
+
+        $response = curl_exec($curl);
+        $error = curl_error($curl);
+        curl_close($curl);
+        $response = json_decode($response);
+        return $response->data;
+    }
 }

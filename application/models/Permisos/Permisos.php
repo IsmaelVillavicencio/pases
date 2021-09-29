@@ -1256,6 +1256,20 @@ class Permisos extends CI_Model
                         array_push($personalWS,$dataRESTPersona);
                     }*/
 
+                    if($datos['persona'][$i]['idempresa'] == 0){
+                        $datosREST =  array(
+                            "rfc"               => $datos['persona'][$i]['rfc'],
+                            "nombre"           => $datos['persona'][$i]['empresa'],
+                            "clave_patronal"    => $datos['persona'][$i]['clavePatronal'],
+                        );
+                        $dataRESTEmpresa = $this->addEmpresas($datosREST);
+                        if(isset($dataRESTEmpresa->id)){
+                            $datos['persona'][$i]['idempresa'] = $dataRESTEmpresa->id;
+                        }else{
+                            $error = false;
+                        }
+                    }
+
                     if($error){
                         $datos['persona'][$i]["tiposeguro"] = 3;
                         $datos['persona'][$i]["numeroseguro"] = ($datos['persona'][$i]["noSeguro"] != "") ? $datos['persona'][$i]["noSeguro"] : '';
@@ -1578,6 +1592,17 @@ class Permisos extends CI_Model
         $myWS->endpoint = 'api/Personas/v1';
         $myWS->parametros = $datos;
         $dataWS = $myWS->peticion_post();
+        return $dataWS;
+    }
+    public function addEmpresas($datos){
+        $myWS = new WS();
+        $myWS->url = BASE_URL_REST;
+		$myWS->token = $this->session->_token;
+        //$resp = $myWS->login();
+
+        $myWS->endpoint = 'empresas';
+        $myWS->parametros = $datos;
+        $dataWS = $myWS->peticion_post_rest();
         return $dataWS;
     }
 
