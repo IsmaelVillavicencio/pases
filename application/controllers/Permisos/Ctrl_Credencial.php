@@ -44,18 +44,14 @@ class Ctrl_Credencial extends CI_Controller {
 			'herramientas'=> $this->Permisos->getEquiposHerramientas($id),
 			'materiales' => $this->Permisos->getMateriales($id),
 		);
-
-		$empresa_name = '';
-		$empresa_clave = '';
-			if($data["datos"]["data"]->id_empresa != null){
-				$dataWS = $this->getEmpressName($data["datos"]["data"]->id_empresa);
-				if(isset($dataWS['data']['nombre'])){
-					$empresa_name = $dataWS['data']['nombre'];
-					$empresa_clave = ($dataWS['data']['clave_patronal'] != null ? $dataWS['data']['clave_patronal'] : '');
-				}
+		
+		if($data["datos"]["data"]->id_empresa != null){
+			$dataWS = $this->getEmpressName($data["datos"]["data"]->id_empresa);
+			if(isset($dataWS['data']['nombre'])){
+				$data["datos"]["data"]->empresa = $dataWS['data']['nombre'];
+				$data["datos"]["data"]->clave_patronal = ($dataWS['data']['clave_patronal'] != null ? $dataWS['data']['clave_patronal'] : '');
 			}
-		$data["datos"]["data"]->empresa = $empresa_name;
-		$data["datos"]["data"]->clave_patronal = $empresa_clave;
+		}
 		
 		$rowPersonal = "";
 		foreach ($data["personal"]["data"] as $valor) {
@@ -160,17 +156,13 @@ class Ctrl_Credencial extends CI_Controller {
 			'QRCode'	=> null
 		);
 		
-		$empresa_name = '';
-		$empresa_clave = '';
 		if($data["permiso"]["data"]->id_empresa != null){
 			$dataWS = $this->getEmpressName($data["permiso"]["data"]->id_empresa);
 			if(isset($dataWS['data']['nombre'])){
-				$empresa_name = $dataWS['data']['nombre'];
-				$empresa_clave = ($dataWS['data']['clave_patronal'] != null ? $dataWS['data']['clave_patronal'] : '');
+				$data["permiso"]["data"]->empresa = $dataWS['data']['nombre'];
+				$data["permiso"]["data"]->clave_patronal = ($dataWS['data']['clave_patronal'] != null ? $dataWS['data']['clave_patronal'] : '');
 			}
 		}
-		$data["permiso"]["data"]->empresa = $empresa_name;
-		$data["permiso"]["data"]->clave_patronal = $empresa_clave;
 
 		//eP|<?php echo $permiso["data"]->id."|".$persona["data"]->id_persona."|".$permiso["data"]->fecha_termino."|458913|658712|".$permiso["data"]->permiso_grupal
 		$QRCode = 'eP|'.$data['permiso']['data']->id.'|'.$data['persona']['data']->id_persona.'|'.$data['permiso']['data']->fecha_termino.'|458913|658712|'.$data['permiso']['data']->permiso_grupal;

@@ -371,17 +371,13 @@ class Ctrl_Permisos extends Sesion {
 					$response = $this->Permisos->getAllByEstatus($idpermiso);
 
 
-				$empresa_name = '';
-
 				foreach ($response['data'] as $value) {
 					if($value->id_empresa != null){
 						$dataWS = $this->getEmpressName($value->id_empresa);
 						if(isset($dataWS['data']['nombre'])){
-							$empresa_name = $dataWS['data']['nombre'];
+							$value->empresa = $dataWS['data']['nombre'];
 						}
 					}
-					$value->empresa = $empresa_name;
-					$empresa_name = '';
 				}
 			}else{
 				$response['data'] = 'Petición inválida';
@@ -421,17 +417,14 @@ class Ctrl_Permisos extends Sesion {
 
 				$response = $this->Permisos->getGridPermisos($datos);
 
-				$empresa_name = '';
-
 				foreach ($response['data'] as $value) {
 					if($value->id_empresa != null){
 						$dataWS = $this->getEmpressName($value->id_empresa);
 						if(isset($dataWS['data']['nombre'])){
-							$empresa_name = $dataWS['data']['nombre'];
+							$value->empresa = $dataWS['data']['nombre'];
 						}
 					}
-					$value->empresa = $empresa_name;
-					$empresa_name = '';
+
 				}
 			}else{
 				$response['data'] = 'Petición inválida';
@@ -622,17 +615,13 @@ class Ctrl_Permisos extends Sesion {
 				$idpermiso = $this->security->xss_clean($this->input->get('idpermiso'));
 				$response = $this->Permisos->getById($idpermiso);
 
-				$empresa_name = '';
-				$empresa_clave = '';
-					if($response['data']->id_empresa != null ){
-						$dataWS = $this->getEmpressName($response['data']->id_empresa);
-						if(isset($dataWS['data']['nombre'])){
-							$empresa_name = $dataWS['data']['nombre'];
-							$empresa_clave = ($dataWS['data']['clave_patronal'] != null ? $dataWS['data']['clave_patronal'] : '');
-						}
+				if($response['data']->id_empresa != null ){
+					$dataWS = $this->getEmpressName($response['data']->id_empresa);
+					if(isset($dataWS['data']['nombre'])){
+						$response['data']->empresa = $dataWS['data']['nombre'];
+						$response['data']->clave_patronal = ($dataWS['data']['clave_patronal'] != null ? $dataWS['data']['clave_patronal'] : '');
 					}
-				$response['data']->empresa = $empresa_name;
-				$response['data']->clave_patronal = $empresa_clave;
+				}
 			}else{
 				$response['data'] = 'Petición inválida';
 				throw new Exception('Petición inválida');
@@ -865,18 +854,13 @@ class Ctrl_Permisos extends Sesion {
 				$id = $this->security->xss_clean($this->input->get('id'));
 				$idpermiso = $this->security->xss_clean($this->input->get('idpermiso'));
 				$response = $this->Permisos->getPersonalById($id,$idpermiso);
-
-				$empresa_name = '';
-				$empresa_clave = '';
 					if($response['data']->id_empresa != null ){
 						$dataWS = $this->getEmpressName($response['data']->id_empresa);
 						if(isset($dataWS['data']['nombre'])){
-							$empresa_name = $dataWS['data']['nombre'];
-							$empresa_clave = ($dataWS['data']['clave_patronal'] != null ? $dataWS['data']['clave_patronal'] : '');
+							$response['data']->empresa = $dataWS['data']['nombre'];
+							$response['data']->clave_patronal = ($dataWS['data']['clave_patronal'] != null ? $dataWS['data']['clave_patronal'] : '');
 						}
 					}
-				$response['data']->empresa = $empresa_name;
-				$response['data']->clave_patronal = $empresa_clave;
 			}else{
 				$response['data'] = 'Petición inválida';
 				throw new Exception('Petición inválida');
