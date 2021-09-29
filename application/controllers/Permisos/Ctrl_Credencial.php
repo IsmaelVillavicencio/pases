@@ -49,8 +49,10 @@ class Ctrl_Credencial extends CI_Controller {
 		$empresa_clave = '';
 			if($data["datos"]["data"]->id_empresa != null){
 				$dataWS = $this->getEmpressName($data["datos"]["data"]->id_empresa);
-				$empresa_name = $dataWS['data']['nombre'];
-				$empresa_clave = ($dataWS['data']['clave_patronal'] != null ? $dataWS['data']['clave_patronal'] : '');
+				if(isset($dataWS['data']['nombre'])){
+					$empresa_name = $dataWS['data']['nombre'];
+					$empresa_clave = ($dataWS['data']['clave_patronal'] != null ? $dataWS['data']['clave_patronal'] : '');
+				}
 			}
 		$data["datos"]["data"]->empresa = $empresa_name;
 		$data["datos"]["data"]->clave_patronal = $empresa_clave;
@@ -162,8 +164,10 @@ class Ctrl_Credencial extends CI_Controller {
 		$empresa_clave = '';
 		if($data["permiso"]["data"]->id_empresa != null){
 			$dataWS = $this->getEmpressName($data["permiso"]["data"]->id_empresa);
-			$empresa_name = $dataWS['data']['nombre'];
-			$empresa_clave = ($dataWS['data']['clave_patronal'] != null ? $dataWS['data']['clave_patronal'] : '');
+			if(isset($dataWS['data']['nombre'])){
+				$empresa_name = $dataWS['data']['nombre'];
+				$empresa_clave = ($dataWS['data']['clave_patronal'] != null ? $dataWS['data']['clave_patronal'] : '');
+			}
 		}
 		$data["permiso"]["data"]->empresa = $empresa_name;
 		$data["permiso"]["data"]->clave_patronal = $empresa_clave;

@@ -347,7 +347,9 @@ class Ctrl_Permisos extends Sesion {
 					foreach ($response['data'] as $value) {
 						if($value->id_empresa != null){
 							$dataWS = $this->getEmpressName($value->id_empresa);
-							$empresa_name = $dataWS['data']['nombre'];
+							if(isset($dataWS['data']['nombre'])){
+								$empresa_name = $dataWS['data']['nombre'];
+							}
 						}
 						$value->empresa = $empresa_name;
 						$empresa_name = '';
@@ -374,7 +376,9 @@ class Ctrl_Permisos extends Sesion {
 				foreach ($response['data'] as $value) {
 					if($value->id_empresa != null){
 						$dataWS = $this->getEmpressName($value->id_empresa);
-						$empresa_name = $dataWS['data']['nombre'];
+						if(isset($dataWS['data']['nombre'])){
+							$empresa_name = $dataWS['data']['nombre'];
+						}
 					}
 					$value->empresa = $empresa_name;
 					$empresa_name = '';
@@ -422,7 +426,9 @@ class Ctrl_Permisos extends Sesion {
 				foreach ($response['data'] as $value) {
 					if($value->id_empresa != null){
 						$dataWS = $this->getEmpressName($value->id_empresa);
-						$empresa_name = $dataWS['data']['nombre'];
+						if(isset($dataWS['data']['nombre'])){
+							$empresa_name = $dataWS['data']['nombre'];
+						}
 					}
 					$value->empresa = $empresa_name;
 					$empresa_name = '';
@@ -618,10 +624,12 @@ class Ctrl_Permisos extends Sesion {
 
 				$empresa_name = '';
 				$empresa_clave = '';
-					if($response['data']->id_empresa != null){
+					if($response['data']->id_empresa != null ){
 						$dataWS = $this->getEmpressName($response['data']->id_empresa);
-						$empresa_name = $dataWS['data']['nombre'];
-						$empresa_clave = ($dataWS['data']['clave_patronal'] != null ? $dataWS['data']['clave_patronal'] : '');
+						if(isset($dataWS['data']['nombre'])){
+							$empresa_name = $dataWS['data']['nombre'];
+							$empresa_clave = ($dataWS['data']['clave_patronal'] != null ? $dataWS['data']['clave_patronal'] : '');
+						}
 					}
 				$response['data']->empresa = $empresa_name;
 				$response['data']->clave_patronal = $empresa_clave;
@@ -860,10 +868,12 @@ class Ctrl_Permisos extends Sesion {
 
 				$empresa_name = '';
 				$empresa_clave = '';
-					if($response['data']->id_empresa != null){
+					if($response['data']->id_empresa != null ){
 						$dataWS = $this->getEmpressName($response['data']->id_empresa);
-						$empresa_name = $dataWS['data']['nombre'];
-						$empresa_clave = ($dataWS['data']['clave_patronal'] != null ? $dataWS['data']['clave_patronal'] : '');
+						if(isset($dataWS['data']['nombre'])){
+							$empresa_name = $dataWS['data']['nombre'];
+							$empresa_clave = ($dataWS['data']['clave_patronal'] != null ? $dataWS['data']['clave_patronal'] : '');
+						}
 					}
 				$response['data']->empresa = $empresa_name;
 				$response['data']->clave_patronal = $empresa_clave;
