@@ -136,7 +136,7 @@
                 </div>
                 <div class="col-md-4 col-sm-6 col-xs-12" id="divClavePatronal" style="display:none;">
                     <br>
-                    <span class="required">*</span><span> Clave patronal:</span>
+                    <span class="required"></span><span> Clave patronal:</span>
                         <input autocomplete="off" type="text" id="clavePatronal" class="form-control reiniciar-personal" value="" maxlength="11" required>
                     <span id="errorclavePatronal" class="error"></span>
                 </div>

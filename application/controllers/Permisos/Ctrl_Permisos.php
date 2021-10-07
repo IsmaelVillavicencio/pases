@@ -367,8 +367,9 @@ class Ctrl_Permisos extends Sesion {
 				if($this->session->_permiso_rol == 7){
 					$response = $this->Permisos->getAllMigracion($idpermiso);
 				}
-				if($this->session->_permiso_rol != 5 && $this->session->_permiso_rol != 6 && $this->session->_permiso_rol != 7 && $this->session->_permiso_rol != 8)
+				if($this->session->_permiso_rol != 5 && $this->session->_permiso_rol != 6 && $this->session->_permiso_rol != 7 && $this->session->_permiso_rol != 8){
 					$response = $this->Permisos->getAllByEstatus($idpermiso);
+				}
 
 
 				foreach ($response['data'] as $value) {
@@ -379,6 +380,7 @@ class Ctrl_Permisos extends Sesion {
 						}
 					}
 				}
+				
 			}else{
 				$response['data'] = 'Petición inválida';
 				throw new Exception('Petición inválida');
@@ -458,6 +460,16 @@ class Ctrl_Permisos extends Sesion {
 					'idempresa'		=> $this->input->get('idempresa')
 				);
 				$response = $this->Permisos->getAllFiltro($datos);
+
+				foreach ($response['data'] as $value) {
+					if($value->id_empresa != null){
+						$dataWS = $this->getEmpressName($value->id_empresa);
+						if(isset($dataWS['data']['nombre'])){
+							$value->empresa = $dataWS['data']['nombre'];
+						}
+					}
+
+				}
 			}else{
 				$response['data'] = 'Petición inválida';
 				throw new Exception('Petición inválida');
@@ -508,6 +520,16 @@ class Ctrl_Permisos extends Sesion {
 				}
 				if($this->session->_permiso_rol == 8){
 					$response = $this->Permisos->getFiltroByUser($datos);
+				}
+
+				foreach ($response['data'] as $value) {
+					if($value->id_empresa != null){
+						$dataWS = $this->getEmpressName($value->id_empresa);
+						if(isset($dataWS['data']['nombre'])){
+							$value->empresa = $dataWS['data']['nombre'];
+						}
+					}
+
 				}
 			}
 			/*if ($this->input->is_ajax_request()) {

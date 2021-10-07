@@ -548,7 +548,7 @@ class Permisos extends CI_Model
     *               base a la especificación del estatus recibido
     */
     public function getAllAduana($idpermiso){
-        $query = "SELECT tp.*,  te.nombre as empresa, ctp.nombre as tipo_permiso, TT.numequipos, TT2.nummaterial, cep.nombre as estatus_nombre, tp.autorizacion, tp.autorizacion_aduana
+        $query = "SELECT TOP 100 tp.*,  te.nombre as empresa, ctp.nombre as tipo_permiso, TT.numequipos, TT2.nummaterial, cep.nombre as estatus_nombre, tp.autorizacion, tp.autorizacion_aduana
             FROM tbl_Pases tp
             left JOIN tbl_Empresas te on tp.id_empresa = te.id
             LEFT JOIN cat_tipo_Permiso ctp on tp.id_tipo_permiso = ctp.id
@@ -567,7 +567,8 @@ class Permisos extends CI_Model
         return [
 			'status' 	=> true,
 			'message'	=> '',
-			'data'		=> $respuesta
+			'data'		=> $respuesta,
+            'info'      => $query
 		];
     }
 
@@ -578,7 +579,7 @@ class Permisos extends CI_Model
     *               base a la especificación del estatus recibido
     */
     public function getAllMigracion($idpermiso){
-        $query = "SELECT tp.*,  te.nombre as empresa, ctp.nombre as tipo_permiso, cep.nombre as estatus_nombre, tp.autorizacion, tp.autorizacion_aduana, TT.numpersonas
+        $query = "SELECT TOP 100 tp.*,  te.nombre as empresa, ctp.nombre as tipo_permiso, cep.nombre as estatus_nombre, tp.autorizacion, tp.autorizacion_aduana, TT.numpersonas
             FROM tbl_Pases tp
             left JOIN tbl_Empresas te on tp.id_empresa = te.id
             LEFT JOIN cat_tipo_Permiso ctp on tp.id_tipo_permiso = ctp.id
@@ -1527,7 +1528,7 @@ class Permisos extends CI_Model
             $response = [
                 'status' 	=> false,
                 'message'	=> 'No fue posible realizar el registro',
-                'data'		=> [$idpermiso,$personal],
+                'data'		=> [$datos],
                 'token' 	=> null,
             ];
         }else{

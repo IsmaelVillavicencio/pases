@@ -75,9 +75,6 @@ class Permisos {
         this.obtener_periodos()
     }
     inicio() {
-        id_empresa = _id_empresa_rest
-        id_contrato = idcontratovigenteusuario
-        entidad.value = _empresa
         btnGuardar.disabled = true;
         DTPersonal = $(tabPersonal).DataTable({
             "language": {
@@ -216,10 +213,8 @@ class Permisos {
                 this.validaciones = new VALIDACIONES();
                 let resultado = this.validaciones.caracteres_validos_sin_acentos_con_numero(ev.target.value,1);
                 if (!resultado.resp) {
-                    console.log(resultado)
                     errorclavePatronal.innerHTML = "Información no válida"
                 }else{
-                    console.log(resultado)
                     errorclavePatronal.innerHTML = ""
                 }
             }
@@ -1542,11 +1537,7 @@ class Permisos {
                     if (response.data != false) {
                         idempresa.value = response.data.id_empresa
                         clavePatronal.value = response.data.clave_patronal
-                        if(response.data.siglas != null){
-                            empresa.value = response.data.siglas
-                        }else{
-                            empresa.value = response.data.nombre
-                        }
+                        empresa.value = response.data.nombre
                         
                         errorempresa.innerHTML = ''
                         errorempresa_rfc.innerHTML = ''
@@ -2582,6 +2573,11 @@ class Permisos {
                 response.data.forEach(element => {
                     $(tipoPermiso).append('<option value="' + element.id + '">' + element.nombre + '</option>');
                 });
+            },
+            complete: function() {
+                id_empresa = _id_empresa_rest
+                id_contrato = idcontratovigenteusuario
+                entidad.value = _empresa
             }
         }).fail(function (response) {
 
@@ -3336,7 +3332,6 @@ class Permisos {
             vehiculotab.disabled = true
         }
 
-        console.log(datos);
         if (!validacion) {
             $(errorPersonalDuplicado).html("El registro ya existe el la lista")
             return validacion;
@@ -3344,7 +3339,6 @@ class Permisos {
             $(errorPersonalDuplicado).html("")
         )
         datosPersonal.push(datos)
-		console.log(datos);
         /*if (permisoGrupal.checked == false && datosPersonal.length == 1) {
             tipoEmpleado.setAttribute("disabled", true)
         }*/
@@ -3997,7 +3991,7 @@ class Permisos {
             error: (xhr, ajaxOptions, thrownError) => {
                 confirmar_guardar.disabled = false;
                 btnGuardar.disabled = false;
-                peticion_fallida(thrownError);
+                peticion_fallida();
             }
         }).fail(function (response) {
             if (response.responseText == "Sesion") {

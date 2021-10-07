@@ -5,7 +5,6 @@ const ip_address = $("#ip_address").val();
 const idcontratovigenteusuario = $("#idcontratovigenteusuario").val();
 const idempresavigenteusuario = $("#idempresavigenteusuario").val();
 const _id_empresa_rest = $("#_id_empresa_rest").val();
-const _empresa = $("#_empresa").val();
 const app_path = $("#app_path").val();
 const _token = $("#token").val();
 
@@ -109,6 +108,23 @@ const fecha_obligatoria = (mensaje = "") => {
 
 	$("#modal_fecha_obligatoria").modal("show");
 }
+
+const validacion_campos = (mensaje = "") => {
+	if(mensaje == "")
+		$("#mensaje_verificacion").html("Favor de verificar la información ingresada");
+	else
+		$("#mensaje_verificacion").html(mensaje);
+
+	$("#modal_verificacion_campos").modal("show");
+	return true;
+}
+
+const mostrar_mensaje = (mensaje = "") => {	
+	$("#mensaje").html(mensaje);
+	$("#modal_mensaje").modal("show");
+	return true;
+}
+
 //efectos
 const mouseOverVer = (obj) => {
   obj.src= base_url+"assets/iconos/Ver_02.png";
