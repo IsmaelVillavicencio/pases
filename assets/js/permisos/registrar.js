@@ -526,16 +526,6 @@ class Permisos {
             }
         })
 
-        noFacturaVeh.addEventListener("keydown", (ev) => {
-            if (ev.keyCode != 16) {
-                this.validaciones = new VALIDACIONES();
-                let resultado = this.validaciones.caracteres_validos_especial(ev.key, 1);
-                if (!resultado.resp) {
-                    ev.preventDefault();
-                }
-            }
-        })
-
         noPoliza.addEventListener("keydown", (ev) => {
             if (ev.keyCode != 16) {
                 this.validaciones = new VALIDACIONES();
@@ -990,23 +980,7 @@ class Permisos {
 			} 
             $(modalMaterial).modal()
         })*/
-
-       /* adjuntarVehiculoFactura.addEventListener("change", this.previsualizar_vehiculo_factura)
 			
-        btnSubirFacturaVehiculo.addEventListener('click', (ev) => {
-			$("#pdfViewerVehiculoFactura").css("height","0px");
-			$("#pdfViewerVehiculoFactura").html("");
-			var tmp= $("#tab_factura").attr("href");			
-			if (typeof tmp  !== "undefined"){ 
-				var capa = "pdfViewerVehiculoFactura";
-				$("#"+capa).css({"overflow":"hidden", "height":"300px", "overflow-y":"scroll"});
-                $("#"+capa).html('<div class="img-zoom-container"><img id="myimage" width="100%" src="' + tmp + '"/>');
-			} 
-			
-			
-            $(modalVehiculoFactura).modal()
-        })*/
-
         btnSubirVehiculo.addEventListener('click', (ev) => {
             $(btnSiguienteAdjuntarVehiculo).hide();
             $(btnAceptarAdjuntarVechiculo).hide();
@@ -1157,12 +1131,7 @@ class Permisos {
                 document.getElementById('btnSubirMaterial').value = 'Actualizar documento'
             }
         })*/
-        btnAceptarAdjuntarVehiculoFactura.addEventListener('click', (ev) => {
-            if (adjuntarVehiculoFactura.value != "") {
-                document.getElementById('btnSubirFacturaVehiculo').value = 'Actualizar documento'
-            }
 
-        })
         btnAceptarAdjuntarVechiculo.addEventListener('click', (ev) => {
             if (ajuntarLateralVehiculo.value != "" && adjuntarPlacaVehiculo.value != "") {
                 document.getElementById('btnSubirVehiculo').value = 'Actualizar archivo'
@@ -2375,58 +2344,6 @@ class Permisos {
             }
         }
     }
-    previsualizar_vehiculo_factura() {
-        var fileReader = new FileReader();
-        //pdfViewerVehiculoFactura.innerHTML = ''
-        erroradjuntarVehiculoFactura.innerHTML = ''
-
-        var extencion = $(this)[0].files[0].name;
-        if (extencion != '') {
-            extencion = extencion.split(".");
-            extencion = extencion[extencion.length - 1];
-        }
-
-        var permitidos = ["image/jpg", "image/jpeg", "image/png", "application/pdf"];
-        if (!permitidos.includes($(this)[0].files[0].type) || extencion == 'jfif') {
-            erroradjuntarVehiculoFactura.innerHTML = "El archivo a subir debe ser un documento en PDF o imagen PNG o JPG"
-            return false;
-        }
-
-        if (($(this)[0].files[0].size / 1000000) > 2) {
-            erroradjuntarVehiculoFactura.innerHTML = "El tamaño máximo permitido es de 2 MB"
-            return false;
-        }
-
-        fileReader.onload = function () {
-            var TheFileContents = fileReader.result;
-            $(pdfViewerVehiculoFactura).html('<img width="460" height="200" src="' + TheFileContents + '"/>');
-        };
-        fileReader.readAsDataURL($(this)[0].files[0]);
-
-        btnAceptarAdjuntarVehiculoFactura.onclick = function () {
-            if (fileReader != "") {
-                $(errorSubirFacturaVehiculo).html("")
-            }
-        }
-    }
-    previsualizar_modificar_facturaVehiculo(fotoFacturaVehiculo) {
-
-        var fileReader = new FileReader();
-        //pdfViewerVehiculoFactura.innerHTML = ''
-        erroradjuntarVehiculoFactura.innerHTML = ''
-
-        fileReader.onload = function () {
-            var TheFileContents = fileReader.result;
-            $(pdfViewerVehiculoFactura).html('<img width="460" height="200" src="' + TheFileContents + '"/>');
-        };
-        fileReader.readAsDataURL(fotoFacturaVehiculo);
-
-        btnAceptarAdjuntarVehiculoFactura.onclick = function () {
-            if (fileReader != "") {
-                $(errorSubirFacturaVehiculo).html("")
-            }
-        }
-    }
     previsualizar_vehiculo(ev) {
         var fileReader = new FileReader();
         //pdfViewerVehiculo.innerHTML = ''
@@ -2477,12 +2394,6 @@ class Permisos {
         };
         fileReader.readAsDataURL(fotoLateralVehiculo);
 
-
-        btnAceptarAdjuntarVehiculoFactura.onclick = function () {
-            if (fileReader != "") {
-                $(errorSubirFacturaVehiculo).html("")
-            }
-        }
     }
     previsualizar_modificar_placaVehiculo(fotoPlacaVehiculo) {
 
@@ -2503,13 +2414,6 @@ class Permisos {
             //adjuntarPlacaVehiculo.dataset.imagen = TheFileContents
         };
         fileReader.readAsDataURL(fotoPlacaVehiculo);
-
-
-        btnAceptarAdjuntarVehiculoFactura.onclick = function () {
-            if (fileReader != "") {
-                $(errorSubirFacturaVehiculo).html("")
-            }
-        }
     }
    /* obtener_datos_contrato() {
         if(id_empresa != 0){
@@ -2983,8 +2887,6 @@ class Permisos {
 
                 beforeSend: function () {
                     idvehiculo.value = 0
-                    adjuntarVehiculoFactura.dataset.imagen = ""
-                    adjuntarVehiculoFactura.dataset.id = ""
                     ajuntarLateralVehiculo.dataset.imagen = ""
                     ajuntarLateralVehiculo.dataset.id = ""
                     adjuntarPlacaVehiculo.dataset.imagen = ""
@@ -3050,11 +2952,6 @@ class Permisos {
                             $(errorperiodoCobFechaInicio).html("")
                             $(errorperiodoCobFechaFin).html("")
                             //$(errorestatusVehiculo).html("")
-
-                            adjuntarVehiculoFactura.dataset.id = (response.data_interna.id_fotografia_factura != null) ? response.data_interna.id_fotografia_factura : ""
-                            adjuntarVehiculoFactura.dataset.imagen = response.data_interna.fotografia_factura
-                            btnSubirFacturaVehiculo.value = "Actualizar documento"
-                            $(errorSubirFacturaVehiculo).html("")
 
                             ajuntarLateralVehiculo.dataset.id = (response.data_interna.id_fotografia_lateral != null) ? response.data_interna.id_fotografia_lateral : ""
                             ajuntarLateralVehiculo.dataset.imagen = response.data_interna.fotografia_lateral
@@ -3770,17 +3667,6 @@ class Permisos {
             validacion = false
         }
 		
-		var tmp= $("#val_factura").val();		
-			if (typeof tmp  !== "undefined"){}else {
-				$(errorSubirFacturaVehiculo).html("Campo obligatorio"); validacion = false;
-			}
-			
-        /*if (adjuntarVehiculoFactura.value == "" && adjuntarVehiculoFactura.dataset.imagen == "" && fotoFacturaVehiculo == null) {
-            $(errorSubirFacturaVehiculo).html("Campo obligatorio")
-            validacion = false
-        }
-		*/
-		
         /*if (ajuntarLateralVehiculo.value == "" && ajuntarLateralVehiculo.dataset.imagen == "" && fotoLateralVehiculo == null) {
             $(errorSubirFotoVehiculo).html("Campo obligatorio")
             validacion = false
@@ -3830,25 +3716,16 @@ class Permisos {
                 tipoVehiculo: tipoVehiculo.value,
                 tipoTarCircu: tipoTarjetaCirculacion.value,
                 noTarjeta: noTarjeta.value,
-                //vigenciaTarjete: vigenciaTarjeta.value,
-                //tipoDocumento: tipodocumentoVeh.value,
-                //noFactura: noFacturaVeh.value,
-                //idimagenfactura:  0,
-                documentoFactura: $("#val_factura").val(),
-                //documentoFactura        : $("#adjuntarVehiculoFactura")[0].files[0],
                 aseguradora: aseguradorasVeh.value,
                 noPoliza: noPoliza.value,
                 vigenciaPoliza: vigenciaPoliza.value,
                 periodoPago: periodoPago.value,
                 periodoFechaInicio: periodoCobFechaInicio.value,
                 periodoFechaFin: periodoCobFechaFin.value,
-                //estatusVehiculo         : estatusVehiculo.value,
                 chofer: selChofer.value,
                 idfotografiaLateral:  0,
                 fotografiaLateral: $("#val_lateral").val(),
-                //fotografiaLateral       : $("#ajuntarLateralVehiculo")[0].files[0],
                 idfotografiaPlaca:  0,
-                //fotografiaPlaca         : $("#adjuntarPlacaVehiculo")[0].files[0],
                 fotografiaPlaca: $("#val_placa").val(),
             }
 
@@ -3871,16 +3748,6 @@ class Permisos {
 			$("#errorSubirFotoLat").html(""); 
 			$("#errorSubirFotoPla").html(""); 
 			
-                /*
-
-                '<div class="p-1">' +
-                '<a href="#!" title="Modificar">' +
-                '<span class="glyphicon glyphicon-pencil modificar-vehiculo" data-id="' + (datosVehiculos.length - 1) + '"></span>' +
-                '</a>' +
-                '</div>' +
-
-                */
-			
             datosVehiculos.push(datos)
             DTVehiculo.row.add([
                 '<center>' + datos.noPlaca + '</center>',
@@ -3899,7 +3766,6 @@ class Permisos {
             ]).draw(false)
             edicion_vehiculo = 0
             //Reincio de modales de carga de documentos
-            adjuntarVehiculoFactura.value = ''
             ajuntarLateralVehiculo.value = ''
             adjuntarPlacaVehiculo.value = ''
             fotografiaLateral.style.display = ""
@@ -3916,7 +3782,6 @@ class Permisos {
             //Reinicio de valores de campos
             idvehiculo.value = 0
             $(".reiniciar-vehiculo").val("")
-            document.getElementById('btnSubirFacturaVehiculo').value = 'Subir documento'
             document.getElementById('btnSubirVehiculo').value = 'Subir archivo'
 
             fotoFacturaVehiculo = null
@@ -4220,7 +4085,6 @@ $(tabVehiculos).on('click', '.modificar-vehiculo', function (ev) {
     selChofer.value = datosVehiculos[ev.target.dataset.id].chofer
     fotoLateralVehiculo = datosVehiculos[ev.target.dataset.id].fotografiaLateral
     fotoPlacaVehiculo = datosVehiculos[ev.target.dataset.id].fotografiaPlaca
-    btnSubirFacturaVehiculo.value = "Actualizar documento"
     btnSubirVehiculo.value = "Actualizar foto"
 
     var temp = fotoFacturaVehiculo;var archivo = temp;var arc = temp.split("/");temp = arc[4];
@@ -4235,9 +4099,6 @@ $(tabVehiculos).on('click', '.modificar-vehiculo', function (ev) {
 	var txt = "<input type='hidden' id='val_placa' value ='"+temp+"'>";  
 	$("#errorSubirFotoPla").html("<span class='color:#000'><a id='tab_placa' href='/"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);
 
-    $(btnSubirFacturaVehiculo).on('click', function (ev) {
-        per.previsualizar_modificar_facturaVehiculo(fotoFacturaVehiculo)
-    })
     $(btnSubirVehiculo).on('click', function (ev) {
         per.previsualizar_modificar_lateralVehiculo(fotoLateralVehiculo)
     })
@@ -4265,7 +4126,6 @@ $(tabVehiculos).on('click', '.modificar-vehiculo', function (ev) {
     //$(errorvigenciaTarjeta).html("")
     
     //$(errortipodocumentoVeh).html("")
-    //$(erroradjuntarVehiculoFactura).html("")
     $(erroraseguradorasVeh).html("")
     $(errornoPoliza).html("")
     $(errorvigenciaPoliza).html("")
@@ -4799,36 +4659,6 @@ var upequiepoRF = new plupload.Uploader({
     }
 });upequiepoRF.init()
 
-
-// Upload Subir Factura
-var upfactura = new plupload.Uploader({
-    browse_button: 'adjuntarVehiculoFactura', // this can be an id of a DOM element or the DOM element itself
-    url: base_url+'upload/uploadPermisos/vehiculos',
-    chunk_size: '1mb',
-    max_file_count: 1,
-    multi_selection: false,
-    unique_names: true,
-    multipart_params: {     [csrf.name] : csrf.value  },
-    filters: {max_file_size : '20mb', mime_types: [{ title: "Jpg", extensions: "jpg" },{ title: "PNG", extensions: "png" }]},
-    init: {
-        PostInit: function () { document.getElementById('btnAceptarAdjuntarVehiculoFactura').onclick = function () { upfactura.start();return false;}},
-        Error: function(up, err) {if(err.code == -600)$(erroradjuntarContrato).html("El maximo tamañ±o de archivo es de 20mb")},
-        Browse: function (up) { if (up.files.length > 0)                up.removeFile(up.files[0]);         },
-        FilesAdded: function (up, files) {  previsualizar_archivo(up.files,"pdfViewerVehiculoFactura"); },			
-        UploadProgress: function (up, file) {			
-            var span = document.getElementById('errorSubirFacturaVehiculo'); //Capa muestra avance
-            span.innerHTML = '<span style="color:#000;"> Cargando archivo: ' + file.percent + '%</span>';            
-        },
-        FileUploaded: function (up, file, info) {
-			var archivo = "/assets/uploads/permisos/vehiculos/"+file.target_name;
-			var txt = "<input type='hidden' id='val_factura' value ='"+file.target_name+"'>";
-			$("#errorSubirFacturaVehiculo").html("<span class='color:#000'><a  id='tab_factura' href='"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-            info = JSON.parse(info.response)	
-        },
-    }
-});upfactura.init();
-
- 
 // Upload VEhiculo lateral
 var uplate = new plupload.Uploader({
     browse_button: 'ajuntarLateralVehiculo', // this can be an id of a DOM element or the DOM element itself
