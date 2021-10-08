@@ -135,6 +135,18 @@ class Permisos {
                 errormotivo.innerHTML = 'Campo obligatorio'
             }
         })
+        limpiarFormulario.addEventListener('click',(ev)=>{
+            let elemVehiculos = document.getElementsByClassName('reiniciar-vehiculo')
+            for (let i = 0; i < elemVehiculos.length; i++) {
+                elemVehiculos[i].value = '';    
+                ajuntarLateralVehiculo.value = '';
+                ajuntarLateralVehiculo.dataset.imagen = ""
+                ajuntarLateralVehiculo.dataset.id = ""
+                adjuntarPlacaVehiculo.value = ''; 
+                adjuntarPlacaVehiculo.dataset.imagen = ""
+                adjuntarPlacaVehiculo.dataset.id = ""
+            }
+        })
 
         /*motivo.addEventListener("keydown", (ev) => {
             if (ev.keyCode != 16) {
@@ -2832,7 +2844,7 @@ class Permisos {
                     noSerieVehiculo.value = response.data.validar_numero_serie
                     noMotor.value = response.data.numero_motor
                     marcaVahiculo.value = response.data.marca
-                    modeloVehiculo.value = response.data.modelo
+                    modeloVehicuo.value = response.data.modelo
                     anio.value = response.data.anio
                     color.value = response.data.color
                     tipoTarjetaCirculacion.value = response.data.id_tipo_tarjeta_circulacion
@@ -2843,8 +2855,17 @@ class Permisos {
                     periodoPago.value = response.data.id_tipo_periodo
                     periodoCobFechaInicio.value = response.data.fecha_inicio_cobertura
                     periodoFechaFin.value = response.data.fecha_fin_cobertura
-                    ajuntarLateralVehiculo.dataset.id = (response.data.id_imagen_licencia != null) ? response.data.id_imagen_licencia : ""
-                    adjuntarPlacaVehiculo.dataset.id = (response.data.id_imagen_identificacion != null) ? response.data.id_imagen_identificacion : ""
+                    ajuntarLateralVehiculo.dataset.id = (response.data.id_lateral != null) ? response.data.id_lateral : ""
+                    ajuntarLateralVehiculo.dataset.imagen = (response.data.link_lateral != null) ? response.data.link_lateral : ""
+                    adjuntarPlacaVehiculo.dataset.id = (response.data.id_placa != null) ? response.data.id_placa : ""
+                    adjuntarPlacaVehiculo.dataset.imagen = (response.data.link_placa != null) ? response.data.link_placa : ""
+                    
+                    tipoVehiculo.setAttribute("disabled",true)
+                    noSerieVehiculo.setAttribute("disabled",true)
+                    marcaVehiculo.setAttribute("disabled",true)
+                    modeloVehicuo.setAttribute("disabled",true)
+                    anio.setAttribute("disabled",true)
+                    
                 }
             }
         }).fail(function (response) {
@@ -2859,11 +2880,18 @@ class Permisos {
             beforeSend: function () {
             },
             success: function (response) {
-                if(response.status == true){
+                console.log(response)
+                if(response.data != null){
                     tipoVehiculo.value = response.data.id_tipo_vehiculo
-                    marcaVahiculo.value = response.data.marca
-                    modeloVehiculo.value = response.data.modelo
+                    marcaVehiculo.value = response.data.marca
+                    modeloVehicuo.value = response.data.modelo
                     anio.value = response.data.anio
+
+                    noSerieVehiculo.setAttribute("disabled",true)
+                    tipoVehiculo.setAttribute("disabled",true)
+                    marcaVehiculo.setAttribute("disabled",true)
+                    modeloVehicuo.setAttribute("disabled",true)
+                    anio.setAttribute("disabled",true)
                 }
             }
         }).fail(function (response) {
