@@ -28,3 +28,4 @@ composer.lock
 
 # Archivos de conexion
 /application/config/database.php
+/application/config/config.php

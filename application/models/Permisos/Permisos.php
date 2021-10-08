@@ -1453,7 +1453,7 @@ class Permisos extends CI_Model
                             $respuestaVehisulo = $this->Permisos->addVehiculos($idpermiso,$personal,$datos['permiso'],$datos['vehiculo'][$i]);
                             if(isset($respuestaVehisulo->id_vehiculo)){
                                 //Cargar imagenes al servidor
-                                if($datos['vehiculo'][$i]["documentoFactura"] != ""){
+                                /*if($datos['vehiculo'][$i]["documentoFactura"] != ""){
                                     //Factura Vehiculo
                                     $datVehFact = array(
                                         'idvehiculo' => $respuestaVehisulo->id_vehiculo,
@@ -1470,12 +1470,12 @@ class Permisos extends CI_Model
                                     if(!$respuestaImgFactVehiculo['status']){
                                         $error = false;
                                     }
-                                }
+                                }*/
             
                                 if($datos['vehiculo'][$i]["fotografiaLateral"] != ""){
                                     $datVehLat = array(
                                         'idvehiculo' => $respuestaVehisulo->id_vehiculo,
-                                        'idimagen' => 0,
+                                        'idempresa' => $datos['permiso']->idempresa,
                                         'idtipodocumentovehiculo' => 'null',
                                         'numerodocumentovehiculo' => null,
                                         'fechaexpiracion' => null,
@@ -1493,7 +1493,7 @@ class Permisos extends CI_Model
                                 if($datos['vehiculo'][$i]["fotografiaPlaca"] != ""){
                                     $datVehPlaca = array(
                                         'idvehiculo' => $respuestaVehisulo->id_vehiculo,
-                                        'idimagen' => 0,
+                                        'idempresa' => $datos['permiso']->idempresa,
                                         'idtipodocumentovehiculo' => 'null',
                                         'numerodocumentovehiculo' => null,
                                         'fechaexpiracion' => null,
@@ -1829,7 +1829,6 @@ class Permisos extends CI_Model
         $respuestaLog = $this->addRespaldoInformacion($datosLOG);
 
         $sp = "EXEC sp_addVehiculosPermisos ".$permiso['idempresa'].",
-            0,
             ".$datos['idvehiculo'].",
             '".$datos['noPlaca']."',
             '".$datos['noSerie']."',
@@ -1861,10 +1860,10 @@ class Permisos extends CI_Model
         $respuestaLog = $this->addRespaldoInformacion($datosLOG);
 
         $sp = "EXEC sp_addImagenesVehiculo ".$datos['idvehiculo'].",
-            ".$datos['idimagen'].",
+            ".$datos['idempresa'].",
             '".$datos['nombre']."',
             '".$datos['link']."',
-            ".$datos['idtipodocumentovehiculo'].",
+            ".$datos['idtipotoma'].",
             '".$datos['numerodocumentovehiculo']."',
             '".$datos['fechaexpiracion']."',
             ".$datos['tipo'].",
