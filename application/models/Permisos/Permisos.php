@@ -847,11 +847,11 @@ class Permisos extends CI_Model
     public function getVehiculos($idpermiso){
         $query = "SELECT tbl_Vehiculos.id,
             tbl_Vehiculos.numero_serie,
-            tbl_Vehiculos.numero_placa,
+            det_Vehiculo_Empresa.numero_placa,
             tbl_Vehiculos.marca,
             tbl_Vehiculos.modelo,
             tbl_Vehiculos.anio,
-            tbl_Vehiculos.color,
+            det_Vehiculo_Empresa.color,
             cat_estatus_Registro_Pases.nombre as estatus,
             det_Pase_Vehiculo.estatus_pase,
             det_Pase_Vehiculo.id_usuario_registro
@@ -860,6 +860,8 @@ class Permisos extends CI_Model
             ON det_Pase_Vehiculo.id_permiso = tbl_Pases.id
             JOIN tbl_Vehiculos
             ON tbl_Vehiculos.id = det_Pase_Vehiculo.id_vehiculo
+            JOIN det_Vehiculo_Empresa
+            ON det_Vehiculo_Empresa.id_vehiculo = tbl_Vehiculos.id
             JOIN cat_estatus_Registro_Pases
             ON cat_estatus_Registro_Pases.id = det_Pase_Vehiculo.estatus_pase
             WHERE tbl_Pases.id = $idpermiso";
@@ -877,7 +879,7 @@ class Permisos extends CI_Model
     *Descripción:   Obtiene Vehiculos del pase consultado recupera el nombre del chofer
     */
     public function getVehiculosChofer($idpermiso){
-        $query = "SELECT numero_serie, numero_placa, marca, anio, modelo,color,
+        $query = "SELECT numero_serie, det_Vehiculo_Empresa.numero_placa, marca, anio, modelo, det_Vehiculo_Empresa.color,
         CASE CONCAT(tbl_Personas.nombre, ' ', tbl_Personas.primer_apellido, ' ' , tbl_Personas.segundo_apellido) 
             WHEN '' THEN 'Sin responsable'
             ELSE CONCAT(tbl_Personas.nombre, ' ', tbl_Personas.primer_apellido, ' ' , tbl_Personas.segundo_apellido)
@@ -887,6 +889,8 @@ class Permisos extends CI_Model
         ON det_Pase_Vehiculo.id_permiso = tbl_Pases.id
         JOIN tbl_Vehiculos
         ON tbl_Vehiculos.id = det_Pase_Vehiculo.id_vehiculo
+        JOIN det_Vehiculo_Empresa 
+        ON tbl_Vehiculos.id = det_Vehiculo_Empresa.id_Vehiculo 
         LEFT JOIN tbl_Personas
         ON tbl_Personas.id = det_Pase_Vehiculo.id_chofer
         WHERE tbl_Pases.id = $idpermiso";
@@ -899,7 +903,11 @@ class Permisos extends CI_Model
     }
 
     public function getVehiculosByPermiso($idpermiso,$idusuario){
-        $query = "SELECT tbl_Vehiculos.*,  cat_tipo_Tarjeta_Circulacion.nombre as tipo_tarjeta_circulacion, 
+        $query = "SELECT tbl_Vehiculos.id, tbl_Vehiculos.id_tipo_vehiculo, tbl_Vehiculos.numero_serie, tbl_Vehiculos.marca, tbl_Vehiculos.modelo, tbl_Vehiculos.anio,
+        cat_tipo_Tarjeta_Circulacion.nombre as tipo_tarjeta_circulacion, 
+        det_Vehiculo_Empresa.id_empresa, det_Vehiculo_Empresa.numero_placa, det_Vehiculo_Empresa.color, det_Vehiculo_Empresa.id_tipo_tarjeta_circulacion, det_Vehiculo_Empresa.numero_tarjeta_circulacion,
+        det_Vehiculo_Empresa.id_tipo_aseguradora, det_Vehiculo_Empresa.numero_poliza, det_Vehiculo_Empresa.vigencia_poliza, det_Vehiculo_Empresa.id_tipo_periodo,
+        det_Vehiculo_Empresa.fecha_inicio_covertura, det_Vehiculo_Empresa.fecha_fin_covertura,
         tbl_Personas.nombre as nombre_chofer, tbl_Personas.primer_apellido as primer_apellido_chofer,
         tbl_Personas.segundo_apellido as segundo_apellido_chofer, tbl_Personas.curp as curp_chofer, tbl_Personas.nss as nss_chofer,
         tbl_Imagenes.link as link_fotografia_chofer, tbl_Imagenes.nombre as fotografia_chofer,
@@ -907,8 +915,9 @@ class Permisos extends CI_Model
         FROM tbl_Pases
         JOIN det_Pase_Vehiculo ON det_Pase_Vehiculo.id_permiso = tbl_Pases.id
         JOIN tbl_Vehiculos ON tbl_Vehiculos.id = det_Pase_Vehiculo.id_vehiculo
+        JOIN det_Vehiculo_Empresa ON tbl_Vehiculos.id = det_Vehiculo_Empresa.id_Vehiculo 
         JOIN tbl_Personas ON det_Pase_Vehiculo.id_chofer = tbl_Personas.id
-        LEFT JOIN cat_tipo_Tarjeta_Circulacion on tbl_Vehiculos.id_tipo_tarjeta_circulacion = cat_tipo_Tarjeta_Circulacion.id
+        LEFT JOIN cat_tipo_Tarjeta_Circulacion on det_Vehiculo_Empresa.id_tipo_tarjeta_circulacion = cat_tipo_Tarjeta_Circulacion.id
         LEFT JOIN tbl_Imagenes on tbl_Personas.id = tbl_Imagenes.id_personal and tbl_Imagenes.id_tipo_toma = 3 and tbl_Imagenes.estatus = 1
         LEFT JOIN tbl_Imagenes ti on tbl_Vehiculos.id = ti.id_vehiculo and ti.id_tipo_toma = 7 and ti.estatus = 1
         WHERE tbl_Pases.id = $idpermiso and det_Pase_Vehiculo.id_chofer = $idusuario";
@@ -1052,15 +1061,14 @@ class Permisos extends CI_Model
             tbl_Vehiculos.anio,
             cat_tipo_vehiculo.nombre as tipo_vehiculo,
             cat_tipo_tarjeta_circulacion.nombre as tipo_tarjeta_circulacion,
-            tbl_Vehiculos.numero_tarjeta_circulacion,
-            tbl_Vehiculos.vigencia_tarjeta_circulacion,
+            det_Vehiculo_Empresa.numero_tarjeta_circulacion,
             cat_tipo_Aseguradoras.nombre as tipo_aseguradora,
-            tbl_Vehiculos.numero_poliza,
-            tbl_Vehiculos.fecha_inicio_cobertura,
-            tbl_Vehiculos.fecha_fin_cobertura,
+            det_Vehiculo_Empresa.numero_poliza,
+            det_Vehiculo_Empresa.fecha_inicio_cobertura,
+            det_Vehiculo_Empresa.fecha_fin_cobertura,
             CONCAT(tbl_Personas.nombre, ' ', tbl_Personas.primer_apellido, ' ' , tbl_Personas.segundo_apellido) as chofer,
             tbl_Vehiculos.numero_serie as noSerieVehiculo,
-            tbl_Vehiculos.numero_placa as noPlaca,
+            det_Vehiculo_Empresa.numero_placa as noPlaca,
             tbl_Vehiculos.id,
             det_Pase_Vehiculo.observacion,
             CONCAT(ti.link,'',ti.nombre) as imagen_factura,
@@ -1071,10 +1079,12 @@ class Permisos extends CI_Model
             FROM tbl_Vehiculos
             JOIN cat_tipo_Vehiculo
             ON cat_tipo_vehiculo.id = tbl_Vehiculos.id_tipo_vehiculo
+            JOIN det_Vehiculo_Empresa
+            ON det_Vehiculo_Empresa.id_vehiculo = tbl_Vehiculos.id
             JOIN cat_tipo_Tarjeta_Circulacion
-            ON cat_tipo_tarjeta_circulacion.id = tbl_vehiculos.id_tipo_tarjeta_circulacion
+            ON cat_tipo_tarjeta_circulacion.id = det_Vehiculo_Empresa.id_tipo_tarjeta_circulacion
             JOIN cat_tipo_Aseguradoras
-            ON cat_tipo_Aseguradoras.id = tbl_Vehiculos.id_tipo_aseguradora
+            ON cat_tipo_Aseguradoras.id = det_Vehiculo_Empresa.id_tipo_aseguradora
             JOIN det_Pase_Vehiculo
             ON det_Pase_Vehiculo.id_vehiculo = tbl_vehiculos.id
             LEFT JOIN det_Vehiculo_Verificacion
@@ -1108,7 +1118,6 @@ class Permisos extends CI_Model
         tbl_Vehiculos.id_tipo_vehiculo,
         tbl_Vehiculos.id_tipo_tarjeta_circulacion,
         tbl_Vehiculos.numero_tarjeta_circulacion,
-        tbl_Vehiculos.vigencia_tarjeta_circulacion,
         f1.id_tipo_documento,
         f1.numero_factura,
         f1.id_fotografia_factura,
@@ -1163,7 +1172,6 @@ class Permisos extends CI_Model
         tbl_Vehiculos.id_tipo_vehiculo,
         tbl_Vehiculos.id_tipo_tarjeta_circulacion,
         tbl_Vehiculos.numero_tarjeta_circulacion,
-        tbl_Vehiculos.vigencia_tarjeta_circulacion,
         tbl_vehiculos.numero_placa,
         tbl_vehiculos.numero_serie,
         tbl_vehiculos.marca,
@@ -1475,7 +1483,7 @@ class Permisos extends CI_Model
                                 if($datos['vehiculo'][$i]["fotografiaLateral"] != ""){
                                     $datVehLat = array(
                                         'idvehiculo' => $respuestaVehisulo->id_vehiculo,
-                                        'idempresa' => $datos['permiso']->idempresa,
+                                        'idempresa' => $datos['permiso']['idempresa'],
                                         'idtipodocumentovehiculo' => 'null',
                                         'numerodocumentovehiculo' => null,
                                         'fechaexpiracion' => null,
@@ -1493,7 +1501,7 @@ class Permisos extends CI_Model
                                 if($datos['vehiculo'][$i]["fotografiaPlaca"] != ""){
                                     $datVehPlaca = array(
                                         'idvehiculo' => $respuestaVehisulo->id_vehiculo,
-                                        'idempresa' => $datos['permiso']->idempresa,
+                                        'idempresa' => $datos['permiso']['idempresa'],
                                         'idtipodocumentovehiculo' => 'null',
                                         'numerodocumentovehiculo' => null,
                                         'fechaexpiracion' => null,
@@ -1863,9 +1871,6 @@ class Permisos extends CI_Model
             ".$datos['idempresa'].",
             '".$datos['nombre']."',
             '".$datos['link']."',
-            ".$datos['idtipotoma'].",
-            '".$datos['numerodocumentovehiculo']."',
-            '".$datos['fechaexpiracion']."',
             ".$datos['tipo'].",
             ".$this->idusuario;
         $respuesta = $this->db->query($sp)->row();
@@ -2247,7 +2252,7 @@ class Permisos extends CI_Model
         JOIN tbl_Imagenes ti on ti.id_personal = dpp.id_personal
         WHERE tp.id = $permiso and (ti.id_tipo_toma = 1 or ti.id_tipo_toma = 2)";
 
-        $sp2 = " SELECT tv.id as id_vehiculo, tv.vigencia_poliza, tv.vigencia_tarjeta_circulacion, tv.fecha_fin_cobertura
+        $sp2 = " SELECT tv.id as id_vehiculo, tv.vigencia_poliza, tv.fecha_fin_cobertura
         FROM tbl_Pases tp
         JOIN det_Pase_Vehiculo dpv on dpv.id_permiso = tp.id
         JOIN tbl_Vehiculos tv on tv.id = dpv.id_vehiculo

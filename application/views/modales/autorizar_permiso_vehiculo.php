@@ -38,7 +38,7 @@
                         <input type="text" id="vigenciaTarjeta" class="lectura" value="" disabled>
                     </div-->
                 </div>
-                <div class="row mt-4">
+                <div class="row mt-4" style="display: none;">
                     <div class="col-md-6 col-sm-6">
                         Tipo de documento:
                         <input type="text" id="tipoDocumento" class="lectura" value="" disabled>
