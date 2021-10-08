@@ -2456,7 +2456,6 @@ class Permisos {
                             tipoVehiculo.value = response.data_interna.id_tipo_vehiculo
                             tipoTarjetaCirculacion.value = response.data_interna.id_tipo_tarjeta_circulacion
                             noTarjeta.value = response.data_interna.numero_tarjeta_circulacion
-                            //vigenciaTarjeta.value = response.data_interna.vigencia_tarjeta_circulacion
                             tipodocumentoVeh.value = response.data_interna.id_tipo_documento
                             noFacturaVeh.value = response.data_interna.numero_factura
                             aseguradorasVeh.value = response.data_interna.id_tipo_aseguradora
@@ -2486,12 +2485,6 @@ class Permisos {
                             btnSubirVehiculo.value = "Actualizar foto"
                             $(errorSubirFotoVehiculo).html("")
 
-                            /*if (fechaTermino.value > response.data_interna.vigencia_tarjeta_circulacion) {
-                                $(errorvigenciaTarjeta).html("Debe estar vigente durante el periodo")
-                            } else {
-                                vigenciaTarjeta.value = response.data_interna.vigencia_tarjeta_circulacion
-                                $(errorvigenciaTarjeta).html("")
-                            }*/
                             if (fechaTermino.value > response.data_interna.vigencia_poliza) {
                                 $(errorvigenciaPoliza).html("Debe estar vigente durante el periodo")
                             } else {

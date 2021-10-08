@@ -575,7 +575,6 @@ class Permisos{
                     tipoVehiculo.value = response.data.tipo_vehiculo
                     tipoTarjeta.value = response.data.tipo_tarjeta_circulacion
                     noTarjeta.value = response.data.numero_tarjeta_circulacion
-                    //vigenciaTarjeta.value = response.data.vigencia_tarjeta_circulacion
                     tipoDocumento.value = response.data.tipo_factura
                     noFacturaVehiculo.value = response.data.numero_factura
                     aseguradora.value = response.data.tipo_aseguradora
