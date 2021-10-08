@@ -585,7 +585,7 @@
                     <span id="errorvigenciaTarjeta" class="error"></span>
                 </div-->
             </div>
-            <div class="row">
+            <!--div class="row">
                 <div class="col-md-4 col-sm-6 col-xs-12">
                     <br>
                     <span class="required">*</span><span>Tipo de documento:</span>
@@ -603,7 +603,7 @@
                     <input autocomplete="off" type="button" class="btn btn-default btn-border btn-block" id="btnSubirFacturaVehiculo" value="Subir factura/carta factura">
                     <span id="errorSubirFacturaVehiculo" class="error"></span>
                 </div>
-            </div>
+            </div-->
             <div class="row">
                 <div class="col-md-4 col-sm-6 col-xs-12">
                     <br>
@@ -911,7 +911,7 @@
         </div>
     </div>
 </div>
-<div class="modal" id="modalVehiculoFactura" role="dialog">
+<!--div class="modal" id="modalVehiculoFactura" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -937,7 +937,7 @@
             </div>
         </div>
     </div>
-</div>
+</div-->
 <div class="modal" id="modalVehiculo" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">

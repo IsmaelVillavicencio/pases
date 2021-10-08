@@ -67,7 +67,7 @@ class Permisos {
         this.obtener_aseguradoras()
 
         this.obtener_tipos_equipos()
-        this.obtener_tipos_documentos()
+        //this.obtener_tipos_documentos()
         this.obtener_tipos_materiales()
         this.obtener_tipos_medidas()
         this.obtener_tipos_vehiculos()
@@ -991,7 +991,7 @@ class Permisos {
             $(modalMaterial).modal()
         })*/
 
-        adjuntarVehiculoFactura.addEventListener("change", this.previsualizar_vehiculo_factura)
+       /* adjuntarVehiculoFactura.addEventListener("change", this.previsualizar_vehiculo_factura)
 			
         btnSubirFacturaVehiculo.addEventListener('click', (ev) => {
 			$("#pdfViewerVehiculoFactura").css("height","0px");
@@ -1005,7 +1005,7 @@ class Permisos {
 			
 			
             $(modalVehiculoFactura).modal()
-        })
+        })*/
 
         btnSubirVehiculo.addEventListener('click', (ev) => {
             $(btnSiguienteAdjuntarVehiculo).hide();
@@ -1109,6 +1109,9 @@ class Permisos {
 
         //noPlaca.addEventListener("change", this.peticion_repuve)
         //noSerieVehiculo.addEventListener("change",this.peticion_repuve)
+
+        noPlaca.addEventListener("change", this.validar_placa)
+        noSerieVehiculo.addEventListener("change",this.validar_numero_serie)
 
         ajuntarLateralVehiculo.addEventListener("change", this.previsualizar_vehiculo)
         adjuntarPlacaVehiculo.addEventListener("change", this.previsualizar_vehiculo)
@@ -2762,7 +2765,7 @@ class Permisos {
 
         });
     }
-    obtener_tipos_documentos() {
+    /*obtener_tipos_documentos() {
         $.ajax({
             url: base_url + 'Catalogos/Ctrl_TiposDocumentos/getByEstatus',
             type: 'GET',
@@ -2785,7 +2788,7 @@ class Permisos {
         }).fail(function (response) {
 
         });
-    }
+    }*/
     obtener_tipos_materiales() {
         $.ajax({
             url: base_url + 'Catalogos/Ctrl_TiposMateriales/getByEstatus',
@@ -2911,6 +2914,57 @@ class Permisos {
                 $(selChofer).append('<option value="' + index + '"' + selection + '>' + datosPersonal[index].nombre + ' ' + datosPersonal[index].primerApellido + ' ' + datosPersonal[index].segundoApellido + '</option>');
             }
         }
+    }
+    validar_placa(){
+        $.ajax({
+            url: base_url_rest + 'vehiculos/placa/'+idempresavigenteusuario+'/'+noPlaca.value,
+            type: 'GET',
+            dataType: 'json',
+            beforeSend: function () {
+            },
+            success: function (response) {
+                if(response.status == true){
+                    tipoVehiculo.value = response.data.id_tipo_vehiculo
+                    noSerieVehiculo.value = response.data.validar_numero_serie
+                    noMotor.value = response.data.numero_motor
+                    marcaVahiculo.value = response.data.marca
+                    modeloVehiculo.value = response.data.modelo
+                    anio.value = response.data.anio
+                    color.value = response.data.color
+                    tipoTarjetaCirculacion.value = response.data.id_tipo_tarjeta_circulacion
+                    noTarjeta.value = response.data.numero_tarjeta_circulacion
+                    aseguradorasVeh.value = response.data.id_tipo_aseguradora
+                    noPoliza.value = response.data.numero_poliza
+                    vigenciaPoliza.value = response.data.vigencia_poliza
+                    periodoPago.value = response.data.id_tipo_periodo
+                    periodoCobFechaInicio.value = response.data.fecha_inicio_cobertura
+                    periodoFechaFin.value = response.data.fecha_fin_cobertura
+                    ajuntarLateralVehiculo.dataset.id = (response.data.id_imagen_licencia != null) ? response.data.id_imagen_licencia : ""
+                    adjuntarPlacaVehiculo.dataset.id = (response.data.id_imagen_identificacion != null) ? response.data.id_imagen_identificacion : ""
+                }
+            }
+        }).fail(function (response) {
+
+        });
+    }
+    validar_numero_serie(){
+        $.ajax({
+            url: base_url_rest + 'vehiculos/noserie/'+noSerieVehiculo.value,
+            type: 'GET',
+            dataType: 'json',
+            beforeSend: function () {
+            },
+            success: function (response) {
+                if(response.status == true){
+                    tipoVehiculo.value = response.data.id_tipo_vehiculo
+                    marcaVahiculo.value = response.data.marca
+                    modeloVehiculo.value = response.data.modelo
+                    anio.value = response.data.anio
+                }
+            }
+        }).fail(function (response) {
+
+        });
     }
     /*peticion_repuve(ev) {
 
@@ -3675,10 +3729,10 @@ class Permisos {
             $(errorvigenciaTarjeta).html("Campo obligatorio")
             validacion = false
         }*/
-        if (tipodocumentoVeh.value == "") {
+        /*if (tipodocumentoVeh.value == "") {
             $(errortipodocumentoVeh).html("Campo obligatorio")
             validacion = false
-        }
+        }*/
         /*if(noFacturaVeh.value == ""){
             $(errornoFacturaVeh).html("Campo obligatorio")
             validacion = false
@@ -3777,9 +3831,9 @@ class Permisos {
                 tipoTarCircu: tipoTarjetaCirculacion.value,
                 noTarjeta: noTarjeta.value,
                 //vigenciaTarjete: vigenciaTarjeta.value,
-                tipoDocumento: tipodocumentoVeh.value,
-                noFactura: noFacturaVeh.value,
-                idimagenfactura:  0,
+                //tipoDocumento: tipodocumentoVeh.value,
+                //noFactura: noFacturaVeh.value,
+                //idimagenfactura:  0,
                 documentoFactura: $("#val_factura").val(),
                 //documentoFactura        : $("#adjuntarVehiculoFactura")[0].files[0],
                 aseguradora: aseguradorasVeh.value,
@@ -4153,9 +4207,9 @@ $(tabVehiculos).on('click', '.modificar-vehiculo', function (ev) {
     tipoTarjetaCirculacion.value = datosVehiculos[ev.target.dataset.id].tipoTarCircu
     noTarjeta.value = datosVehiculos[ev.target.dataset.id].noTarjeta
     //vigenciaTarjeta.value = datosVehiculos[ev.target.dataset.id].vigenciaTarjete
-    tipodocumentoVeh.value = datosVehiculos[ev.target.dataset.id].tipoDocumento
-    noFacturaVeh.value = datosVehiculos[ev.target.dataset.id].noFactura
-    fotoFacturaVehiculo = datosVehiculos[ev.target.dataset.id].documentoFactura
+    //tipodocumentoVeh.value = datosVehiculos[ev.target.dataset.id].tipoDocumento
+    //noFacturaVeh.value = datosVehiculos[ev.target.dataset.id].noFactura
+    //fotoFacturaVehiculo = datosVehiculos[ev.target.dataset.id].documentoFactura
     aseguradorasVeh.value = datosVehiculos[ev.target.dataset.id].aseguradora
     noPoliza.value = datosVehiculos[ev.target.dataset.id].noPoliza
     vigenciaPoliza.value = datosVehiculos[ev.target.dataset.id].vigenciaPoliza
@@ -4209,8 +4263,9 @@ $(tabVehiculos).on('click', '.modificar-vehiculo', function (ev) {
     $(errortipoTarjetaCirculacion).html("")
     $(errornoTarjeta).html("")
     //$(errorvigenciaTarjeta).html("")
-    $(errortipodocumentoVeh).html("")
-    $(erroradjuntarVehiculoFactura).html("")
+    
+    //$(errortipodocumentoVeh).html("")
+    //$(erroradjuntarVehiculoFactura).html("")
     $(erroraseguradorasVeh).html("")
     $(errornoPoliza).html("")
     $(errorvigenciaPoliza).html("")
@@ -4219,7 +4274,7 @@ $(tabVehiculos).on('click', '.modificar-vehiculo', function (ev) {
     $(errorperiodoCobFechaFin).html("")
     //$(errorestatusVehiculo).html("")
     $(errorselChofer).html("")
-    $(errorSubirFacturaVehiculo).html("")
+    //$(errorSubirFacturaVehiculo).html("")
     $(errorSubirFotoVehiculo).html("")
 
 })
