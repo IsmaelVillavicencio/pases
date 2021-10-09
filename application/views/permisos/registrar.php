@@ -520,8 +520,7 @@
                     <select id="tipoVehiculo" class="form-control reiniciar-vehiculo" required></select>
                     <span id="errortipoVehiculo" class="error"></span>
                 </div>
-                <br><br>
-                <div class="col-md-4 col-sm-6 col-xs-12">
+                <div class="col-md-4 col-sm-6 col-xs-12" style="margin-top:40px;">
                     <button type="button" id="limpiarFormulario" class="btn btn-default">Limpiar</button>
                 </div>
             </div>
