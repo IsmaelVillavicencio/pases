@@ -135,6 +135,18 @@ class Permisos {
                 errormotivo.innerHTML = 'Campo obligatorio'
             }
         })
+        limpiarFormulario.addEventListener('click',(ev)=>{
+            let elemVehiculos = document.getElementsByClassName('reiniciar-vehiculo')
+            for (let i = 0; i < elemVehiculos.length; i++) {
+                elemVehiculos[i].value = '';    
+                elemVehiculos[i].removeAttribute("disabled")
+            }
+            idvehiculo.value = 0
+
+            $("#errorSubirFotoLat").html(""); 
+			$("#errorSubirFotoPla").html("");
+            document.getElementById('btnSubirVehiculo').value = 'Subir archivo'
+        })
 
         /*motivo.addEventListener("keydown", (ev) => {
             if (ev.keyCode != 16) {
@@ -2820,7 +2832,7 @@ class Permisos {
         }
     }
     validar_placa(){
-        if(id_vehiculo.value == 0 && noSerieVehiculo.value == ''){
+        if(idvehiculo.value == 0){
             $.ajax({
                 url: base_url_rest + 'vehiculos/placa/'+idempresavigenteusuario+'/'+noPlaca.value,
                 type: 'GET',
@@ -2829,33 +2841,49 @@ class Permisos {
                 },
                 success: function (response) {
                     if(response.status == true){
-                        id_vehiculo.value = response.data.id_vehiculo
-                        tipoVehiculo.value = response.data.id_tipo_vehiculo
-                        noSerieVehiculo.value = response.data.validar_numero_serie
-                        noMotor.value = response.data.numero_motor
-                        marcaVehiculo.value = response.data.marca
-                        modeloVehicuo.value = response.data.modelo
-                        anio.value = response.data.anio
-                        color.value = response.data.color
-                        tipoTarjetaCirculacion.value = response.data.id_tipo_tarjeta_circulacion
-                        noTarjeta.value = response.data.numero_tarjeta_circulacion
-                        aseguradorasVeh.value = response.data.id_tipo_aseguradora
-                        noPoliza.value = response.data.numero_poliza
-                        vigenciaPoliza.value = response.data.vigencia_poliza
-                        periodoPago.value = response.data.id_tipo_periodo
-                        periodoCobFechaInicio.value = response.data.fecha_inicio_cobertura
-                        periodoFechaFin.value = response.data.fecha_fin_cobertura
-                        ajuntarLateralVehiculo.dataset.id = (response.data.id_imagen_licencia != null) ? response.data.id_imagen_licencia : ""
-                        adjuntarPlacaVehiculo.dataset.id = (response.data.id_imagen_identificacion != null) ? response.data.id_imagen_identificacion : ""
+                        idvehiculo.value = response.data.vehiculo[0].id_vehiculo
+                        tipoVehiculo.value = response.data.vehiculo[0].id_tipo_vehiculo
+                        noSerieVehiculo.value = response.data.vehiculo[0].numero_serie
+                        noMotor.value = response.data.vehiculo[0].numero_motor
+                        marcaVehiculo.value = response.data.vehiculo[0].marca
+                        modeloVehicuo.value = response.data.vehiculo[0].modelo
+                        anio.value = response.data.vehiculo[0].anio
+                        color.value = response.data.vehiculo[0].color
+                        tipoTarjetaCirculacion.value = response.data.vehiculo[0].id_tipo_tarjeta_circulacion
+                        noTarjeta.value = response.data.vehiculo[0].numero_tarjeta_circulacion
+                        aseguradorasVeh.value = response.data.vehiculo[0].id_tipo_aseguradora
+                        noPoliza.value = response.data.vehiculo[0].numero_poliza
+                        vigenciaPoliza.value = response.data.vehiculo[0].vigencia_poliza
+                        periodoPago.value = response.data.vehiculo[0].id_tipo_periodo
+                        periodoCobFechaInicio.value = response.data.vehiculo[0].fecha_inicio_cobertura
+                        periodoCobFechaFin.value = response.data.vehiculo[0].fecha_fin_cobertura
+                        var txtL = "<input type='hidden' id='val_lateral' value ='"+response.data.imagenes[0].link+"'>";
+                        var txtP = "<input type='hidden' id='val_placa' value ='"+response.data.imagenes[1].link+"'>";                   
+                        $("#errorSubirFotoLat").html("<span class='color:#000'><a id='tab_lateral' href='"+base_url+response.data.imagenes[0].link+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txtL);			
+                        $("#errorSubirFotoPla").html("<span class='color:#000'><a id='tab_placa' href='"+base_url+response.data.imagenes[1].link+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txtP);		
+                        /*ajuntarLateralVehiculo.dataset.id = (response.data.imagenes[0].id != null) ? response.data.imagenes[0].id : ""
+                        ajuntarLateralVehiculo.dataset.imagen = (response.data.imagenes[0].link != null) ? response.data.imagenes[0].link : ""
+                        adjuntarPlacaVehiculo.dataset.id = (response.data.imagenes[1].id != null) ? response.data.imagenes[1].id : ""
+                        adjuntarPlacaVehiculo.dataset.imagen = (response.data.imagenes[1].link != null) ? response.data.imagenes[1].link : ""*/
+                        btnSubirVehiculo.value = "Actualizar foto"
+                        
+                        tipoVehiculo.setAttribute("disabled",true)
+                        noSerieVehiculo.setAttribute("disabled",true)
+                        marcaVehiculo.setAttribute("disabled",true)
+                        modeloVehicuo.setAttribute("disabled",true)
+                        anio.setAttribute("disabled",true)
+                        
+                    }else{
+                        $(".reiniciar-vehiculo").val("")
                     }
                 }
-            }).fail(function (response) {
-    
-            });
+                }).fail(function (response) {
+        
+                });
         }
     }
     validar_numero_serie(){
-        if(id_vehiculo.value == 0 && noPlaca.value == ''){
+        if(idvehiculo.value == 0){
             $.ajax({
                 url: base_url_rest + 'vehiculos/noserie/'+noSerieVehiculo.value,
                 type: 'GET',
@@ -2863,17 +2891,29 @@ class Permisos {
                 beforeSend: function () {
                 },
                 success: function (response) {
-                    if(response.status == true){
-                        id_vehiculo.value = response.data.id_vehiculo
+                    if(response.data != null){
+                        idvehiculo.value = response.data.id_vehiculo
                         tipoVehiculo.value = response.data.id_tipo_vehiculo
                         marcaVehiculo.value = response.data.marca
                         modeloVehicuo.value = response.data.modelo
                         anio.value = response.data.anio
+
+                        noSerieVehiculo.setAttribute("disabled",true)
+                        tipoVehiculo.setAttribute("disabled",true)
+                        marcaVehiculo.setAttribute("disabled",true)
+                        modeloVehicuo.setAttribute("disabled",true)
+                        anio.setAttribute("disabled",true)
+                    }else{
+                        idvehiculo.value = 0
+                        tipoVehiculo.value = ''
+                        marcaVehiculo.value = ''
+                        modeloVehicuo.value = ''
+                        anio.value = ''
                     }
                 }
-            }).fail(function (response) {
+                }).fail(function (response) {
 
-            });
+                });
         }
     }
     /*peticion_repuve(ev) {
@@ -3709,6 +3749,13 @@ class Permisos {
         }*/
 
         if (validacion) {
+
+            let elemVehiculos = document.getElementsByClassName('reiniciar-vehiculo')
+            for (let i = 0; i < elemVehiculos.length; i++) {  
+                elemVehiculos[i].removeAttribute("disabled")
+            }
+
+
             let datos = {
                 idvehiculo: idvehiculo.value,
                 noPlaca: noPlaca.value,
@@ -4729,3 +4776,6 @@ var upplaca = new plupload.Uploader({
         },
     }
 });upplaca.init();
+
+
+

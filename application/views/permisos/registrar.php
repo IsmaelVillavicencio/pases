@@ -113,7 +113,7 @@
                         <input autocomplete="off" type="hidden" id="id_personal_rest" value="0">
                         <select id="tipoEmpleado" class="form-control reiniciar-personal" required></select>
                     <span id="errortipoEmpleado" class="error"></span>
-                </div>
+                </div>               
                 <div class="col-md-4 col-sm-6 col-xs-12" id="divNacionalidad" style="display:none;">
                     <br>
                     <span class="required">*</span><span> Nacionalidad:</span>
@@ -519,6 +519,9 @@
                     <span class="required">*</span><span> Tipo de vehículo:</span>
                     <select id="tipoVehiculo" class="form-control reiniciar-vehiculo" required></select>
                     <span id="errortipoVehiculo" class="error"></span>
+                </div>
+                <div class="col-md-4 col-sm-6 col-xs-12" style="margin-top:40px;">
+                    <button type="button" id="limpiarFormulario" class="btn btn-default">Limpiar</button>
                 </div>
             </div>
             <div class="row">
