@@ -943,7 +943,8 @@ class Ctrl_Permisos extends Sesion {
 				}
 
 				$id = $this->security->xss_clean($this->input->get('id'));
-				$response = $this->Permisos->getVehiculosById($id);
+				$idpermiso = $this->security->xss_clean($this->input->get('idpermiso'));
+				$response = $this->Permisos->getVehiculosById($id, $idpermiso);
 			}else{
 				$response['data'] = 'Petición inválida';
 				throw new Exception('Petición inválida');

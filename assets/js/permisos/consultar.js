@@ -563,7 +563,8 @@ class Permisos{
             type: 'GET',
             dataType: 'json',
             data: {
-                id: ev.target.dataset.id
+                id: ev.target.dataset.id,
+                idpermiso: id_permiso
             },
             beforeSend: () => {
                 spinner.style.visibility = "visible";
