@@ -2269,13 +2269,13 @@ class Permisos {
             },
             beforeSend: function () {
                 $(tipoDocumento).append('<option value="">Seleccione</option>');
-                $(tipodocumentoVeh).append('<option value="">Seleccione</option>');
+                //$(tipodocumentoVeh).append('<option value="">Seleccione</option>');
             },
             success: function (response) {
                 response.data.forEach(element => {
                     if (element.id == 3 || element.id == 4) {
                         $(tipoDocumento).append('<option value="' + element.id + '">' + element.nombre + '</option>');
-                        $(tipodocumentoVeh).append('<option value="' + element.id + '">' + element.nombre + '</option>');
+                        //$(tipodocumentoVeh).append('<option value="' + element.id + '">' + element.nombre + '</option>');
                     }
                 });
             }

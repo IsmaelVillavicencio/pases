@@ -907,7 +907,7 @@ class Permisos extends CI_Model
         cat_tipo_Tarjeta_Circulacion.nombre as tipo_tarjeta_circulacion, 
         det_Vehiculo_Empresa.id_empresa, det_Vehiculo_Empresa.numero_placa, det_Vehiculo_Empresa.color, det_Vehiculo_Empresa.id_tipo_tarjeta_circulacion, det_Vehiculo_Empresa.numero_tarjeta_circulacion,
         det_Vehiculo_Empresa.id_tipo_aseguradora, det_Vehiculo_Empresa.numero_poliza, det_Vehiculo_Empresa.vigencia_poliza, det_Vehiculo_Empresa.id_tipo_periodo,
-        det_Vehiculo_Empresa.fecha_inicio_covertura, det_Vehiculo_Empresa.fecha_fin_covertura,
+        det_Vehiculo_Empresa.fecha_inicio_cobertura, det_Vehiculo_Empresa.fecha_fin_cobertura,
         tbl_Personas.nombre as nombre_chofer, tbl_Personas.primer_apellido as primer_apellido_chofer,
         tbl_Personas.segundo_apellido as segundo_apellido_chofer, tbl_Personas.curp as curp_chofer, tbl_Personas.nss as nss_chofer,
         tbl_Imagenes.link as link_fotografia_chofer, tbl_Imagenes.nombre as fotografia_chofer,

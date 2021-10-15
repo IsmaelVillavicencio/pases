@@ -108,15 +108,20 @@ class Permisos{
             },
             beforeSend: function () {
                 $(f_entidad).append('<option value="">Seleccione</option>');
+                $(f_entidad).append('<option value="' +  + '">' + _id_empresa_rest + '</option>');
+                f_entidad.disabled = true;
+                f_entidad.value = _id_empresa_rest
             },
             success: function (response) {
-                if(Area != 8){
-                    response.data.forEach(element => {
-                        $(f_entidad).append('<option value="' + element.id + '">' + element.nombre + '</option>');
-                    });
-                }else{
-                    $(f_entidad).append('<option value="' + response.data.id + '" selected>' + response.data.nombre + '</option>');
-                    f_entidad.disabled = true;
+                if(response.data != null){
+                    if(Area != 8){
+                        response.data.forEach(element => {
+                            $(f_entidad).append('<option value="' + element.id + '">' + element.nombre + '</option>');
+                        });
+                    }else{
+                        $(f_entidad).append('<option value="' + response.data.id + '" selected>' + response.data.nombre + '</option>');
+                        f_entidad.disabled = true;
+                    }
                 }
             },
         });
