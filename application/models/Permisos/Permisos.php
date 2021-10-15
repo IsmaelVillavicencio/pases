@@ -864,7 +864,9 @@ class Permisos extends CI_Model
             ON det_Vehiculo_Empresa.id_vehiculo = tbl_Vehiculos.id
             JOIN cat_estatus_Registro_Pases
             ON cat_estatus_Registro_Pases.id = det_Pase_Vehiculo.estatus_pase
-            WHERE tbl_Pases.id = $idpermiso";
+            WHERE tbl_Pases.id = ".$idpermiso."
+            AND det_Vehiculo_Empresa.estatus = 1
+            AND det_Vehiculo_Empresa.id_empresa = tbl_Pases.id_empresa";
         $respuesta = $this->db->query($query)->result();
         return [
 			'status' 	=> true,
