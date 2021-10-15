@@ -67,7 +67,7 @@ class Permisos {
         this.obtener_aseguradoras()
 
         this.obtener_tipos_equipos()
-        //this.obtener_tipos_documentos()
+        this.obtener_tipos_documentos()
         this.obtener_tipos_materiales()
         this.obtener_tipos_medidas()
         this.obtener_tipos_vehiculos()
@@ -141,6 +141,11 @@ class Permisos {
                 elemVehiculos[i].value = '';    
                 elemVehiculos[i].removeAttribute("disabled")
             }
+            idvehiculo.value = 0
+
+            $("#errorSubirFotoLat").html(""); 
+			$("#errorSubirFotoPla").html("");
+            document.getElementById('btnSubirVehiculo').value = 'Subir archivo'
         })
 
         /*motivo.addEventListener("keydown", (ev) => {
@@ -2676,7 +2681,7 @@ class Permisos {
 
         });
     }
-    /*obtener_tipos_documentos() {
+    obtener_tipos_documentos() {
         $.ajax({
             url: base_url + 'Catalogos/Ctrl_TiposDocumentos/getByEstatus',
             type: 'GET',
@@ -2686,20 +2691,20 @@ class Permisos {
             },
             beforeSend: function () {
                 $(tipoDocumento).append('<option value="">Seleccione</option>');
-                $(tipodocumentoVeh).append('<option value="">Seleccione</option>');
+                //$(tipodocumentoVeh).append('<option value="">Seleccione</option>');
             },
             success: function (response) {
                 response.data.forEach(element => {
                     if (element.id == 3 || element.id == 4) {
                         $(tipoDocumento).append('<option value="' + element.id + '">' + element.nombre + '</option>');
-                        $(tipodocumentoVeh).append('<option value="' + element.id + '">' + element.nombre + '</option>');
+                        //$(tipodocumentoVeh).append('<option value="' + element.id + '">' + element.nombre + '</option>');
                     }
                 });
             }
         }).fail(function (response) {
 
         });
-    }*/
+    }
     obtener_tipos_materiales() {
         $.ajax({
             url: base_url + 'Catalogos/Ctrl_TiposMateriales/getByEstatus',
@@ -2827,77 +2832,89 @@ class Permisos {
         }
     }
     validar_placa(){
-        $.ajax({
-            url: base_url_rest + 'vehiculos/placa/'+idempresavigenteusuario+'/'+noPlaca.value,
-            type: 'GET',
-            dataType: 'json',
-            beforeSend: function () {
-            },
-            success: function (response) {
-                if(response.status == true){
-                    idvehiculo.value = response.data.vehiculo[0].id_vehiculo
-                    tipoVehiculo.value = response.data.vehiculo[0].id_tipo_vehiculo
-                    noSerieVehiculo.value = response.data.vehiculo[0].numero_serie
-                    noMotor.value = response.data.vehiculo[0].numero_motor
-                    marcaVehiculo.value = response.data.vehiculo[0].marca
-                    modeloVehicuo.value = response.data.vehiculo[0].modelo
-                    anio.value = response.data.vehiculo[0].anio
-                    color.value = response.data.vehiculo[0].color
-                    tipoTarjetaCirculacion.value = response.data.vehiculo[0].id_tipo_tarjeta_circulacion
-                    noTarjeta.value = response.data.vehiculo[0].numero_tarjeta_circulacion
-                    aseguradorasVeh.value = response.data.vehiculo[0].id_tipo_aseguradora
-                    noPoliza.value = response.data.vehiculo[0].numero_poliza
-                    vigenciaPoliza.value = response.data.vehiculo[0].vigencia_poliza
-                    periodoPago.value = response.data.vehiculo[0].id_tipo_periodo
-                    periodoCobFechaInicio.value = response.data.vehiculo[0].fecha_inicio_cobertura
-                    periodoCobFechaFin.value = response.data.vehiculo[0].fecha_fin_cobertura
-                    var txtL = "<input type='hidden' id='val_lateral' value ='"+response.data.imagenes[0].link+"'>";
-                    var txtP = "<input type='hidden' id='val_placa' value ='"+response.data.imagenes[1].link+"'>";                   
-                    $("#errorSubirFotoLat").html("<span class='color:#000'><a id='tab_lateral' href='"+base_url+response.data.imagenes[0].link+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txtL);			
-                    $("#errorSubirFotoPla").html("<span class='color:#000'><a id='tab_placa' href='"+base_url+response.data.imagenes[1].link+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txtP);		
-                    /*ajuntarLateralVehiculo.dataset.id = (response.data.imagenes[0].id != null) ? response.data.imagenes[0].id : ""
-                    ajuntarLateralVehiculo.dataset.imagen = (response.data.imagenes[0].link != null) ? response.data.imagenes[0].link : ""
-                    adjuntarPlacaVehiculo.dataset.id = (response.data.imagenes[1].id != null) ? response.data.imagenes[1].id : ""
-                    adjuntarPlacaVehiculo.dataset.imagen = (response.data.imagenes[1].link != null) ? response.data.imagenes[1].link : ""*/
-                    btnSubirVehiculo.value = "Actualizar foto"
-                    
-                    tipoVehiculo.setAttribute("disabled",true)
-                    noSerieVehiculo.setAttribute("disabled",true)
-                    marcaVehiculo.setAttribute("disabled",true)
-                    modeloVehicuo.setAttribute("disabled",true)
-                    anio.setAttribute("disabled",true)
-                    
+        if(idvehiculo.value == 0){
+            $.ajax({
+                url: base_url_rest + 'vehiculos/placa/'+idempresavigenteusuario+'/'+noPlaca.value,
+                type: 'GET',
+                dataType: 'json',
+                beforeSend: function () {
+                },
+                success: function (response) {
+                    if(response.status == true){
+                        idvehiculo.value = response.data.vehiculo[0].id_vehiculo
+                        tipoVehiculo.value = response.data.vehiculo[0].id_tipo_vehiculo
+                        noSerieVehiculo.value = response.data.vehiculo[0].numero_serie
+                        noMotor.value = response.data.vehiculo[0].numero_motor
+                        marcaVehiculo.value = response.data.vehiculo[0].marca
+                        modeloVehicuo.value = response.data.vehiculo[0].modelo
+                        anio.value = response.data.vehiculo[0].anio
+                        color.value = response.data.vehiculo[0].color
+                        tipoTarjetaCirculacion.value = response.data.vehiculo[0].id_tipo_tarjeta_circulacion
+                        noTarjeta.value = response.data.vehiculo[0].numero_tarjeta_circulacion
+                        aseguradorasVeh.value = response.data.vehiculo[0].id_tipo_aseguradora
+                        noPoliza.value = response.data.vehiculo[0].numero_poliza
+                        vigenciaPoliza.value = response.data.vehiculo[0].vigencia_poliza
+                        periodoPago.value = response.data.vehiculo[0].id_tipo_periodo
+                        periodoCobFechaInicio.value = response.data.vehiculo[0].fecha_inicio_cobertura
+                        periodoCobFechaFin.value = response.data.vehiculo[0].fecha_fin_cobertura
+                        var txtL = "<input type='hidden' id='val_lateral' value ='"+response.data.imagenes[0].link+"'>";
+                        var txtP = "<input type='hidden' id='val_placa' value ='"+response.data.imagenes[1].link+"'>";                   
+                        $("#errorSubirFotoLat").html("<span class='color:#000'><a id='tab_lateral' href='"+base_url+response.data.imagenes[0].link+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txtL);			
+                        $("#errorSubirFotoPla").html("<span class='color:#000'><a id='tab_placa' href='"+base_url+response.data.imagenes[1].link+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txtP);		
+                        /*ajuntarLateralVehiculo.dataset.id = (response.data.imagenes[0].id != null) ? response.data.imagenes[0].id : ""
+                        ajuntarLateralVehiculo.dataset.imagen = (response.data.imagenes[0].link != null) ? response.data.imagenes[0].link : ""
+                        adjuntarPlacaVehiculo.dataset.id = (response.data.imagenes[1].id != null) ? response.data.imagenes[1].id : ""
+                        adjuntarPlacaVehiculo.dataset.imagen = (response.data.imagenes[1].link != null) ? response.data.imagenes[1].link : ""*/
+                        btnSubirVehiculo.value = "Actualizar foto"
+                        
+                        tipoVehiculo.setAttribute("disabled",true)
+                        noSerieVehiculo.setAttribute("disabled",true)
+                        marcaVehiculo.setAttribute("disabled",true)
+                        modeloVehicuo.setAttribute("disabled",true)
+                        anio.setAttribute("disabled",true)
+                        
+                    }else{
+                        $(".reiniciar-vehiculo").val("")
+                    }
                 }
-            }
-        }).fail(function (response) {
-
-        });
+                }).fail(function (response) {
+        
+                });
+        }
     }
     validar_numero_serie(){
-        $.ajax({
-            url: base_url_rest + 'vehiculos/noserie/'+noSerieVehiculo.value,
-            type: 'GET',
-            dataType: 'json',
-            beforeSend: function () {
-            },
-            success: function (response) {
-                if(response.data != null){
-                    idvehiculo.value = response.data.id_vehiculo
-                    tipoVehiculo.value = response.data.id_tipo_vehiculo
-                    marcaVehiculo.value = response.data.marca
-                    modeloVehicuo.value = response.data.modelo
-                    anio.value = response.data.anio
+        if(idvehiculo.value == 0){
+            $.ajax({
+                url: base_url_rest + 'vehiculos/noserie/'+noSerieVehiculo.value,
+                type: 'GET',
+                dataType: 'json',
+                beforeSend: function () {
+                },
+                success: function (response) {
+                    if(response.data != null){
+                        idvehiculo.value = response.data.id_vehiculo
+                        tipoVehiculo.value = response.data.id_tipo_vehiculo
+                        marcaVehiculo.value = response.data.marca
+                        modeloVehicuo.value = response.data.modelo
+                        anio.value = response.data.anio
 
-                    noSerieVehiculo.setAttribute("disabled",true)
-                    tipoVehiculo.setAttribute("disabled",true)
-                    marcaVehiculo.setAttribute("disabled",true)
-                    modeloVehicuo.setAttribute("disabled",true)
-                    anio.setAttribute("disabled",true)
+                        noSerieVehiculo.setAttribute("disabled",true)
+                        tipoVehiculo.setAttribute("disabled",true)
+                        marcaVehiculo.setAttribute("disabled",true)
+                        modeloVehicuo.setAttribute("disabled",true)
+                        anio.setAttribute("disabled",true)
+                    }else{
+                        idvehiculo.value = 0
+                        tipoVehiculo.value = ''
+                        marcaVehiculo.value = ''
+                        modeloVehicuo.value = ''
+                        anio.value = ''
+                    }
                 }
-            }
-        }).fail(function (response) {
+                }).fail(function (response) {
 
-        });
+                });
+        }
     }
     /*peticion_repuve(ev) {
 
