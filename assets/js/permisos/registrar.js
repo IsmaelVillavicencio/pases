@@ -2832,6 +2832,8 @@ class Permisos {
         }
     }
     validar_placa(){
+        var temp
+        temp = noPlaca.value
         if(idvehiculo.value == 0){
             $.ajax({
                 url: base_url_rest + 'vehiculos/placa/'+idempresavigenteusuario+'/'+noPlaca.value,
@@ -2875,6 +2877,7 @@ class Permisos {
                         
                     }else{
                         $(".reiniciar-vehiculo").val("")
+                       noPlaca.value = temp
                     }
                 }
                 }).fail(function (response) {
