@@ -9,7 +9,7 @@ class Permisos extends CI_Model
         $this->idusuario = $this->session->_id_user;
         $this->idempresa = $this->session->_id_empresa;
 
-        ini_set('memory_limit','256M');
+        ini_set('memory_limit','512M');
 		ini_set('sqlsrv.ClientBufferMaxKBSize','524288');
 		ini_set('pdo_sqlsrv.client_buffer_max_kb_size','524288');
 		set_time_limit(300);
@@ -889,10 +889,24 @@ class Permisos extends CI_Model
         FROM tbl_Pases
         JOIN det_Pase_Vehiculo
         ON det_Pase_Vehiculo.id_permiso = tbl_Pases.id
-        JOIN tbl_Vehiculos
-        ON tbl_Vehiculos.id = det_Pase_Vehiculo.id_vehiculo
-        JOIN det_Vehiculo_Empresa 
-        ON tbl_Vehiculos.id = det_Vehiculo_Empresa.id_Vehiculo 
+        JOIN tbl_Vehiculos 
+        ON tbl_Vehiculos.id = det_Pase_Vehiculo.id_vehiculo            
+        JOIN det_Vehiculo_Empresa
+        ON det_Vehiculo_Empresa.id_vehiculo = tbl_Vehiculos.id    
+        AND det_Vehiculo_Empresa.estatus = 1
+        AND det_Vehiculo_Empresa.id_empresa = tbl_Pases.id_empresa
+        JOIN cat_tipo_Vehiculo
+        ON cat_tipo_vehiculo.id = tbl_Vehiculos.id_tipo_vehiculo
+        JOIN cat_tipo_Tarjeta_Circulacion
+        ON cat_tipo_tarjeta_circulacion.id = det_Vehiculo_Empresa.id_tipo_tarjeta_circulacion
+        JOIN cat_tipo_Aseguradoras
+        ON cat_tipo_Aseguradoras.id = det_Vehiculo_Empresa.id_tipo_aseguradora
+        LEFT JOIN tbl_Imagenes ti ON ti.id_vehiculo = det_Pase_Vehiculo.id_vehiculo AND ti.id_tipo_toma = 6 AND ti.estatus = 1 AND det_Vehiculo_Empresa.id_empresa = ti.id_empresa
+        LEFT JOIN tbl_Imagenes ti2 ON ti2.id_vehiculo = det_Pase_Vehiculo.id_vehiculo AND ti2.id_tipo_toma = 7 AND ti2.estatus = 1 AND det_Vehiculo_Empresa.id_empresa = ti2.id_empresa
+        LEFT JOIN tbl_Imagenes ti3 ON ti3.id_vehiculo = det_Pase_Vehiculo.id_vehiculo AND ti3.id_tipo_toma = 8 AND ti3.estatus = 1 AND det_Vehiculo_Empresa.id_empresa = ti3.id_empresa
+        LEFT JOIN cat_tipo_toma ctt ON ctt.id = ti.id_tipo_toma
+        LEFT JOIN cat_tipo_toma ctt2 ON ctt2.id = ti2.id_tipo_toma
+        LEFT JOIN cat_tipo_toma ctt3 ON ctt3.id = ti3.id_tipo_toma
         LEFT JOIN tbl_Personas
         ON tbl_Personas.id = det_Pase_Vehiculo.id_chofer
         WHERE tbl_Pases.id = $idpermiso";
@@ -1058,48 +1072,50 @@ class Permisos extends CI_Model
     *Parámetros:    {$id} => 
     *Descripción:   Obtiene Vehiculos del pase consultado
     */
-    public function getVehiculosById($id){
+    public function getVehiculosById($id, $idpermiso){
         $query = "SELECT tbl_Vehiculos.numero_motor,
-            tbl_Vehiculos.anio,
-            cat_tipo_vehiculo.nombre as tipo_vehiculo,
-            cat_tipo_tarjeta_circulacion.nombre as tipo_tarjeta_circulacion,
-            det_Vehiculo_Empresa.numero_tarjeta_circulacion,
-            cat_tipo_Aseguradoras.nombre as tipo_aseguradora,
-            det_Vehiculo_Empresa.numero_poliza,
-            det_Vehiculo_Empresa.fecha_inicio_cobertura,
-            det_Vehiculo_Empresa.fecha_fin_cobertura,
-            CONCAT(tbl_Personas.nombre, ' ', tbl_Personas.primer_apellido, ' ' , tbl_Personas.segundo_apellido) as chofer,
-            tbl_Vehiculos.numero_serie as noSerieVehiculo,
-            det_Vehiculo_Empresa.numero_placa as noPlaca,
-            tbl_Vehiculos.id,
-            det_Pase_Vehiculo.observacion,
-            CONCAT(ti.link,'',ti.nombre) as imagen_factura,
-            ctt.nombre as tipo_factura,
-            ti.numero_identificacion as numero_factura,
-            CONCAT(ti2.link,'',ti2.nombre) as imagen_lateral, 
-            CONCAT(ti3.link,'',ti3.nombre) as imagen_placa
-            FROM tbl_Vehiculos
-            JOIN cat_tipo_Vehiculo
-            ON cat_tipo_vehiculo.id = tbl_Vehiculos.id_tipo_vehiculo
-            JOIN det_Vehiculo_Empresa
-            ON det_Vehiculo_Empresa.id_vehiculo = tbl_Vehiculos.id
-            JOIN cat_tipo_Tarjeta_Circulacion
-            ON cat_tipo_tarjeta_circulacion.id = det_Vehiculo_Empresa.id_tipo_tarjeta_circulacion
-            JOIN cat_tipo_Aseguradoras
-            ON cat_tipo_Aseguradoras.id = det_Vehiculo_Empresa.id_tipo_aseguradora
-            JOIN det_Pase_Vehiculo
-            ON det_Pase_Vehiculo.id_vehiculo = tbl_vehiculos.id
-            LEFT JOIN det_Vehiculo_Verificacion
-            ON det_Vehiculo_Verificacion.id_vehiculo = tbl_Vehiculos.id
-            LEFT JOIN tbl_Imagenes ti ON ti.id_vehiculo = det_Pase_Vehiculo.id_vehiculo AND ti.id_tipo_toma = 6 AND ti.estatus = 1
-            LEFT JOIN tbl_Imagenes ti2 ON ti2.id_vehiculo = det_Pase_Vehiculo.id_vehiculo AND ti2.id_tipo_toma = 7 AND ti2.estatus = 1
-            LEFT JOIN tbl_Imagenes ti3 ON ti3.id_vehiculo = det_Pase_Vehiculo.id_vehiculo AND ti3.id_tipo_toma = 8 AND ti3.estatus = 1
-            LEFT JOIN cat_tipo_toma ctt ON ctt.id = ti.id_tipo_toma
-            LEFT JOIN cat_tipo_toma ctt2 ON ctt2.id = ti2.id_tipo_toma
-            LEFT JOIN cat_tipo_toma ctt3 ON ctt3.id = ti3.id_tipo_toma
-            LEFT JOIN tbl_Personas
-            ON tbl_Personas.id = det_Pase_Vehiculo.id_chofer
-            WHERE tbl_Vehiculos.id = $id";
+        tbl_Vehiculos.anio,
+        cat_tipo_vehiculo.nombre as tipo_vehiculo,
+        cat_tipo_tarjeta_circulacion.nombre as tipo_tarjeta_circulacion,
+        det_Vehiculo_Empresa.numero_tarjeta_circulacion,
+        cat_tipo_Aseguradoras.nombre as tipo_aseguradora,
+        det_Vehiculo_Empresa.numero_poliza,
+        det_Vehiculo_Empresa.fecha_inicio_cobertura,
+        det_Vehiculo_Empresa.fecha_fin_cobertura,
+        CONCAT(tbl_Personas.nombre, ' ', tbl_Personas.primer_apellido, ' ' , tbl_Personas.segundo_apellido) as chofer,
+        tbl_Vehiculos.numero_serie as noSerieVehiculo,
+        det_Vehiculo_Empresa.numero_placa as noPlaca,
+        tbl_Vehiculos.id,
+        det_Pase_Vehiculo.observacion,
+        CONCAT(ti.link,'',ti.nombre) as imagen_factura,
+        ctt.nombre as tipo_factura,
+        ti.numero_identificacion as numero_factura,
+        CONCAT(ti2.link,'',ti2.nombre) as imagen_lateral, 
+        CONCAT(ti3.link,'',ti3.nombre) as imagen_placa
+        FROM tbl_Pases
+        JOIN det_Pase_Vehiculo
+        ON det_Pase_Vehiculo.id_permiso = tbl_Pases.id
+        JOIN tbl_Vehiculos 
+        ON tbl_Vehiculos.id = det_Pase_Vehiculo.id_vehiculo            
+        JOIN det_Vehiculo_Empresa
+        ON det_Vehiculo_Empresa.id_vehiculo = tbl_Vehiculos.id    
+        AND det_Vehiculo_Empresa.estatus = 1
+        AND det_Vehiculo_Empresa.id_empresa = tbl_Pases.id_empresa
+        JOIN cat_tipo_Vehiculo
+        ON cat_tipo_vehiculo.id = tbl_Vehiculos.id_tipo_vehiculo
+        JOIN cat_tipo_Tarjeta_Circulacion
+        ON cat_tipo_tarjeta_circulacion.id = det_Vehiculo_Empresa.id_tipo_tarjeta_circulacion
+        JOIN cat_tipo_Aseguradoras
+        ON cat_tipo_Aseguradoras.id = det_Vehiculo_Empresa.id_tipo_aseguradora
+        LEFT JOIN tbl_Imagenes ti ON ti.id_vehiculo = det_Pase_Vehiculo.id_vehiculo AND ti.id_tipo_toma = 6 AND ti.estatus = 1 AND det_Vehiculo_Empresa.id_empresa = ti.id_empresa
+        LEFT JOIN tbl_Imagenes ti2 ON ti2.id_vehiculo = det_Pase_Vehiculo.id_vehiculo AND ti2.id_tipo_toma = 7 AND ti2.estatus = 1 AND det_Vehiculo_Empresa.id_empresa = ti2.id_empresa
+        LEFT JOIN tbl_Imagenes ti3 ON ti3.id_vehiculo = det_Pase_Vehiculo.id_vehiculo AND ti3.id_tipo_toma = 8 AND ti3.estatus = 1 AND det_Vehiculo_Empresa.id_empresa = ti3.id_empresa
+        LEFT JOIN cat_tipo_toma ctt ON ctt.id = ti.id_tipo_toma
+        LEFT JOIN cat_tipo_toma ctt2 ON ctt2.id = ti2.id_tipo_toma
+        LEFT JOIN cat_tipo_toma ctt3 ON ctt3.id = ti3.id_tipo_toma
+        LEFT JOIN tbl_Personas
+        ON tbl_Personas.id = det_Pase_Vehiculo.id_chofer
+        WHERE tbl_Vehiculos.id = ".$id." AND tbl_Pases.id = ".$idpermiso;
         $respuesta = $this->db->query($query)->row();
         return [
 			'status' 	=> true,
