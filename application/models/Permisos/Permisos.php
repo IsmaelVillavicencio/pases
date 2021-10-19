@@ -909,7 +909,9 @@ class Permisos extends CI_Model
         LEFT JOIN cat_tipo_toma ctt3 ON ctt3.id = ti3.id_tipo_toma
         LEFT JOIN tbl_Personas
         ON tbl_Personas.id = det_Pase_Vehiculo.id_chofer
-        WHERE tbl_Pases.id = $idpermiso";
+        WHERE tbl_Pases.id = ".$idpermiso."
+        AND tbl_Pases.id_empresa = det_Vehiculo_Empresa.id_empresa
+        AND det_Vehiculo_Empresa.estatus = 1";
         $respuesta = $this->db->query($query)->result();
         return [
 			'status' 	=> true,
