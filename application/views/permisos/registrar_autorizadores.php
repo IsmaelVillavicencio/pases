@@ -631,7 +631,7 @@
                 <div class="col-md-4 col-sm-6 col-xs-12">
                     <br>
                     <span class="required">*</span><span> Chofer:</span>
-                    <select id="selChofer" class="form-control reiniciar-vehiculo" required></select>
+                    <select id="selChofer" class="form-control" required></select>
                     <span id="errorselChofer" class="error"></span>
                 </div>
                 <div class="col-md-4 col-xl-3 col-xl-3">

@@ -2859,10 +2859,10 @@ class Permisos {
                         periodoPago.value = response.data.vehiculo[0].id_tipo_periodo
                         periodoCobFechaInicio.value = response.data.vehiculo[0].fecha_inicio_cobertura
                         periodoCobFechaFin.value = response.data.vehiculo[0].fecha_fin_cobertura
-                        var txtL = "<input type='hidden' id='val_lateral' value ='"+response.data.imagenes[0].link+"'>";
-                        var txtP = "<input type='hidden' id='val_placa' value ='"+response.data.imagenes[1].link+"'>";                   
-                        $("#errorSubirFotoLat").html("<span class='color:#000'><a id='tab_lateral' href='"+base_url+response.data.imagenes[0].link+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txtL);			
-                        $("#errorSubirFotoPla").html("<span class='color:#000'><a id='tab_placa' href='"+base_url+response.data.imagenes[1].link+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txtP);		
+                        var txtL = "<input type='hidden' id='val_lateral' value ='"+response.data.imagenes[0].nombre+"'>";
+                        var txtP = "<input type='hidden' id='val_placa' value ='"+response.data.imagenes[1].nombre+"'>";                   
+                        $("#errorSubirFotoLat").html("<span class='color:#000'><a id='tab_lateral' href='"+base_url+response.data.imagenes[0].link+response.data.imagenes[0].nombre+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txtL);			
+                        $("#errorSubirFotoPla").html("<span class='color:#000'><a id='tab_placa' href='"+base_url+response.data.imagenes[1].link+response.data.imagenes[1].nombre+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txtP);		
                         /*ajuntarLateralVehiculo.dataset.id = (response.data.imagenes[0].id != null) ? response.data.imagenes[0].id : ""
                         ajuntarLateralVehiculo.dataset.imagen = (response.data.imagenes[0].link != null) ? response.data.imagenes[0].link : ""
                         adjuntarPlacaVehiculo.dataset.id = (response.data.imagenes[1].id != null) ? response.data.imagenes[1].id : ""
