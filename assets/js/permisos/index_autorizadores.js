@@ -60,9 +60,10 @@ class Permisos{
                 estatus : 1
             },
             beforeSend: function () {
-                $(f_entidad).append('<option value="' + idempresavigenteusuario + '">' + _empresa + '</option>');
+                $(f_entidad).append('<option value="">Seleccione</option>');
+                $(f_entidad).append('<option value="' +  + '">' + _id_empresa_rest + '</option>');
                 f_entidad.disabled = true;
-                f_entidad.value = idempresavigenteusuario
+                f_entidad.value = _id_empresa_rest
             },
             success: function (response) {
                 response.data.forEach(element => {
