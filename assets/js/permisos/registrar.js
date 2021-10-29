@@ -1707,6 +1707,9 @@ class Permisos {
                         idpersona.value = response.data.id
                         idcontacto.value = (response.data.id_contacto == null ? 0 : response.data.id_contacto)
 
+                        nombre.setAttribute("disabled",true)
+                        primerApellido.setAttribute("disabled",true)
+                        segundoApellido.setAttribute("disabled",true)
                         nombre.value = response.data.nombre
                         primerApellido.value = response.data.primer_apellido
                         segundoApellido.value = response.data.segundo_apellido
@@ -1905,6 +1908,9 @@ class Permisos {
 							$("#errorSubirLicencia").html("<span class='color:#000'><a href='/"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);
 						}
                     }else{
+                        nombre.removeAttribute("disabled")
+                        primerApellido.removeAttribute("disabled")
+                        segundoApellido.removeAttribute("disabled")
                         chofer.checked = false
                         divLicencia.style.display = 'none'
                         divAseguradora.style.display = 'none'
