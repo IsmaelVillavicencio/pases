@@ -73,9 +73,7 @@ class Permisos{
             
         }
         //if(Area != 8){
-            btnFiltrarAplicar.addEventListener('click',()=>{
-                busqueda()
-            })
+            btnFiltrarAplicar.addEventListener('click',this.obtenerDatosTabla)
         //}
         if(typeof btnRegistrarPermiso !== 'undefined'){
             btnRegistrarPermiso.addEventListener("click",()=>{
@@ -189,6 +187,20 @@ class Permisos{
 			url: base_url+'Permisos/Ctrl_Permisos/getAll',
 			type: 'GET',
 			dataType: 'json',
+            data:{
+                fechainicio:    f_fecha_inicio.value,
+                fechatermino:   f_fecha_final.value, 
+                nosolicitud:    f_noSolicitud.value,
+                idempresa:      f_entidad.value, 
+                idvigencia:     f_vigencia.value, 
+                idtipopermiso:  f_tpermiso.value, 
+                idestatuspase:  f_estatus.value, 
+                nombrepersona:  f_nombre.value,
+                noplaca:        f_noPlaca.value
+            },
+            beforeSend: function(){
+                DTPermisos.clear().draw();
+            },
 			success: function(response){
                 //if(U || D){
                 if(response != null){
@@ -260,84 +272,104 @@ class Permisos{
                             }
                         }
 
-                                consultar = '<div class="p-1">'+
+                        consultar = '<div class="p-1">'+
                                     '<a href="#!" title="Consultar">'+
                                         '<span class="glyphicon glyphicon-eye-open ver" data-id="'+element.id+'"></span>'+
                                     '</a>'+
                                 '</div>';
-                            if(Area == 6){
-                                if(element.id_estatus_pase != 13 &&element.id_estatus_pase != 12 && element.id_estatus_pase != 11 && element.id_estatus_pase != 6 && element.id_estatus_pase != 8 && element.id_estatus_pase != 10){
-                                    eliminar = '<div class="p-1">'+
-                                        '<a href="#!" title="Dar de baja">'+
-                                            '<span class="glyphicon glyphicon-trash eliminar" data-id="'+element.id+'"></span>'+
-                                        '</a>'+
-                                    '</div>';
-                                }
-                            }
-                            if(Area == 5){
-                                if(element.id_estatus_pase == 11){
-                                    eliminar = '<div class="p-1">'+
-                                        '<a href="#!" title="Dar de baja">'+
-                                            '<span class="glyphicon glyphicon-trash eliminar" data-id="'+element.id+'"></span>'+
-                                        '</a>'+
-                                    '</div>';
-                                }
-                            }
-                            if(element.id_estatus_pase != 13 && element.id_estatus_pase != 14){
+
+                        if(Area == 6){
+                            if(element.id_estatus_pase != 13 &&element.id_estatus_pase != 12 && element.id_estatus_pase != 11 && element.id_estatus_pase != 6 && element.id_estatus_pase != 8 && element.id_estatus_pase != 10){
                                 eliminar = '<div class="p-1">'+
                                     '<a href="#!" title="Dar de baja">'+
                                         '<span class="glyphicon glyphicon-trash eliminar" data-id="'+element.id+'"></span>'+
                                     '</a>'+
                                 '</div>';
                             }
-                            if(Area == 8){
-                                if(element.id_estatus_pase == 11 || element.id_estatus_pase == 12){
-                                    /*duplicar = '<div class="p-1">'+
-                                            '<a href="#!"  title="Duplicar">'+
-                                                '<span class="glyphicon glyphicon-repeat duplicar" data-id="'+element.id+'"></span>'+
-                                            '</a>'+
-                                        '</div>';*/
-                                }
+                        }
+
+                        if(Area == 5){
+                            if(element.id_estatus_pase == 11){
+                                eliminar = '<div class="p-1">'+
+                                    '<a href="#!" title="Dar de baja">'+
+                                        '<span class="glyphicon glyphicon-trash eliminar" data-id="'+element.id+'"></span>'+
+                                    '</a>'+
+                                '</div>';
                             }
-                            if((Area == 5 && element.id_estatus_pase == 1) || ((Area == 5 || Area == 6) && element.id_estatus_pase == 2) || ((Area == 5 || Area == 7) && element.id_estatus_pase == 3) || ((Area == 5 || Area == 6 || Area == 7) && element.id_estatus_pase == 4)){
-                               if((Area == 5 && api) || (Area == 6 && aduana) || (Area == 7 && migracion)){
+                        }
+                        
+                        if(element.id_estatus_pase != 13 && element.id_estatus_pase != 14){
+                            eliminar = '<div class="p-1">'+
+                                '<a href="#!" title="Dar de baja">'+
+                                    '<span class="glyphicon glyphicon-trash eliminar" data-id="'+element.id+'"></span>'+
+                                '</a>'+
+                            '</div>';
+                        }
+
+                        /*if(Area == 8){
+                            if(element.id_estatus_pase == 11 || element.id_estatus_pase == 12){
+                                / *duplicar = '<div class="p-1">'+
+                                    '<a href="#!"  title="Duplicar">'+
+                                        '<span class="glyphicon glyphicon-repeat duplicar" data-id="'+element.id+'"></span>'+
+                                    '</a>'+
+                                '</div>';* /
+                            }
+                        }*/
+
+                        if((Area == 5 && element.id_estatus_pase == 1) || ((Area == 5 || Area == 6) && element.id_estatus_pase == 2) || ((Area == 5 || Area == 7) && element.id_estatus_pase == 3) || ((Area == 5 || Area == 6 || Area == 7) && element.id_estatus_pase == 4)){
+                            if((Area == 5 && api) || (Area == 6 && aduana) || (Area == 7 && migracion)){
                                 autorizar = '<div class="p-1">'+
                                     '<a href="#!" title="Autorizar">'+
                                         '<span class="glyphicon glyphicon-list-alt editar" data-id="'+element.id+'"></span>'+
                                     '</a>'+
                                 '</div>';
-                               }
                             }
-                            if( (Area == 4 || Area == 8) && element.id_estatus_pase == 11){
-                                    /*extender = '<div class="p-1">'+
-                                        '<a href="#!" title="Extender">'+
-                                            '<span class="icon-calendar extender" data-id="'+element.id+'"></span>'+
-                                        '</a>'+
-                                    '</div>';
-                                    duplicar = '<div class="p-1">'+
-                                        '<a href="#!"  title="Duplicar">'+
-                                            '<span class="glyphicon glyphicon-repeat duplicar" data-id="'+element.id+'"></span>'+
-                                        '</a>'+
-                                    '</div>';*/
-                                    imprimir = '<div class="p-1">'+
-                                        '<a href="#!" title="Imprimir">'+
-                                            '<span class="glyphicon glyphicon-print imprimir" data-id="'+element.id+'"></span>'+
-                                        '</a>'+
-                                    '</div>';
-                            }
-                            if(element.id_estatus_pase == 11){
-                                enviar = '<div class="p-1">'+
-                                    '<a href="#!" title="Enviar correo">'+
-                                        '<span class="glyphicon glyphicon-envelope enviar" data-id="'+element.id+'"></span>'+
-                                    '</a>'+
-                                '</div>';
+                        }
 
-                                enviar_whats = '<div class="p-1">'+
-                                    '<a href="#!" title="Enviar whatsapp" style="color:#000000">'+
-                                        '<i class="fa fa-whatsapp enviar_whatsapp" aria-hidden="true" data-id="'+element.id+'"></i>'+
+                        if (Area == 8 || Area == 4) {
+                            if(element.id_estatus_pase != 1 && element.id_estatus_pase != 2 && element.id_estatus_pase != 3 && element.id_estatus_pase != 4){
+                                duplicar = '<div class="p-1">'+
+                                    '<a href="#!"  title="Duplicar">'+
+                                        '<span class="glyphicon glyphicon-repeat duplicar" data-id="'+element.id+'"></span>'+
                                     '</a>'+
                                 '</div>';
                             }
+                        }
+
+                        //if( (Area == 4 || Area == 8) && element.id_estatus_pase == 11){
+                        if( (Area == 4 || Area == 8) && element.id_estatus_pase == 11){
+                            if(element.bext){
+                                extender = '<div class="p-1">'+
+                                    '<a href="#!" title="Extender">'+
+                                        '<span class="icon-calendar extender" data-id="'+element.id+'"></span>'+
+                                    '</a>'+
+                                '</div>';
+                            }
+                            /*duplicar = '<div class="p-1">'+
+                                '<a href="#!"  title="Duplicar">'+
+                                    '<span class="glyphicon glyphicon-repeat duplicar" data-id="'+element.id+'"></span>'+
+                                '</a>'+
+                            '</div>';*/
+                            imprimir = '<div class="p-1">'+
+                                '<a href="#!" title="Imprimir">'+
+                                    '<span class="glyphicon glyphicon-print imprimir" data-id="'+element.id+'"></span>'+
+                                '</a>'+
+                            '</div>';
+                        }
+
+                        if(element.id_estatus_pase == 11){
+                            enviar = '<div class="p-1">'+
+                                '<a href="#!" title="Enviar correo">'+
+                                    '<span class="glyphicon glyphicon-envelope enviar" data-id="'+element.id+'"></span>'+
+                                '</a>'+
+                            '</div>';
+
+                            enviar_whats = '<div class="p-1">'+
+                                '<a href="#!" title="Enviar whatsapp" style="color:#000000">'+
+                                    '<i class="fa fa-whatsapp enviar_whatsapp" aria-hidden="true" data-id="'+element.id+'"></i>'+
+                                '</a>'+
+                            '</div>';
+                        }
                             
                         DTPermisos.row.add([
                             '<center>'+element.id+'</center>',
@@ -520,9 +552,9 @@ $(tabPermisos).on('click', '.duplicar', function(ev){
 });
 
 
-function busqueda(){
+/*function busqueda(){
     $.ajax({
-        url : base_url + 'Permisos/Ctrl_Permisos/getFiltro',
+        url : base_url + 'index.php/Permisos/Ctrl_Permisos/getFiltro',
         type : 'GET',
         data: {
             fechainicio: f_fecha_inicio.value,
@@ -611,43 +643,48 @@ function busqueda(){
                         }
                     }
 
-                            consultar = '<div class="p-1">'+
-                                '<a href="#!" title="Consultar">'+
-                                    '<span class="glyphicon glyphicon-eye-open ver" data-id="'+element.id+'"></span>'+
+                    consultar = '<div class="p-1">'+
+                        '<a href="#!" title="Consultar">'+
+                            '<span class="glyphicon glyphicon-eye-open ver" data-id="'+element.id+'"></span>'+
+                        '</a>'+
+                    '</div>';
+
+                    if(Area == 6){
+                        if(element.id_estatus_pase != 13 &&element.id_estatus_pase != 12 && element.id_estatus_pase != 11 && element.id_estatus_pase != 6 && element.id_estatus_pase != 8 && element.id_estatus_pase != 10){
+                            eliminar = '<div class="p-1">'+
+                                '<a href="#!" title="Dar de baja">'+
+                                    '<span class="glyphicon glyphicon-trash eliminar" data-id="'+element.id+'"></span>'+
                                 '</a>'+
                             '</div>';
-                        if(Area == 6){
-                            if(element.id_estatus_pase != 13 &&element.id_estatus_pase != 12 && element.id_estatus_pase != 11 && element.id_estatus_pase != 6 && element.id_estatus_pase != 8 && element.id_estatus_pase != 10){
-                                eliminar = '<div class="p-1">'+
-                                    '<a href="#!" title="Dar de baja">'+
-                                        '<span class="glyphicon glyphicon-trash eliminar" data-id="'+element.id+'"></span>'+
-                                    '</a>'+
-                                '</div>';
-                            }
                         }
-                        if(Area == 5){
-                            if(element.id_estatus_pase == 11){
-                                eliminar = '<div class="p-1">'+
-                                    '<a href="#!" title="Dar de baja">'+
-                                        '<span class="glyphicon glyphicon-trash eliminar" data-id="'+element.id+'"></span>'+
-                                    '</a>'+
-                                '</div>';
-                            }
+                    }
+
+                    if(Area == 5){
+                        if(element.id_estatus_pase == 11){
+                            eliminar = '<div class="p-1">'+
+                                '<a href="#!" title="Dar de baja">'+
+                                    '<span class="glyphicon glyphicon-trash eliminar" data-id="'+element.id+'"></span>'+
+                                '</a>'+
+                            '</div>';
                         }
-                        if(Area == 8){
-                            if(element.id_estatus_pase != 13 || element.id_estatus_pase != 14){
-                                eliminar = '<div class="p-1">'+
-                                    '<a href="#!" title="Dar de baja">'+
-                                        '<span class="glyphicon glyphicon-trash eliminar" data-id="'+element.id+'"></span>'+
-                                    '</a>'+
-                                '</div>';
-                            }
+                    }
+
+                    if(Area == 8){
+                        if(element.id_estatus_pase != 13 || element.id_estatus_pase != 14){
+                            eliminar = '<div class="p-1">'+
+                                '<a href="#!" title="Dar de baja">'+
+                                    '<span class="glyphicon glyphicon-trash eliminar" data-id="'+element.id+'"></span>'+
+                                '</a>'+
+                            '</div>';
                         }
-                        if(Area == 8){
-                            if(element.id_estatus_pase == 11 || element.id_estatus_pase == 12){
-                            }
+                    }
+
+                    if(Area == 8){
+                        if(element.id_estatus_pase == 11 || element.id_estatus_pase == 12){
                         }
-                        if((Area == 5 && element.id_estatus_pase == 1) || ((Area == 5 || Area == 6) && element.id_estatus_pase == 2) || ((Area == 5 || Area == 7) && element.id_estatus_pase == 3) || ((Area == 5 || Area == 6 || Area == 7) && element.id_estatus_pase == 4)){
+                    }
+
+                    if((Area == 5 && element.id_estatus_pase == 1) || ((Area == 5 || Area == 6) && element.id_estatus_pase == 2) || ((Area == 5 || Area == 7) && element.id_estatus_pase == 3) || ((Area == 5 || Area == 6 || Area == 7) && element.id_estatus_pase == 4)){
                         if((Area == 5 && api) || (Area == 6 && aduana) || (Area == 7 && migracion)){
                             autorizar = '<div class="p-1">'+
                                 '<a href="#!" title="Autorizar">'+
@@ -655,34 +692,51 @@ function busqueda(){
                                 '</a>'+
                             '</div>';
                         }
-                        }
-                        if(Area == 4 || Area == 8){
-                            if(element.id_estatus_pase == 11){
-                                imprimir = '<div class="p-1">'+
-                                    '<a href="#!" title="Imprimir">'+
-                                        '<span class="glyphicon glyphicon-print imprimir" data-id="'+element.id+'"></span>'+
-                                    '</a>'+
-                                '</div>';
-                            }
-                        }
-                        if(Area == 8 && element.id_estatus_pase == 11){
-                            /*duplicar = '<div class="p-1">'+
+                    }
+
+                    if (Area == 8 || Area == 4) {
+                        if(element.id_estatus_pase != 1 && element.id_estatus_pase != 2 && element.id_estatus_pase != 3 && element.id_estatus_pase != 4){
+                            duplicar = '<div class="p-1">'+
                                 '<a href="#!"  title="Duplicar">'+
                                     '<span class="glyphicon glyphicon-repeat duplicar" data-id="'+element.id+'"></span>'+
                                 '</a>'+
-                            '</div>';*/
-                            enviar = '<div class="p-1">'+
-                                '<a href="#!" title="Enviar correo">'+
-                                    '<span class="glyphicon glyphicon-envelope enviar" data-id="'+element.id+'"></span>'+
-                                '</a>'+
                             '</div>';
+                        }
+                    }
 
-                            enviar_whats = '<div class="p-1">'+
-                                '<a href="#!" title="Enviar whatsapp" style="color:#000000">'+
-                                    '<i class="fa fa-whatsapp enviar_whatsapp" aria-hidden="true" data-id="'+element.id+'"></i>'+
+                    if((Area == 4 || Area == 8) && element.id_estatus_pase == 11){    
+                        if(element.bext){
+                            extender = '<div class="p-1">'+
+                                '<a href="#!" title="Extender">'+
+                                    '<span class="icon-calendar extender" data-id="'+element.id+'"></span>'+
                                 '</a>'+
                             '</div>';
                         }
+                        imprimir = '<div class="p-1">'+
+                            '<a href="#!" title="Imprimir">'+
+                                '<span class="glyphicon glyphicon-print imprimir" data-id="'+element.id+'"></span>'+
+                            '</a>'+
+                        '</div>';
+                    }
+
+                    if(Area == 8 && element.id_estatus_pase == 11){
+                        /*duplicar = '<div class="p-1">'+
+                            '<a href="#!"  title="Duplicar">'+
+                                '<span class="glyphicon glyphicon-repeat duplicar" data-id="'+element.id+'"></span>'+
+                            '</a>'+
+                        '</div>';* /
+                        enviar = '<div class="p-1">'+
+                            '<a href="#!" title="Enviar correo">'+
+                                '<span class="glyphicon glyphicon-envelope enviar" data-id="'+element.id+'"></span>'+
+                            '</a>'+
+                        '</div>';
+
+                        enviar_whats = '<div class="p-1">'+
+                            '<a href="#!" title="Enviar whatsapp" style="color:#000000">'+
+                                '<i class="fa fa-whatsapp enviar_whatsapp" aria-hidden="true" data-id="'+element.id+'"></i>'+
+                            '</a>'+
+                        '</div>';
+                    }
                         
                     DTPermisos.row.add([
                         '<center>'+element.id+'</center>',
@@ -710,7 +764,7 @@ function busqueda(){
                 });
             }/*else{
                 peticion_fallida("No se encontraron registros con los criterios de búsqueda")
-            }*/
+            }* /
         }
     });
-}
+}*/

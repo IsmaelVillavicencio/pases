@@ -337,27 +337,54 @@ class Ctrl_Permisos extends Sesion {
 
 		try {
 			if ($this->input->is_ajax_request()) {
-				$idpermiso = $this->input->get("idpermiso");
+				//$idpermiso = $this->input->get("idpermiso");
 
-				if($this->session->_permiso_rol == 4 ||$this->session->_permiso_rol == 5){
-					$response = $this->Permisos->getAll($idpermiso);
+				//if($this->session->_permiso_rol == 4 ||$this->session->_permiso_rol == 5){
+				$datos = array(
+					'nosolicitud'   => $this->input->get('nosolicitud'),
+					'idvigencia'    => $this->input->get('idvigencia'),
+					'noplaca'		=> $this->input->get('noplaca'),
+					'nombrepersona' => $this->input->get('nombrepersona'),
+					'fechainicio'	=> $this->input->get('fechainicio'),
+					'fechatermino'	=> $this->input->get('fechatermino'),
+					'idtipopermiso'	=> $this->input->get('idtipopermiso'),
+					'idestatuspase'	=> $this->input->get('idestatuspase'),
+					'idempresa'		=> $this->input->get('idempresa'),
+					'permiso_rol'	=> $this->session->_permiso_rol
+				);
+				//$response = $this->Permisos->getAll($idpermiso);
 
-					$empresa_name = '';
+				$response = $this->Permisos->getGridPermisos($datos);
 
-					foreach ($response['data'] as $value) {
-						if($value->id_empresa != null){
-							$dataWS = $this->getEmpressName($value->id_empresa);
-							if(isset($dataWS['data']['nombre'])){
-								$empresa_name = $dataWS['data']['nombre'];
-							}
+				$empresa_name = '';
+
+				/*foreach ($response['data'] as $value) {
+					if($value->id_empresa != null){
+						$dataWS = $this->getEmpressName($value->id_empresa);
+						if(isset($dataWS['data']['nombre'])){
+							$empresa_name = $dataWS['data']['nombre'];
 						}
-						$value->empresa = $empresa_name;
-						$empresa_name = '';
 					}
+					$value->empresa = $empresa_name;
+					$empresa_name = '';
+				}*/
 
-					echo json_encode($response);
-					return;
+				$dataWS = $this->getEmpresas();
+
+				foreach ($response['data'] as $value){
+					if($value->id_empresa != null){
+						$clave = array_search($value->id_empresa, $dataWS['data']);
+						//if(isset($dataWS['data']['nombre'])){
+						$empresa_name = $dataWS['data'][$clave]['nombre'];
+						//}
+					}
+					$value->empresa = $empresa_name;
+					$empresa_name = '';
 				}
+
+				echo json_encode($response);
+				return;
+				/*}
 				if($this->session->_permiso_rol == 8){
 					$response = $this->Permisos->getAllByUser($idpermiso);
 				}
@@ -379,7 +406,7 @@ class Ctrl_Permisos extends Sesion {
 							$value->empresa = $dataWS['data']['nombre'];
 						}
 					}
-				}
+				}*/
 				
 			}else{
 				$response['data'] = 'Petición inválida';
@@ -1090,6 +1117,17 @@ class Ctrl_Permisos extends Sesion {
         $myWS->parametros = $datos;
         $dataWS = $myWS->peticion_post();
         return $dataWS;
+    }
+
+	public function getEmpresas(){
+        $myWS = new WS();
+        $myWS->url = BASE_URL_REST;
+		$myWS->token = $this->session->_token;
+        //$resp = $myWS->login();
+
+        $myWS->endpoint = 'empresas';
+        $dataWS = $myWS->obtener_datos();
+        return json_decode($dataWS, true);
     }
 
 	public function getEmpressName($userId){
@@ -2253,6 +2291,43 @@ class Ctrl_Permisos extends Sesion {
 			header("HTTP/1.0 400 " . utf8_decode($e->getMessage()));
 		}
 
+		header('Content-type: application/json');
+		echo json_encode($response);
+		exit;
+	}
+	public function getInfoDuplicar(){
+		$response = [
+			'status' 	=> false,
+			'message'	=> '',
+			'data'		=> null
+		];
+
+		try {
+			if ($this->input->is_ajax_request()) {
+				if (!$this->input->get()){
+					$response['data'] = 'Petición inválida';
+					throw new Exception('Petición inválida');
+				}
+
+				$id_permiso = $this->security->xss_clean($this->input->get("idPermiso"));
+				
+				$response["data"]["info"] = 	$this->Permisos->getById($id_permiso);
+				$response["data"]["personal"] = $this->Permisos->getPersonalDuplicar($id_permiso);
+				$response["data"]["equipo"] = 	$this->Permisos->getEquipoDuplicar($id_permiso);
+				$response["data"]["material"] = $this->Permisos->getMateriales($id_permiso);
+				$response["data"]["vehiculo"] = $this->Permisos->getVehiculosDuplicar($id_permiso);
+				foreach ($response["data"]["personal"]["data"] as $value) {
+					$response["data"]["personal"]["adicional"][] = $this->Permisos->getPersonalAdicionalDuplicar($value->id,$id_permiso);
+				}
+			}else{
+				$response['data'] = 'Petición inválida';
+				throw new Exception('Petición inválida');
+			}
+		} 
+		catch (Exception $e) {
+			header("HTTP/1.0 400 " . utf8_decode($e->getMessage()));
+		}
+		
 		header('Content-type: application/json');
 		echo json_encode($response);
 		exit;

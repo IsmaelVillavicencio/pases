@@ -1,4 +1,4 @@
-const url_regreso = localStorage.getItem("url_regreso");
+const id_permiso = localStorage.getItem("id_permiso");
 
 var DTPersonal, DTEquipo, DTVehiculo, DTMaterial;
 var errorEstructuraCURP = false;
@@ -7,9 +7,6 @@ var errorEstructuraNSS = false;
 var errorEstructuraINEIFE = false;
 var errorEstructuraPasaporte = false;
 var fotoFacturaEquipo = null
-var fotoEquipoAnexo = null
-var fotoEquipoRF = null
-var fotoMaterial = null
 var fotoFacturaVehiculo = null
 var fotoLateralVehiculo = null
 var fotoPlacaVehiculo = null
@@ -20,7 +17,6 @@ var date = new Date();
 var actual = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().split("T")[0];
 var nacionalidadMod = 0
 var personalAlmacenado = []
-var id_permiso = 0;
 var id_empresa = 0;
 var id_persona_fisica = 0;
 var id_contrato = 0;
@@ -28,7 +24,6 @@ var datosPersonal = []
 var datosEquipos = []
 var datosVehiculos = []
 var datosMaterial = []
-var datosPase = []
 var cambios = 0
 var choferes = 0
 var estatus_pase = 0
@@ -39,9 +34,6 @@ var edicion_equipo = 0
 var eidicion_material = 0
 var edicion_vehiculo = 0
 
-var tmplat = "";
-var tmppla = "";
-var tmpfac = "";
 let QrScanner
 import('../../librerias/QRScanner/qr-scanner.min.js').then((module) => {
     QrScanner = module.default;
@@ -56,7 +48,7 @@ const camQrResult = document.getElementById('cam-qr-result');
 class Permisos {
     constructor() {
         this.inicio();
-        //this.obtener_datos_contrato()
+        this.obtener_datos_contrato()
         this.obtener_tipos_permisos()
         this.obtener_actividades_realizar()
         this.obtener_vigencias()
@@ -73,8 +65,16 @@ class Permisos {
         this.obtener_tipos_vehiculos()
         this.obtener_tipos_tarjetas_circulacion()
         this.obtener_periodos()
+
+        this.obtener_datos_contrato_info()
+        this.obtenerPersonal()
+        this.obtenerEquipoHerramienta()
+        this.obternerMaterial()
+        this.obtenerVehiculo()
     }
     inicio() {
+        id_empresa = idempresavigenteusuario
+        id_contrato = idcontratovigenteusuario
         btnGuardar.disabled = true;
         DTPersonal = $(tabPersonal).DataTable({
             "language": {
@@ -100,10 +100,6 @@ class Permisos {
             }
         });
 
-        aceptar.addEventListener('click',(ev)=>{
-            window.location.href = base_url + 'Permisos/Ctrl_Permisos/registrar';
-        })
-
         clientetEntidad.addEventListener("keydown", (ev) => {
             if (ev.keyCode != 16) {
                 this.validaciones = new VALIDACIONES();
@@ -128,32 +124,11 @@ class Permisos {
                 }
             }
         })
-        motivo.addEventListener("change",(ev)=>{
-            if(motivo.value != ""){
-                errormotivo.innerHTML = ''
-            }else{
-                errormotivo.innerHTML = 'Campo obligatorio'
-            }
-        })
-        limpiarFormulario.addEventListener('click',(ev)=>{
-            let elemVehiculos = document.getElementsByClassName('reiniciar-vehiculo')
-            for (let i = 0; i < elemVehiculos.length; i++) {
-                elemVehiculos[i].value = '';    
-                elemVehiculos[i].removeAttribute("disabled")
-            }
-            idvehiculo.value = 0
 
-            $("#errorSubirFotoLat").html(""); 
-			$("#errorSubirFotoPla").html("");
-            document.getElementById('btnSubirVehiculo').value = 'Subir archivo'
-        })
-
-        /*motivo.addEventListener("keydown", (ev) => {
+        motivo.addEventListener("keydown", (ev) => {
             if (ev.keyCode != 16) {
-                if (ev.keyCode == 219)
-                    ev.preventDefault();
                 this.validaciones = new VALIDACIONES();
-                let resultado = this.validaciones.caracteres_validos_apostrofe(ev.key, 1);
+                let resultado = this.validaciones.caracteres_validos(ev.key, 1);
                 if (!resultado.resp) {
                     ev.preventDefault();
                 }
@@ -168,14 +143,14 @@ class Permisos {
             if (ev.target.value == "") {
                 elementError.innerHTML = 'Campo Obligatorio'
             } else {
-                let resultado = this.validaciones.caracteres_validos_apostrofe(ev.target.value, 2);
+                let resultado = this.validaciones.caracteres_validos_especial(ev.target.value, 2);
                 if (!resultado.resp) {
                     elementError.innerHTML = 'Información no válida'
                 }
             }
-        })*/
+        })
 
-       /* empresa.addEventListener("keydown", (ev) => {
+        empresa.addEventListener("keydown", (ev) => {
             if (ev.keyCode != 16) {
                 this.validaciones = new VALIDACIONES();
                 let resultado = this.validaciones.caracteres_validos(ev.key, 1);
@@ -183,31 +158,19 @@ class Permisos {
                     ev.preventDefault();
                 }
             }
-        })*/
-        let elemento_formulario = document.getElementsByClassName("form-control")
-      
-        for (let i = 0; i < elemento_formulario.length; i++) {
-            elemento_formulario[i].addEventListener("change",function(){
-                if(elemento_formulario[i].value != ""){
-                    let elementError = document.getElementById("error" + elemento_formulario[i].id)
-                    if(elementError != null){
-                        elementError.innerHTML = ""
-                    }
-                }
-            })
-        }
-        empresa.addEventListener("keydown",(ev)=>{
-            if(ev.keyCode == 219){
-                ev.preventDefault()
-            }
         })
         empresa.addEventListener("change", (ev) => {
             let elementError = document.getElementById("error" + ev.target.id)
             elementError.innerHTML = ''
+
+            this.validaciones = new VALIDACIONES();
             if (ev.target.value == "") {
                 elementError.innerHTML = 'Campo Obligatorio'
-            } else { 
-                elementError.innerHTML = ''
+            } else {
+                let resultado = this.validaciones.caracteres_validos(ev.target.value, 2);
+                if (!resultado.resp) {
+                    elementError.innerHTML = 'Información no válida'
+                }
             }
         })
 
@@ -220,37 +183,17 @@ class Permisos {
                 }
             }
         })
-        clavePatronal.addEventListener("change", (ev) => {
+
+        clavePatronal.addEventListener("keydown", (ev) => {
             if (ev.keyCode != 16) {
                 this.validaciones = new VALIDACIONES();
-                let resultado = this.validaciones.caracteres_validos_sin_acentos_con_numero(ev.target.value,1);
-                if (!resultado.resp) {
-                    errorclavePatronal.innerHTML = "Información no válida"
-                }else{
-                    errorclavePatronal.innerHTML = ""
-                }
-            }
-        })
-        empresa_rfc.addEventListener("change", (ev) => {
-            if (ev.keyCode != 16) {
-                this.validaciones = new VALIDACIONES();
-                let resultado = this.validaciones.caracteres_validos_sin_acentos_con_numero(ev.target.value,1);
-                if (!resultado.resp) {
-                    errorempresa_rfc.innerHTML = "Información no valida"
-                }else{
-                    errorempresa_rfc.innerHTML = ""
-                }
-            }
-        })
-        empresa_rfc.addEventListener("keydown", (ev) => {
-            if (ev.keyCode != 16) {
-                this.validaciones = new VALIDACIONES();
-                let resultado = this.validaciones.caracteres_validos_sin_acentos_con_numero(ev.key, 1);
+                let resultado = this.validaciones.caracteres_validos_especial(ev.key, 1);
                 if (!resultado.resp) {
                     ev.preventDefault();
                 }
             }
         })
+
         nombre.addEventListener("keydown", (ev) => {
             if (ev.keyCode != 16) {
                 this.validaciones = new VALIDACIONES();
@@ -300,6 +243,7 @@ class Permisos {
                 }
             }
         })
+
         segundoApellido.addEventListener("keydown", (ev) => {
             if (ev.keyCode != 16) {
                 this.validaciones = new VALIDACIONES();
@@ -309,6 +253,7 @@ class Permisos {
                 }
             }
         })
+
         segundoApellido.addEventListener("change", (ev) => {
             let elementError = document.getElementById("error" + ev.target.id)
             elementError.innerHTML = ''
@@ -319,6 +264,7 @@ class Permisos {
                 elementError.innerHTML = 'Información no válida'
             }
         })
+
         numtelefono.addEventListener("keydown", (ev) => {
             if (ev.keyCode != 16 && ev.keyCode != 8 && ev.keyCode != 9) {
                 this.validaciones = new VALIDACIONES();
@@ -376,7 +322,7 @@ class Permisos {
         noLicencia.addEventListener("keydown", (ev) => {
             if (ev.keyCode != 16 && ev.keyCode != 8 && ev.keyCode != 9) {
                 this.validaciones = new VALIDACIONES();
-                let resultado = this.validaciones.caracteres_validos_sin_acentos_con_numero(ev.key, 1);
+                let resultado = this.validaciones.caracteres_validos_numericos(ev.key, 1);
                 if (!resultado.resp) {
                     ev.preventDefault();
                 }
@@ -388,10 +334,10 @@ class Permisos {
             elementError.innerHTML = ''
 
             this.validaciones = new VALIDACIONES();
-            if (ev.target.value.length < 4) {
+            if (ev.target.value.length < 8) {
                 elementError.innerHTML = 'El formato no es correcto'
             } else {
-                let resultado = this.validaciones.caracteres_validos_sin_acentos_con_numero(ev.target.value, 1);
+                let resultado = this.validaciones.caracteres_validos_numericos(ev.target.value, 1);
                 if (!resultado.resp) {
                     elementError.innerHTML = 'Información no válida'
                 }
@@ -443,26 +389,47 @@ class Permisos {
                 elementError.innerHTML = 'Información no válida'
             }
         })
+
         modeloHerramienta.addEventListener("keydown", (ev) => {
-            if(ev.keyCode == 219){
-                ev.preventDefault()
+            if (ev.keyCode != 16 && ev.keyCode != 8 && ev.keyCode != 9) {
+                this.validaciones = new VALIDACIONES();
+                let resultado = this.validaciones.caracteres_validos_sin_acentos_con_numero(ev.key, 1);
+                if (!resultado.resp) {
+                    ev.preventDefault();
+                }
             }
         })
 
         modeloHerramienta.addEventListener("change", (ev) => {
             let elementError = document.getElementById("error" + ev.target.id)
             elementError.innerHTML = ''
+
+            this.validaciones = new VALIDACIONES();
+            let resultado = this.validaciones.caracteres_validos_sin_acentos_con_numero(ev.target.value, 1);
+            if (!resultado.resp) {
+                elementError.innerHTML = 'Información no válida'
+            }
         })
 
         marcaHerramienta.addEventListener("keydown", (ev) => {
-            if(ev.keyCode == 219){
-                ev.preventDefault()
+            if (ev.keyCode != 16 && ev.keyCode != 8 && ev.keyCode != 9) {
+                this.validaciones = new VALIDACIONES();
+                let resultado = this.validaciones.caracteres_validos_sin_acentos_con_numero(ev.key, 1);
+                if (!resultado.resp) {
+                    ev.preventDefault();
+                }
             }
         })
 
         marcaHerramienta.addEventListener("change", (ev) => {
             let elementError = document.getElementById("error" + ev.target.id)
             elementError.innerHTML = ''
+
+            this.validaciones = new VALIDACIONES();
+            let resultado = this.validaciones.caracteres_validos_sin_acentos_con_numero(ev.target.value, 1);
+            if (!resultado.resp) {
+                elementError.innerHTML = 'Información no válida'
+            }
         })
 
         noFacturaEquipo.addEventListener("keydown", (ev) => {
@@ -487,10 +454,8 @@ class Permisos {
         })
 
         noPlaca.addEventListener("keydown", (ev) => {
-            if(tipoVehiculo.value != 2 && tipoVehiculo.value != 7){
-                //noSerieVehiculo.value = ''
-                //noMotor.value = ''
-            }
+            noSerieVehiculo.value = ''
+            noMotor.value = ''
             if (ev.keyCode != 16) {
                 this.validaciones = new VALIDACIONES();
                 let resultado = this.validaciones.caracteres_validos_especial(ev.key, 1);
@@ -501,10 +466,8 @@ class Permisos {
         })
 
         noSerieVehiculo.addEventListener("keydown", (ev) => {
-            if(tipoVehiculo.value != 2 && tipoVehiculo.value != 7){
-                //noPlaca.value = ''
-                //noMotor.value = ''
-            }
+            noPlaca.value = ''
+            noMotor.value = ''
             if (ev.keyCode != 16) {
                 this.validaciones = new VALIDACIONES();
                 let resultado = this.validaciones.caracteres_validos_especial(ev.key, 1);
@@ -515,10 +478,8 @@ class Permisos {
         })
 
         noMotor.addEventListener("keydown", (ev) => {
-            if(tipoVehiculo.value != 2 && tipoVehiculo.value != 7){
-                //noPlaca.value = ''
-                //noSerieVehiculo.value = ''
-            }
+            noPlaca.value = ''
+            noSerieVehiculo.value = ''
             if (ev.keyCode != 16) {
                 this.validaciones = new VALIDACIONES();
                 let resultado = this.validaciones.caracteres_validos_especial(ev.key, 1);
@@ -529,6 +490,16 @@ class Permisos {
         })
 
         noTarjeta.addEventListener("keydown", (ev) => {
+            if (ev.keyCode != 16) {
+                this.validaciones = new VALIDACIONES();
+                let resultado = this.validaciones.caracteres_validos_especial(ev.key, 1);
+                if (!resultado.resp) {
+                    ev.preventDefault();
+                }
+            }
+        })
+
+        noFacturaVeh.addEventListener("keydown", (ev) => {
             if (ev.keyCode != 16) {
                 this.validaciones = new VALIDACIONES();
                 let resultado = this.validaciones.caracteres_validos_especial(ev.key, 1);
@@ -625,14 +596,13 @@ class Permisos {
             }
         })
 
-        /*fechaInicio.addEventListener("change", (ev) => {
+        fechaInicio.addEventListener("change", (ev) => {
             let actual_tmp = new Date().toISOString().split("T")[0];
-            console.log(actual_tmp);
             errorfechaInicio.innerHTML = ""
             if (ev.target.value < actual_tmp) {
                 errorfechaInicio.innerHTML = "Fecha fuera de rango"
             }
-        })*/
+        })
 
         vigencia.addEventListener('change', (ev) => {
             if (ev.target.value == 2) {
@@ -648,9 +618,6 @@ class Permisos {
                 fechaTermino.setAttribute("disabled", true)
                 fechaTermino.value = fechaInicio.value
             }
-            if(fechaInicio.value != "" && ev.target.value == 1){
-                tipoEmpleado.removeAttribute("disabled")
-            } 
         })
 
         dias.addEventListener("change", () => {
@@ -680,6 +647,7 @@ class Permisos {
 
                 }
             }
+
             if (vigencia.value == 1) {
                 fechaTermino.value = ev.target.value
                 tipoEmpleado.removeAttribute("disabled")
@@ -724,7 +692,7 @@ class Permisos {
                 divCURPResp.style.display = ""
                 curpResponsable.setAttribute("class", "form-control validar-requerido reiniciar-pase")
                 $(errorcurpResponsable).html("")
-              //tipoEmpleado.removeAttribute("disabled")
+                tipoEmpleado.removeAttribute("disabled")
             } else {
                 if (datosPersonal.length <= 1) {
                     curpResponsable.value = ""
@@ -732,7 +700,7 @@ class Permisos {
                     divCURPResp.style.display = "none"
                     curpResponsable.setAttribute("class", "form-control reiniciar-pase")
                     $(errorcurpResponsable).html("")
-                    /*tipoEmpleado.setAttribute("disabled", true)*/
+                    tipoEmpleado.setAttribute("disabled", true)
                 } else {
                     $(errorcurpResponsable).html("Debe haber sólo un registro en la tabla")
                     permisoGrupal.checked = true
@@ -792,39 +760,28 @@ class Permisos {
         noPlaca.addEventListener('change', (ev) => {
             $(errorVehiculoDuplicado).html("")
         })
-        anexo29.addEventListener('change', (ev) => {
-            $(erroranexo29).html("")
-        })
-        descripcionEquipo.addEventListener('change', (ev) => {
-            $(errordescripcionEquipo).html("")
-        })
 
         nacionalidad.addEventListener("change", this.validar_tipoPersona_nacionalidad)
         tipoEmpleado.addEventListener("change", this.validar_tipoPersona_nacionalidad)
         tipoSeguro.addEventListener("change", this.validar_seguro)
 
-
-        //clavePatronal.addEventListener("change", this.validar_clave_patronal)
-        empresa_rfc.addEventListener("focusout", this.validar_rfc)
+        clavePatronal.addEventListener("change", this.validar_clave_patronal)
         curp.addEventListener("keyup", (ev) => {
             ev.target.value = ev.target.value.toUpperCase()
             $(errorPersonalDuplicado).html("")
         });
-       
-       curp.addEventListener("change", this.validar_curp)
+        curp.addEventListener("change", this.validar_curp)
 
         claveElector.addEventListener("keyup", (ev) => {
             ev.target.value = ev.target.value.toUpperCase()
-            if (!errorEstructuraINEIFE) {
-                $(errorclaveElectoral).html("")
-            }
+            $(errorclaveElectoral).html("")
         });
 
         claveElector.addEventListener("change", this.INE_IFE)
 
         noPasaporte.addEventListener("keyup", (ev) => {
             ev.target.value = ev.target.value.toUpperCase()
-          //  $(errornumPasaporte).html("")
+            $(errornumPasaporte).html("")
         });
 
         noPasaporte.addEventListener("change", this.validar_pasaporte)
@@ -895,122 +852,81 @@ class Permisos {
         })
 
         btnAdjuntarLicencia.addEventListener("click", (ev) => {
-            $("#pdfViewerLicencia").css("height","0px");
-			$("#pdfViewerLicencia").html("");
-            var tmp= $("#val_licencia").val();		
-			if (typeof tmp  !== "undefined"){ 
-				var capa = "pdfViewerLicencia";
-				$("#"+capa).css({"overflow":"hidden", "height":"300px", "overflow-y":"scroll"});
-                $("#"+capa).html('<div class="img-zoom-container"><img id="myimage" width="100%" src="/assets/uploads/permisos/personal/' + tmp + '"/>');
-			} 
+            if (adjuntarLicencia.dataset.imagen) {
+                $(pdfViewerLicencia).html('<img width="460" height="200" src="' + base_url + '/' + adjuntarLicencia.dataset.imagen + '"/>');
+            } else {
+                pdfViewerLicencia.innerHTML = ''
+                erroradjuntarLicencia.innerHTML = ''
+            }
             $(modalLicencia).modal()
         })
         adjuntarLicencia.addEventListener("change", this.previsualizar_licencia)
 
         btnSubirIdentificacion.addEventListener("click", (ev) => {
-            $("#pdfViewerIdentificacion").css("height","0px");
-			$("#pdfViewerIdentificacion").html("");
-            var tmp= $("#val_identificacion").val();		
-			if (typeof tmp  !== "undefined"){ 
-				var capa = "pdfViewerIdentificacion";
-				$("#"+capa).css({"overflow":"hidden", "height":"300px", "overflow-y":"scroll"});
-                $("#"+capa).html('<div class="img-zoom-container"><img id="myimage" width="100%" src="/assets/uploads/permisos/personal/' + tmp + '"/>');
-			} 
+            if (adjuntarIdentificacion.dataset.imagen) {
+                $(pdfViewerIdentificacion).html('<img width="460" height="200" src="' + base_url + '/' + adjuntarIdentificacion.dataset.imagen + '"/>');
+            } else {
+                pdfViewerIdentificacion.innerHTML = ''
+                erroradjuntarIdentificacion.innerHTML = ''
+            }
             $(modalIdentificacion).modal()
         })
-         adjuntarIdentificacion.addEventListener("change", this.previsualizar_identificacion)
+        adjuntarIdentificacion.addEventListener("change", this.previsualizar_identificacion)
 
         btnSubirPersonal.addEventListener("click", (ev) => {
-            $("#pdfViewerPersonal").css("height","0px");
-			$("#pdfViewerPersonal").html("");
-            var tmp= $("#val_personal").val();		
-			if (typeof tmp  !== "undefined"){ 
-				var capa = "pdfViewerPersonal";
-				$("#"+capa).css({"overflow":"hidden", "height":"300px", "overflow-y":"scroll"});
-                $("#"+capa).html('<div class="img-zoom-container"><img id="myimage" width="100%" src="/assets/uploads/permisos/personal/' + tmp + '"/>');
-			} 
+            if (adjuntarPersonal.dataset.imagen) {
+                $(pdfViewerPersonal).html('<img width="460" height="200" src="' + base_url + '/' + adjuntarPersonal.dataset.imagen + '"/>');
+            } else {
+                pdfViewerPersonal.innerHTML = ''
+                erroradjuntarPersonal.innerHTML = ''
+            }
             $(modalPersonal).modal()
         })
 
         adjuntarEquipo.addEventListener("change", this.previsualizar_equipo)
 
-        anadirMaterial.addEventListener("click", ()=>{
-            if (fotoMaterial) {
-                Permisos.prototype.agregar_material(fotoMaterial)
-            } else {
-                Permisos.prototype.agregar_material()
+        tipoMaterial.addEventListener("change", (ev) => {
+            divMedidas.style.display = "none"
+            if (ev.target.value == 1) {
+                divMedidas.style.display = ""
             }
         })
 
+        anadirMaterial.addEventListener("click", this.agregar_material)
+
         btnSubirEquipo.addEventListener('click', (ev) => {
-			$("#pdfViewerEquipo").css("height","0px");
-			$("#pdfViewerEquipo").html("");
-            var tmp= $("#val_equipo").val();		
-			if (typeof tmp  !== "undefined"){ 
-				var capa = "pdfViewerEquipo";
-				$("#"+capa).css({"overflow":"hidden", "height":"300px", "overflow-y":"scroll"});
-                $("#"+capa).html('<div class="img-zoom-container"><img id="myimage" width="100%" src="/assets/uploads/permisos/equipos/' + tmp + '"/>');
-			} 
+            if (adjuntarEquipo.dataset.imagen) {
+                $(pdfViewerEquipo).html('<img width="460" height="200" src="' + base_url + '/' + adjuntarEquipo.dataset.imagen + '"/>');
+            } else {
+                pdfViewerEquipo.innerHTML = ''
+                erroradjuntarEquipo.innerHTML = ''
+            }
             $(modalEquipo).modal()
         })
 
-        adjuntarEquipoAnexo.addEventListener("change", this.previsualizar_equipo_anexo)
+        adjuntarVehiculoFactura.addEventListener("change", this.previsualizar_vehiculo_factura)
 
-        btnSubirEquipoAnexo.addEventListener('click', (ev) => {
-			$("#pdfViewerEquipoAnexo").css("height","0px");
-			$("#pdfViewerEquipoAnexo").html("");
-            var tmp= $("#val_equipo_anexo").val();		
-			if (typeof tmp  !== "undefined"){ 
-				var capa = "pdfViewerEquipoAnexo";
-				$("#"+capa).css({"overflow":"hidden", "height":"300px", "overflow-y":"scroll"});
-                $("#"+capa).html('<div class="img-zoom-container"><img id="myimage" width="100%" src="/assets/uploads/permisos/equipos/' + tmp + '"/>');
-			} 
-            $(modalEquipoAnexo).modal()
+        btnSubirFacturaVehiculo.addEventListener('click', (ev) => {
+            if (adjuntarVehiculoFactura.dataset.imagen) {
+                $(pdfViewerVehiculoFactura).html('<img width="460" height="200" src="' + base_url + '/' + adjuntarVehiculoFactura.dataset.imagen + '"/>');
+            } else {
+                pdfViewerVehiculoFactura.innerHTML = ''
+                erroradjuntarVehiculoFactura.innerHTML = ''
+            }
+            $(modalVehiculoFactura).modal()
         })
 
-        adjuntarEquipoRF.addEventListener("change", this.previsualizar_equipo_rf)
-
-        btnSubirEquipoRF.addEventListener('click', (ev) => {
-			$("#pdfViewerEquipoRF").css("height","0px");
-			$("#pdfViewerEquipoRF").html("");
-            var tmp= $("#val_equipo_rf").val();		
-			if (typeof tmp  !== "undefined"){ 
-				var capa = "pdfViewerEquipoRF";
-				$("#"+capa).css({"overflow":"hidden", "height":"300px", "overflow-y":"scroll"});
-                $("#"+capa).html('<div class="img-zoom-container"><img id="myimage" width="100%" src="/assets/uploads/permisos/equipos/' + tmp + '"/>');
-			} 
-            $(modalEquipoRf).modal()
-        })
-
-        /*btnSubirMaterial.addEventListener('click', (ev) => {
-			$("#pdfViewerMaterial").css("height","0px");
-			$("#pdfViewerMaterial").html("");
-            var tmp= $("#val_material").val();		
-			if (typeof tmp  !== "undefined"){ 
-				var capa = "pdfViewerMaterial";
-				$("#"+capa).css({"overflow":"hidden", "height":"300px", "overflow-y":"scroll"});
-                $("#"+capa).html('<div class="img-zoom-container"><img id="myimage" width="100%" src="/assets/uploads/permisos/materiales/' + tmp + '"/>');
-			} 
-            $(modalMaterial).modal()
-        })*/
-			
         btnSubirVehiculo.addEventListener('click', (ev) => {
-            $(btnSiguienteAdjuntarVehiculo).hide();
-            $(btnAceptarAdjuntarVechiculo).hide();
 
-			$("#pdfViewerVehiculo").css("height","0px");
-			$("#pdfViewerVehiculo").html("");
+            if (ajuntarLateralVehiculo.dataset.imagen) {
+                $(pdfViewerVehiculo).html('<img width="460" height="200" src="' + base_url + '/' + ajuntarLateralVehiculo.dataset.imagen + '"/>');
+                $(btnSiguienteAdjuntarVehiculo).show();
+                $(fotografiaLateral).removeAttr("style");
+                $(fotografiaPlaca).hide();
 
-            $(fotografiaLateral).show();
-            $(fotografiaPlaca).hide();
-            
-			var tmp= $("#tab_lateral").attr("href");			
-			if (typeof tmp  !== "undefined"){ 
-				var capa = "pdfViewerVehiculo";
-				$("#"+capa).css({"overflow":"hidden", "height":"300px", "overflow-y":"scroll"});
-                $("#"+capa).html('<div class="img-zoom-container"><img id="myimage" width="100%" src="' + tmp + '"/>');
-			} 
-			
+            } else {
+                pdfViewerVehiculo.innerHTML = ''
+            }
             $(modalVehiculo).modal()
         })
         btnSiguienteAdjuntarVehiculo.addEventListener('click', (ev) => {
@@ -1019,25 +935,15 @@ class Permisos {
             $(fotografiaLateral).hide();
             $(fotografiaPlaca).removeAttr("style");
             $(btnSiguienteAdjuntarVehiculo).hide();
-            $(btnAceptarAdjuntarVechiculo).hide();
-			
-			var tmp= $("#tab_placa").attr("href");		
-			if (typeof tmp  !== "undefined"){ 
-		 
-				var capa = "pdfViewerVehiculo";
-				$("#"+capa).css({"overflow":"hidden", "height":"300px", "overflow-y":"scroll"});
-                $("#"+capa).html('<div class="img-zoom-container"><img id="myimage" width="100%" src="' + tmp + '"/>');
-			} 
-		 
 
-            /*if (adjuntarPlacaVehiculo.dataset.imagen) {
+            if (adjuntarPlacaVehiculo.dataset.imagen) {
 
                 $(pdfViewerVehiculo).html('<img width="460" height="200" src="' + base_url + '/' + adjuntarPlacaVehiculo.dataset.imagen + '"/>');
                 $(btnAceptarAdjuntarVechiculo).show();
 
             } else {
                 pdfViewerVehiculo.innerHTML = ''
-            }*/
+            }
 
         })
 
@@ -1050,19 +956,10 @@ class Permisos {
             } else {
                 Permisos.prototype.agregar_personas()
             }
-
-            if(datosPersonal.length <= 1){
-                permisoGrupal.checked = false
-                curpResponsable.value = ""
-                divCURPResp.style.display = "none"
-            }else{
-                permisoGrupal.checked = true
-                divCURPResp.style.display = ""
-            }
         })
         anadirEquipo.addEventListener("click", (ev) => {
             if (fotoFacturaEquipo) {
-                Permisos.prototype.agregar_equipo(fotoFacturaEquipo, fotoEquipoAnexo, fotoEquipoRF)
+                Permisos.prototype.agregar_equipo(fotoFacturaEquipo)
             } else {
                 Permisos.prototype.agregar_equipo()
             }
@@ -1081,30 +978,21 @@ class Permisos {
 
                 divDocumento1.style.display = ""
                 divResguardo.style.display = ""
-                if(ev.target.value == 5){
-                    divOtros.style.display = ""
-                }else{
-                    divOtros.style.display = "none"
-                }
             } else {
                 divCaracteristicas.style.display = "none"
                 divDocumento1.style.display = "none"
                 divResguardo.style.display = "none"
-                divOtros.style.display = "none"
             }
         })
 
-        //noPlaca.addEventListener("change", this.peticion_repuve)
+        noPlaca.addEventListener("change", this.peticion_repuve)
         //noSerieVehiculo.addEventListener("change",this.peticion_repuve)
-
-        noPlaca.addEventListener("change", this.validar_placa)
-        noSerieVehiculo.addEventListener("change",this.validar_numero_serie)
 
         ajuntarLateralVehiculo.addEventListener("change", this.previsualizar_vehiculo)
         adjuntarPlacaVehiculo.addEventListener("change", this.previsualizar_vehiculo)
 
         confirmar_salir_sin_guardar.addEventListener('click', (ev) => {
-            window.location.href = base_url + url_regreso;
+            window.location.href = base_url + 'Permisos/Ctrl_Permisos';
         });
         btnGuardar.addEventListener('click', this.confirmar_almacenamiento)
         confirmar_guardar.addEventListener('click', this.realizar_almacenamiento_pases)
@@ -1129,29 +1017,19 @@ class Permisos {
                 document.getElementById('btnSubirEquipo').value = 'Actualizar documento'
             }
         })
-        btnAceptarAdjuntarEquipoAnexo.addEventListener('click', (ev) => {
-            if (adjuntarEquipoAnexo.value != "") {
-                document.getElementById('btnSubirEquipoAnexo').value = 'Actualizar Anexo'
+        btnAceptarAdjuntarVehiculoFactura.addEventListener('click', (ev) => {
+            if (adjuntarVehiculoFactura.value != "") {
+                document.getElementById('btnSubirFacturaVehiculo').value = 'Actualizar documento'
             }
-        })
-        btnAceptarAdjuntarEquipoRF.addEventListener('click', (ev) => {
-            if (adjuntarEquipoRF.value != "") {
-                document.getElementById('btnSubirEquipoRF').value = 'Actualizar RF'
-            }
-        })
-        /*btnAceptarAdjuntarMaterial.addEventListener('click', (ev) => {
-            if (adjuntarMaterial.value != "") {
-                document.getElementById('btnSubirMaterial').value = 'Actualizar documento'
-            }
-        })*/
 
+        })
         btnAceptarAdjuntarVechiculo.addEventListener('click', (ev) => {
             if (ajuntarLateralVehiculo.value != "" && adjuntarPlacaVehiculo.value != "") {
                 document.getElementById('btnSubirVehiculo').value = 'Actualizar archivo'
             }
 
         })
-        //noSerieEquipo.addEventListener('change', this.validar_noserie_equipo)
+        noSerieEquipo.addEventListener('change', this.validar_noserie_equipo)
 
         tipoEmpleado.setAttribute("disabled", true)
 
@@ -1170,22 +1048,6 @@ class Permisos {
                 btnSubirIdentificacion.value = "Subir Identificación"
                 fechaVenciminetoIdent.value = ""
             }
-        })
-        actividad.addEventListener('change',(ev)=>{
-            if(actividad.value != ""){
-                erroractividad.innerHTML = ""
-            }
-        })
-        recinto.addEventListener('change',(ev)=>{
-            if(recinto.value != ""){
-                errorrecinto.innerHTML = ""
-            }
-        })
-        tipoIdentificacion.addEventListener('change',(ev)=>{
-            errortipoIdentificacion.innerHTML = ""
-        })
-        entidadGobierno.addEventListener('change',(ev)=>{
-            errorentidadGobierno.innerHTML = ""
         })
         /*vigenciaTarjeta.addEventListener('change', (ev) => {
             if ((vigenciaTarjeta.value < fechaInicio.value || vigenciaTarjeta.value < fechaTermino.value) && vigenciaTarjeta.value != "") {
@@ -1207,71 +1069,15 @@ class Permisos {
                 $(errornoSerieVehiculo).html("Deben ser 17 caracteres")
             } else {
                 $(errornoSerieVehiculo).html("")
-                //Permisos.prototype.peticion_repuve();
+                Permisos.prototype.peticion_repuve();
             }
         })
 
         noMotor.addEventListener('change', (ev) => {
-            if (noMotor.value.length < 4 || noMotor.value.length > 25) {
-                $(errornoMotor).html("Deben ser entre 4 y 25 caracteres")
+            if (noMotor.value.length < 6 || noMotor.value.length > 8) {
+                $(errornoMotor).html("Deben ser entre 6 y 8 caracteres")
             } else {
                 $(errornoMotor).html("")
-            }
-        })
-
-        /*tipoVehiculo.addEventListener('change', (ev) => {
-            if(ev.target.value != 2 && ev.target.value != 7){
-                marcaVehiculo.classList.remove("lectura")
-                marcaVehiculo.classList.add("form-control")
-                marcaVehiculo.disabled = false
-                modeloVehicuo.classList.remove("lectura")
-                modeloVehicuo.classList.add("form-control")
-                modeloVehicuo.disabled = false
-                anio.classList.remove("lectura")
-                anio.classList.add("form-control")
-                anio.disabled = false
-                color.classList.remove("lectura")
-                color.classList.add("form-control")
-                color.disabled = false
-            }else{
-                marcaVehiculo.classList.add("lectura")
-                marcaVehiculo.classList.remove("form-control")
-                marcaVehiculo.disabled = true
-                modeloVehicuo.classList.add("lectura")
-                modeloVehicuo.classList.remove("form-control")
-                modeloVehicuo.disabled = true
-                anio.classList.add("lectura")
-                anio.classList.remove("form-control")
-                anio.disabled = true
-                color.classList.add("lectura")
-                color.classList.remove("form-control")
-                color.disabled = true
-            }
-        })*/
-
-        anio.addEventListener("keydown", (ev) => {
-            if (ev.keyCode != 16 && ev.keyCode != 8 && ev.keyCode != 9) {
-                this.validaciones = new VALIDACIONES();
-                let resultado = this.validaciones.caracteres_validos_numericos(ev.key, 1);
-                if (!resultado.resp) {
-                    ev.preventDefault();
-                }
-            }
-        })
-
-        anio.addEventListener("change", (ev) => {
-            let elementError = document.getElementById("error" + ev.target.id)
-            elementError.innerHTML = ''
-
-            if(anio.value>'2021'){
-                elementError.innerHTML = 'Información no válida'
-                return
-            }
-
-            this.validaciones = new VALIDACIONES();
-            let resultado = this.validaciones.caracteres_validos_numericos(ev.target.value, 1);
-            if (!resultado.resp) {
-                elementError.innerHTML = 'Información no válida'
             }
         })
 
@@ -1300,7 +1106,6 @@ class Permisos {
         }
     }
     validar_seguro() {
-        $(errortipoSeguro).html("")
         switch (tipoSeguro.value) {
             case "1":
                 divAseguradora.style.display = 'none'
@@ -1360,40 +1165,18 @@ class Permisos {
     validar_tipoPersona_nacionalidad(nacionalidadMod) {
 
         divNacionalidad.style.display = ""
-        divCURP.style.display = ''
-        divAnadir.style.display = ''
-        errorcurp.innerHTML = ''
 
         if (nacionalidad.value == 1) {
-            //divCURP.style.display = ""
+            divCURP.style.display = ""
             $(tipoIdentificacion).data("nacional", 1)
-            curpMexicana.style.display = ""
         } else {
-            //divCURP.style.display = "none"
+            divCURP.style.display = "none"
             $(tipoIdentificacion).data("nacional", 0)
-            curpMexicana.style.display = "none"
-            if(tipoEmpleado.value == 1){
-                curpMexicana.style.display = ""
-            }
-        }
-    
-
-        /*if(nacionalidad.value == 2 && tipoEmpleado.value == 1){
-            divCURP.style.display = ''
-        }*/
-
-        /*if(nacionalidad.value == 2 && tipoEmpleado.value == 4){
-            divCURP.style.display = ''
-        }*/
-
-        if(nacionalidad.value == 2 && tipoEmpleado.value == 4){
-            divEntidad.style.display = 'none'
         }
 
-        if ((tipoEmpleado.value == 1 || tipoEmpleado.value == 6 || tipoEmpleado.value == 7) || tipoEmpleado.value == '') {
+        if (tipoEmpleado.value == 1 || tipoEmpleado.value == '') {
             divEmpresa.style.display = "none"
             divClavePatronal.style.display = "none"
-            divRFC.style.display = "none"
             /*divNoIssste.style.display = 'none'
             if(tipoEmpleado.value == 1){    
                 divNoSeguroSocial.style.display = ""
@@ -1403,14 +1186,12 @@ class Permisos {
         } else {
             divEmpresa.style.display = ""
             divClavePatronal.style.display = ""
-            divRFC.style.display = ""
         }
 
         if (tipoEmpleado.value == 5) {
             if (nacionalidad.value == 1) {
                 divEntidad.style.display = ""
                 divClavePatronal.style.display = ""
-                divRFC.style.display = ""
                 /*divNoSeguroSocial.style.display = "none"
                 divNoIssste.style.display = ""
                 divNoSeguro.style.display = "none"
@@ -1418,7 +1199,6 @@ class Permisos {
             } else if (nacionalidad.value == 2) {
                 divEntidad.style.display = "none"
                 divClavePatronal.style.display = ""
-                divRFC.style.display = ""
                 /*divNoSeguroSocial.style.display = "none"
                 divNoIssste.style.display = ""
                 divNoSeguro.style.display = "none"
@@ -1426,7 +1206,6 @@ class Permisos {
             } else {
                 divEntidad.style.display = "none"
                 divClavePatronal.style.display = "none"
-                divRFC.style.display = "none"
                 /*divNoSeguroSocial.style.display = "none"
                 divNoIssste.style.display = "none"
                 divNoSeguro.style.display = "none"
@@ -1435,7 +1214,7 @@ class Permisos {
         } else {
             divEntidad.style.display = 'none'
         }
-        if (tipoEmpleado.value == 1 || tipoEmpleado.value == 6 || tipoEmpleado.value == 7) {
+        if (tipoEmpleado.value == 1) {
             //divNoSeguroSocial.style.display = ""
             if (nacionalidad.value == 2) {
                 /*divAseguradora.style.display = "none"
@@ -1445,10 +1224,9 @@ class Permisos {
             }
         }
 
-        if (tipoEmpleado.value != 1 && tipoEmpleado.value != 5 && tipoEmpleado.value != 6 && tipoEmpleado.value != 7 && nacionalidad.value == 2) {
+        if (tipoEmpleado.value != 1 && tipoEmpleado.value != 5 && nacionalidad.value == 2) {
             divClavePatronal.style.display = ""
-            divRFC.style.display = ""
-            //divEntidad.style.display = ''
+            divEntidad.style.display = ''
             /*divNoSeguroSocial.style.display = "none"
             divNoIssste.style.display = "none"
             divNoSeguro.style.display = ""
@@ -1473,7 +1251,6 @@ class Permisos {
         } else {
             divEmpresa.style.display = "none"
             divClavePatronal.style.display = "none"
-            divRFC.style.display = "none"
 
             divTipoSeguro.style.display = 'none'
             divEntidad.style.display = "none"
@@ -1493,56 +1270,8 @@ class Permisos {
             divLicencia.style.display = "none"
             chofer.checked = false
         }
-
-        if (tipoEmpleado.value != '' && tipoEmpleado.value != 1 && nacionalidad.value == 2){
-            nombre.removeAttribute("disabled")
-            primerApellido.removeAttribute("disabled")
-            segundoApellido.removeAttribute("disabled")
-        }else{
-            nombre.setAttribute("disabled", true)
-            primerApellido.setAttribute("disabled", true)
-            segundoApellido.setAttribute("disabled", true)
-        }
-
     }
-    validar_rfc(ev) {
-        if (ev.target.value != '') {
-            $.ajax({
-                url: base_url_rest + 'empresas/rfc/'+ ev.target.value,
-                type: 'GET',
-                dataType: 'json',
-                global: false,
-                headers: {"Authorization": 'Bearer '+_token},
-                beforeSend: function () {
-                    idempresa.value = 0
-                    empresa.value = ''
-                    clavePatronal.value = ''
-                },
-                success: function (response) {
-                    if (response.data != false) {
-                        idempresa.value = response.data.id_empresa
-                        clavePatronal.value = response.data.clave_patronal
-                        empresa.value = response.data.nombre
-                        
-                        errorempresa.innerHTML = ''
-                        errorempresa_rfc.innerHTML = ''
-                        errorclavePatronal.innerHTML = ''
-
-                        clavePatronal.disabled = true
-                        empresa.disabled = true
-                    }else{
-                        clavePatronal.disabled = false
-                        empresa.disabled = false
-                    }
-                }
-            }).fail(function (response) {
-                if (response.responseText == "Sesion") {
-                    error_sesion();
-                }
-            });
-        }
-    }
-    /*validar_clave_patronal(ev) {
+    validar_clave_patronal(ev) {
         if (ev.target.value != '') {
             $.ajax({
                 url: base_url + 'Usuarios/Ctrl_Empresas/getByClave',
@@ -1568,7 +1297,7 @@ class Permisos {
                 }
             });
         }
-    }*/
+    }
     INE_IFE(ev) {
         this.validaciones = new VALIDACIONES();
         let resultado = this.validaciones.INE_IFE(ev.target.value);
@@ -1604,7 +1333,6 @@ class Permisos {
         }
     }
     validar_curp(ev) {
-
         let elementError = document.getElementById("error" + ev.target.id)
         elementError.innerHTML = ''
 
@@ -1629,29 +1357,8 @@ class Permisos {
                     curp: ev.target.value
                 },
                 beforeSend: function () {
-                    nombre.value = ""
-                    primerApellido.value = ""
-                    segundoApellido.value = ""
-                    numtelefono.value = ""
-                    correo.value = ""
-                    aseguradoras.value = ""
-                    numSeguroSocial.value = ""
-                    noIssste.value = ""
-                    noSeguro.value = ""
-                    noLicencia.value = ""
-                    fechaVenciminetoLic.value = ""
-                    tipoIdentificacion.value = ""
-                    claveElector.value = ""
-                    noPasaporte.value = ""
-                    libretaMar.value = ""
-                    itinerario.value = ""
-                    fechaVenciminetoIdent.value = ""
-                    fotoLicencia = ""
-                    fotoPersona = ""
-                    fotoIdentificacion = ""
-                    
-                    idpersona.value = 0
-                    idcontacto.value = 0
+                    //idpersona.value = 0
+                    //idcontacto.value = 0
 
                     /*nombre.value = ""
                     primerApellido.value = ""
@@ -1693,24 +1400,17 @@ class Permisos {
                     btnAdjuntarLicencia.value = 'Subir licencia'
                     btnSubirIdentificacion.value = 'Subir identificación'
                     btnSubirPersonal.value = 'Subir foto'
- 
-					$("#errorSubirIdentificacion").html("");			 
-					$("#errorSubirPersonal").html("");			
-					$("#errorSubirLicencia").html("");
                 },
                 success: function (response) {
-					 
+					console.log(response)
                     if (response.data != null) {
                         divFechaVencimiento.style.display = ""
                         divSubirDocumento.style.display = ""
                         divSubirfoto.style.display = ""
 						//id_persona_rest.value = 0
                         idpersona.value = response.data.id
-                        idcontacto.value = (response.data.id_contacto == null ? 0 : response.data.id_contacto)
+                        idcontacto.value = response.data.id_contacto
 
-                        nombre.setAttribute("disabled",true)
-                        primerApellido.setAttribute("disabled",true)
-                        segundoApellido.setAttribute("disabled",true)
                         nombre.value = response.data.nombre
                         primerApellido.value = response.data.primer_apellido
                         segundoApellido.value = response.data.segundo_apellido
@@ -1733,10 +1433,10 @@ class Permisos {
                             divNoIssste.style.display = ''
                             tipoSeguro.value = response.data.id_tipo_seguro
                             noIssste.value = response.data.nss
+                            divTipoSeguro.style.display = 'none'
                             divNoSeguro.style.display = 'none'
                             divAseguradora.style.display = 'none'
                             divNoSeguroSocial.style.display = 'none'
-                            errornoIssste.innerHTML = ''
                         }
 
                         if (response.data.id_tipo_seguro == 3) {
@@ -1749,11 +1449,11 @@ class Permisos {
                             divNoIssste.style.display = 'none'
                             divNoSeguroSocial.style.display = 'none'
                         }
-						 
+
                         adjuntarLicencia.dataset.id = (response.data.id_imagen_licencia != null) ? response.data.id_imagen_licencia : ""
                         adjuntarIdentificacion.dataset.id = (response.data.id_imagen_identificacion != null) ? response.data.id_imagen_identificacion : ""
                         adjuntarPersonal.dataset.id = (response.data.id_imagen_persona != null) ? response.data.id_imagen_persona : ""
-						
+
                         if (response.data.numero_licencia != null && nacionalidad.value == 1) {
 
                             noLicencia.value = response.data.numero_licencia
@@ -1829,6 +1529,7 @@ class Permisos {
                                         $(errorSubirIdentificacion).html("")
                                     }
                                 }
+
                                 $(errorclaveElectoral).html("")
 
                                 break;
@@ -1839,7 +1540,6 @@ class Permisos {
                                 divLibretaMar.style.display = "none"
                                 divItinerario.style.display = "none"
                                 noPasaporte.value = response.data.numero_identificacion
-                                errornumPasaporte.innerHTML = ""
 
                                 if (fechaTermino.value > response.data.fecha_expiracion_identificacion) {
                                     $(errorfechaVenciminetoIdent).html("Debe estar vigente durante el periodo")
@@ -1887,43 +1587,6 @@ class Permisos {
                         $(errorcorreo).html("")
                         $(errornumSeguroSocial).html("")
                         $(errortipoIdentificacion).html("")
-                        errortipoSeguro.innerHTML = ""
-						
-						var temp = response.data.fotografia_identificacion;
-						var archivo = temp;
-						var arc = temp.split("/");temp = arc[4];
-						var txt = "<input type='hidden' id='val_identificacion' value ='"+temp+"'>";  
-						$("#errorSubirIdentificacion").html("<span class='color:#000'><a href='/"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-						
-						var temp = response.data.fotografia_persona;
-						var archivo = temp;
-						var arc = temp.split("/");temp = arc[4];
-						var txt = "<input type='hidden' id='val_personal' value ='"+temp+"'>";  
-						$("#errorSubirPersonal").html("<span class='color:#000'><a href='/"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-						
-						var temp = response.data.fotografia_licencia;
-						if (temp != null){
-							var archivo = temp;
-							 var arc = temp.split("/");temp = arc[4]; 
-							var txt = "<input type='hidden' id='val_licencia' value ='"+temp+"'>"; 
-							$("#errorSubirLicencia").html("<span class='color:#000'><a href='/"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);
-						}
-                    }else{
-                        nombre.removeAttribute("disabled")
-                        primerApellido.removeAttribute("disabled")
-                        segundoApellido.removeAttribute("disabled")
-                        chofer.checked = false
-                        divLicencia.style.display = 'none'
-                        divAseguradora.style.display = 'none'
-                        divNoSeguroSocial.style.display = 'none'
-                        divNoIssste.style.display = 'none'
-                        divNoSeguro.style.display = 'none'
-                        divClaveElector.style.display = 'none'
-                        divPasaporte.style.display = 'none'
-                        divLibretaMar.style.display = 'none'
-                        divItinerario.style.display = 'none'
-                        tipoSeguro.value = ""
-                        tipoIdentificacion.value = ""
                     }
                 },
                 complete: function() {
@@ -1934,7 +1597,6 @@ class Permisos {
                         global: false,
                         beforeSend: function name(params) {
                             id_personal_rest = 0
-
                         },
                         success: function (response) {
                             if (response.data.length != 0) {
@@ -1942,13 +1604,9 @@ class Permisos {
                                 if(nombre.value == ''){
                                     nombre.value = response.data.nombre
                                     primerApellido.value = response.data.primer_apellido
-                                    segundoApellido.value = response.data.segundo_apellido       
+                                    segundoApellido.value = response.data.segundo_apellido
                                 }
-                            }else if(nombre.value != ''){
-                                errorcurp.innerHTML = "Información no encontrada"
-                                curp.value = ""
                             }
-                            
                         }
                     }).fail(function (response) {
                         if (response.responseText == "Sesion") {
@@ -1976,7 +1634,7 @@ class Permisos {
             errorEstructuraCorreo = false
         }
     }
-    /*validar_noserie_equipo(ev) {
+    validar_noserie_equipo(ev) {
 
         if (ev.target.id == "noSerieEquipo") {
             $.ajax({
@@ -1991,7 +1649,6 @@ class Permisos {
                     idequipo.value = 0
                     adjuntarEquipo.dataset.imagen = ""
                     adjuntarEquipo.dataset.id = ""
-					$("#errorSubirFacturaEquipo").html("");
                 },
                 success: function (response) {
                     if (response.data != null) {
@@ -2015,13 +1672,6 @@ class Permisos {
                         $(errorHerramientaDuplicado).html("")
                         $(errorSubirFacturaEquipo).html("")
                         $(errorresguardo).html("")
-						
-						var temp = response.data.factura_equipo;
-						var archivo = temp;
-						var arc = temp.split("/");temp = arc[4];
-						var txt = "<input type='hidden' id='val_equipo' value ='"+temp+"'>";  
-						$("#errorSubirFacturaEquipo").html("<span class='color:#000'><a href='/"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-						
 
                     }
                 },
@@ -2033,21 +1683,21 @@ class Permisos {
             });
 
         }
-    }*/
+    }
     previsualizar_licencia() {
         var fileReader = new FileReader();
-        //pdfViewerLicencia.innerHTML = ''
+        pdfViewerLicencia.innerHTML = ''
         erroradjuntarLicencia.innerHTML = ''
 
-        var extencion = $(this)[0].files[0].name;//
+        var extencion = $(this)[0].files[0].name;
         if (extencion != '') {
             extencion = extencion.split(".");
             extencion = extencion[extencion.length - 1];
         }
 
-        var permitidos = ["image/jpg", "image/jpeg", "image/png"];
+        var permitidos = ["image/jpg", "image/jpeg", "image/png", "application/pdf"];
         if (!permitidos.includes($(this)[0].files[0].type) || extencion == 'jfif') {
-            erroradjuntarLicencia.innerHTML = "El archivo a subir debe ser un documento en imagen PNG o JPG"
+            erroradjuntarLicencia.innerHTML = "El archivo a subir debe ser un documento en PDF o imagen PNG o JPG"
             return false;
         }
 
@@ -2070,7 +1720,7 @@ class Permisos {
     }
     previsualizar_identificacion() {
         var fileReader = new FileReader();
-        //pdfViewerIdentificacion.innerHTML = ''
+        pdfViewerIdentificacion.innerHTML = ''
         erroradjuntarIdentificacion.innerHTML = ''
 
         var extencion = $(this)[0].files[0].name;
@@ -2081,7 +1731,7 @@ class Permisos {
 
         var permitidos = ["image/jpg", "image/jpeg", "image/png", "application/pdf"];
         if (!permitidos.includes($(this)[0].files[0].type) || extencion == 'jfif') {
-            erroradjuntarIdentificacion.innerHTML = "El archivo a subir debe ser un documento en imagen en PDF o imagen PNG o JPG"
+            erroradjuntarIdentificacion.innerHTML = "El archivo a subir debe ser un documento en PDF o imagen PNG o JPG"
             return false;
         }
 
@@ -2105,7 +1755,7 @@ class Permisos {
     }
     previsualizar_personal() {
         var fileReader = new FileReader();
-        //pdfViewerPersonal.innerHTML = ''
+        pdfViewerPersonal.innerHTML = ''
         erroradjuntarPersonal.innerHTML = ''
 
         var extencion = $(this)[0].files[0].name;
@@ -2114,9 +1764,9 @@ class Permisos {
             extencion = extencion[extencion.length - 1];
         }
 
-        var permitidos = ["image/jpg", "image/jpeg", "image/png"];
+        var permitidos = ["image/jpg", "image/jpeg", "image/png", "application/pdf"];
         if (!permitidos.includes($(this)[0].files[0].type) || extencion == 'jfif') {
-            erroradjuntarPersonal.innerHTML = "El archivo a subir debe ser un documento en imagen PNG o JPG"
+            erroradjuntarPersonal.innerHTML = "El archivo a subir debe ser un documento en PDF o imagen PNG o JPG"
             return false;
         }
 
@@ -2140,27 +1790,27 @@ class Permisos {
     }
     previsualizar_modificar_licenciaPersona(fotoLicencia) {
 
-        /*var fileReader = new FileReader();
-        //pdfViewerLicencia.innerHTML = ''
+        var fileReader = new FileReader();
+        pdfViewerLicencia.innerHTML = ''
         erroradjuntarLicencia.innerHTML = ''
 
         fileReader.onload = function () {
             var TheFileContents = fileReader.result;
-            console.log(TheFileContents);
             $(pdfViewerLicencia).html('<img width="460" height="200" src="' + TheFileContents + '"/>');
         };
         fileReader.readAsDataURL(fotoLicencia);
+
 
         btnAceptarAdjuntarLicencia.onclick = function () {
             if (fileReader != "") {
                 $(errorSubirLicencia).html("")
             }
-        }*/
+        }
     }
     previsualizar_modificar_identificacionPersona(fotoIdentificacion) {
 
         var fileReader = new FileReader();
-        //pdfViewerIdentificacion.innerHTML = ''
+        pdfViewerIdentificacion.innerHTML = ''
         erroradjuntarIdentificacion.innerHTML = ''
 
         fileReader.onload = function () {
@@ -2179,7 +1829,7 @@ class Permisos {
     previsualizar_modificar_fotoPersona(fotoPersona) {
 
         var fileReader = new FileReader();
-        //pdfViewerPersonal.innerHTML = ''
+        pdfViewerPersonal.innerHTML = ''
         erroradjuntarPersonal.innerHTML = ''
 
         fileReader.onload = function () {
@@ -2197,7 +1847,7 @@ class Permisos {
     }
     previsualizar_equipo() {
         var fileReader = new FileReader();
-        //pdfViewerEquipo.innerHTML = ''
+        pdfViewerEquipo.innerHTML = ''
         erroradjuntarEquipo.innerHTML = ''
 
         var extencion = $(this)[0].files[0].name;
@@ -2233,122 +1883,10 @@ class Permisos {
             }
         }
     }
-    previsualizar_equipo_anexo() {
-        var fileReader = new FileReader();
-        //pdfViewerEquipo.innerHTML = ''
-        erroradjuntarEquipoAnexo.innerHTML = ''
-
-        var extencion = $(this)[0].files[0].name;
-        if (extencion != '') {
-            extencion = extencion.split(".");
-            extencion = extencion[extencion.length - 1];
-        }
-
-        var permitidos = ["image/jpg", "image/jpeg", "image/png", "application/pdf"];
-        if (!permitidos.includes($(this)[0].files[0].type) || extencion == 'jfif') {
-            erroradjuntarEquipoAnexo.innerHTML = "El archivo a subir debe ser un documento en PDF o imagen PNG o JPG"
-            return false;
-        }
-
-        if (($(this)[0].files[0].size / 1000000) > 5) {
-            erroradjuntarEquipoAnexo.innerHTML = "El tamaño máximo permitido es de 5 MB"
-            return false;
-        }
-        var tipoarchivo = $(this)[0].files[0].type
-        fileReader.onload = function () {
-            var TheFileContents = fileReader.result;
-            if (tipoarchivo == 'application/pdf') {
-                $(pdfViewerEquipoAnexo).html('<object> <embed src="' + TheFileContents + '" width="100%" height="300px"/></object>');
-            } else {
-                $(pdfViewerEquipoAnexo).html('<img width="460" height="200" src="' + TheFileContents + '"/>');
-            }
-        };
-        fileReader.readAsDataURL($(this)[0].files[0]);
-
-        btnAceptarAdjuntarEquipoAnexo.onclick = function () {
-            if (fileReader != "") {
-                $(errorSubirEquipoAnexo).html("")
-            }
-        }
-    }
-    previsualizar_equipo_rf() {
-        var fileReader = new FileReader();
-        //pdfViewerEquipo.innerHTML = ''
-        erroradjuntarEquipoRF.innerHTML = ''
-
-        var extencion = $(this)[0].files[0].name;
-        if (extencion != '') {
-            extencion = extencion.split(".");
-            extencion = extencion[extencion.length - 1];
-        }
-
-        var permitidos = ["image/jpg", "image/jpeg", "image/png", "application/pdf"];
-        if (!permitidos.includes($(this)[0].files[0].type) || extencion == 'jfif') {
-            erroradjuntarEquipoRF.innerHTML = "El archivo a subir debe ser un documento en PDF o imagen PNG o JPG"
-            return false;
-        }
-
-        if (($(this)[0].files[0].size / 1000000) > 5) {
-            erroradjuntarEquipoRF.innerHTML = "El tamaño máximo permitido es de 5 MB"
-            return false;
-        }
-        var tipoarchivo = $(this)[0].files[0].type
-        fileReader.onload = function () {
-            var TheFileContents = fileReader.result;
-            if (tipoarchivo == 'application/pdf') {
-                $(pdfViewerEquipoRF).html('<object> <embed src="' + TheFileContents + '" width="100%" height="300px"/></object>');
-            } else {
-                $(pdfViewerEquipoRF).html('<img width="460" height="200" src="' + TheFileContents + '"/>');
-            }
-        };
-        fileReader.readAsDataURL($(this)[0].files[0]);
-
-        btnAceptarAdjuntarEquipoRF.onclick = function () {
-            if (fileReader != "") {
-                $(errorSubirEquipoRF).html("")
-            }
-        }
-    }
-    previsualizar_modificar_equipo_rf(fotoEquipoRF) {
-
-        var fileReader = new FileReader();
-        //pdfViewerEquipo.innerHTML = ''
-        erroradjuntarEquipoRF.innerHTML = ''
-
-        fileReader.onload = function () {
-            var TheFileContents = fileReader.result;
-            $(pdfViewerEquipoRF).html('<img width="460" height="200" src="' + TheFileContents + '"/>');
-        };
-        fileReader.readAsDataURL(fotoEquipoRF);
-
-        btnAceptarAdjuntarEquipoRF.onclick = function () {
-            if (fileReader != "") {
-                $(errorSubirEquipoRF).html("")
-            }
-        }
-    }
-    previsualizar_modificar_equipo_anexo(fotoEquipoAnexo) {
-
-        var fileReader = new FileReader();
-        //pdfViewerEquipo.innerHTML = ''
-        erroradjuntarEquipoAnexo.innerHTML = ''
-
-        fileReader.onload = function () {
-            var TheFileContents = fileReader.result;
-            $(pdfViewerEquipoAnexo).html('<img width="460" height="200" src="' + TheFileContents + '"/>');
-        };
-        fileReader.readAsDataURL(fotoEquipoAnexo);
-
-        btnAceptarAdjuntarEquipoAnexo.onclick = function () {
-            if (fileReader != "") {
-                $(errorSubirEquipoAnexo).html("")
-            }
-        }
-    }
     previsualizar_modificar_equipo(fotoFacturaEquipo) {
 
         var fileReader = new FileReader();
-        //pdfViewerEquipo.innerHTML = ''
+        pdfViewerEquipo.innerHTML = ''
         erroradjuntarEquipo.innerHTML = ''
 
         fileReader.onload = function () {
@@ -2363,9 +1901,61 @@ class Permisos {
             }
         }
     }
+    previsualizar_vehiculo_factura() {
+        var fileReader = new FileReader();
+        pdfViewerVehiculoFactura.innerHTML = ''
+        erroradjuntarVehiculoFactura.innerHTML = ''
+
+        var extencion = $(this)[0].files[0].name;
+        if (extencion != '') {
+            extencion = extencion.split(".");
+            extencion = extencion[extencion.length - 1];
+        }
+
+        var permitidos = ["image/jpg", "image/jpeg", "image/png", "application/pdf"];
+        if (!permitidos.includes($(this)[0].files[0].type) || extencion == 'jfif') {
+            erroradjuntarVehiculoFactura.innerHTML = "El archivo a subir debe ser un documento en PDF o imagen PNG o JPG"
+            return false;
+        }
+
+        if (($(this)[0].files[0].size / 1000000) > 2) {
+            erroradjuntarVehiculoFactura.innerHTML = "El tamaño máximo permitido es de 2 MB"
+            return false;
+        }
+
+        fileReader.onload = function () {
+            var TheFileContents = fileReader.result;
+            $(pdfViewerVehiculoFactura).html('<img width="460" height="200" src="' + TheFileContents + '"/>');
+        };
+        fileReader.readAsDataURL($(this)[0].files[0]);
+
+        btnAceptarAdjuntarVehiculoFactura.onclick = function () {
+            if (fileReader != "") {
+                $(errorSubirFacturaVehiculo).html("")
+            }
+        }
+    }
+    previsualizar_modificar_facturaVehiculo(fotoFacturaVehiculo) {
+
+        var fileReader = new FileReader();
+        pdfViewerVehiculoFactura.innerHTML = ''
+        erroradjuntarVehiculoFactura.innerHTML = ''
+
+        fileReader.onload = function () {
+            var TheFileContents = fileReader.result;
+            $(pdfViewerVehiculoFactura).html('<img width="460" height="200" src="' + TheFileContents + '"/>');
+        };
+        fileReader.readAsDataURL(fotoFacturaVehiculo);
+
+        btnAceptarAdjuntarVehiculoFactura.onclick = function () {
+            if (fileReader != "") {
+                $(errorSubirFacturaVehiculo).html("")
+            }
+        }
+    }
     previsualizar_vehiculo(ev) {
         var fileReader = new FileReader();
-        //pdfViewerVehiculo.innerHTML = ''
+        pdfViewerVehiculo.innerHTML = ''
         errorFotografiasVehiculos.innerHTML = ''
 
         var extencion = $(this)[0].files[0].name;
@@ -2393,18 +1983,24 @@ class Permisos {
 
         if (ev.target.id == "adjuntarPlacaVehiculo") {
             $(btnSiguienteAdjuntarVehiculo).hide();
-            $(btnAceptarAdjuntarVechiculo).hide();
+            $(btnAceptarAdjuntarVechiculo).show();
         } else {
             $(btnSiguienteAdjuntarVehiculo).show();
+        }
+
+        btnAceptarAdjuntarVechiculo.onclick = function () {
+            if (fileReader != "") {
+                $(errorSubirFotoVehiculo).html("")
+            }
         }
     }
     previsualizar_modificar_lateralVehiculo(fotoLateralVehiculo) {
 
         var fileReader = new FileReader();
-        //pdfViewerVehiculo.innerHTML = ''
+        pdfViewerVehiculo.innerHTML = ''
         errorFotografiasVehiculos.innerHTML = ''
 
-        //$(btnSiguienteAdjuntarVehiculo).show();
+        $(btnSiguienteAdjuntarVehiculo).show();
 
         fileReader.onload = function () {
             var TheFileContents = fileReader.result;
@@ -2413,15 +2009,21 @@ class Permisos {
         };
         fileReader.readAsDataURL(fotoLateralVehiculo);
 
+
+        btnAceptarAdjuntarVehiculoFactura.onclick = function () {
+            if (fileReader != "") {
+                $(errorSubirFacturaVehiculo).html("")
+            }
+        }
     }
     previsualizar_modificar_placaVehiculo(fotoPlacaVehiculo) {
 
         //3 lineas a prueba
-        //$(pdfViewerVehiculo).html("");
+        $(pdfViewerVehiculo).html("");
         $(fotografiaLateral).hide();
         $(fotografiaPlaca).removeAttr("style");
-        //$(btnSiguienteAdjuntarVehiculo).hide();
-        //$(btnAceptarAdjuntarVechiculo).show();
+        $(btnSiguienteAdjuntarVehiculo).hide();
+        $(btnAceptarAdjuntarVechiculo).show();
 
         var fileReader = new FileReader();
         pdfViewerVehiculo.innerHTML = ''
@@ -2433,9 +2035,16 @@ class Permisos {
             //adjuntarPlacaVehiculo.dataset.imagen = TheFileContents
         };
         fileReader.readAsDataURL(fotoPlacaVehiculo);
+
+
+        btnAceptarAdjuntarVehiculoFactura.onclick = function () {
+            if (fileReader != "") {
+                $(errorSubirFacturaVehiculo).html("")
+            }
+        }
     }
-   /* obtener_datos_contrato() {
-        if(id_empresa != 0){
+    obtener_datos_contrato() {
+        if(id_empresa != 0 && id_contrato == 0){
             $.ajax({
                 url: base_url + 'Usuarios/Ctrl_Empresas/getById',
                 type: 'GET',
@@ -2448,7 +2057,7 @@ class Permisos {
                 },
                 success: function (response) {
                     if (response.data != "") {
-                        entidad.value = response.data.nombre
+                        entidad.value = response.data.empresa
                     }
                 },
                 complete: function () {
@@ -2459,7 +2068,7 @@ class Permisos {
             });
         }
 
-        /*if(id_contrato != 0){
+        if(id_contrato != 0){
             $.ajax({
                 url: base_url + 'Contratos/Ctrl_Contratos/getById',
                 type: 'GET',
@@ -2483,7 +2092,7 @@ class Permisos {
     
             });
         }
-    }*/
+    }
     obtener_tipos_permisos() {
         $.ajax({
             url: base_url + 'Catalogos/Ctrl_TiposPermisos/getByEstatus',
@@ -2499,11 +2108,6 @@ class Permisos {
                 response.data.forEach(element => {
                     $(tipoPermiso).append('<option value="' + element.id + '">' + element.nombre + '</option>');
                 });
-            },
-            complete: function() {
-                id_empresa = _id_empresa_rest
-                id_contrato = idcontratovigenteusuario
-                entidad.value = _empresa
             }
         }).fail(function (response) {
 
@@ -2698,13 +2302,13 @@ class Permisos {
             },
             beforeSend: function () {
                 $(tipoDocumento).append('<option value="">Seleccione</option>');
-                //$(tipodocumentoVeh).append('<option value="">Seleccione</option>');
+                $(tipodocumentoVeh).append('<option value="">Seleccione</option>');
             },
             success: function (response) {
                 response.data.forEach(element => {
                     if (element.id == 3 || element.id == 4) {
                         $(tipoDocumento).append('<option value="' + element.id + '">' + element.nombre + '</option>');
-                        //$(tipodocumentoVeh).append('<option value="' + element.id + '">' + element.nombre + '</option>');
+                        $(tipodocumentoVeh).append('<option value="' + element.id + '">' + element.nombre + '</option>');
                     }
                 });
             }
@@ -2838,233 +2442,604 @@ class Permisos {
             }
         }
     }
-    validar_placa(){
-        var temp
-        temp = noPlaca.value
-        if(idvehiculo.value == 0){
-            $.ajax({
-                url: base_url_rest + 'vehiculos/placa/'+idempresavigenteusuario+'/'+noPlaca.value,
-                type: 'GET',
-                dataType: 'json',
-                beforeSend: function () {
-                },
-                success: function (response) {
-                    if(response.status == true){
-                        idvehiculo.value = response.data.vehiculo[0].id_vehiculo
-                        tipoVehiculo.value = response.data.vehiculo[0].id_tipo_vehiculo
-                        noSerieVehiculo.value = response.data.vehiculo[0].numero_serie
-                        noMotor.value = response.data.vehiculo[0].numero_motor
-                        marcaVehiculo.value = response.data.vehiculo[0].marca
-                        modeloVehicuo.value = response.data.vehiculo[0].modelo
-                        anio.value = response.data.vehiculo[0].anio
-                        color.value = response.data.vehiculo[0].color
-                        tipoTarjetaCirculacion.value = response.data.vehiculo[0].id_tipo_tarjeta_circulacion
-                        noTarjeta.value = response.data.vehiculo[0].numero_tarjeta_circulacion
-                        aseguradorasVeh.value = response.data.vehiculo[0].id_tipo_aseguradora
-                        noPoliza.value = response.data.vehiculo[0].numero_poliza
-                        vigenciaPoliza.value = response.data.vehiculo[0].vigencia_poliza
-                        periodoPago.value = response.data.vehiculo[0].id_tipo_periodo
-                        periodoCobFechaInicio.value = response.data.vehiculo[0].fecha_inicio_cobertura
-                        periodoCobFechaFin.value = response.data.vehiculo[0].fecha_fin_cobertura
-                        var txtL = "<input type='hidden' id='val_lateral' value ='"+response.data.imagenes[0].nombre+"'>";
-                        var txtP = "<input type='hidden' id='val_placa' value ='"+response.data.imagenes[1].nombre+"'>";                   
-                        $("#errorSubirFotoLat").html("<span class='color:#000'><a id='tab_lateral' href='"+base_url+response.data.imagenes[0].link+response.data.imagenes[0].nombre+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txtL);			
-                        $("#errorSubirFotoPla").html("<span class='color:#000'><a id='tab_placa' href='"+base_url+response.data.imagenes[1].link+response.data.imagenes[1].nombre+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txtP);		
-                        /*ajuntarLateralVehiculo.dataset.id = (response.data.imagenes[0].id != null) ? response.data.imagenes[0].id : ""
-                        ajuntarLateralVehiculo.dataset.imagen = (response.data.imagenes[0].link != null) ? response.data.imagenes[0].link : ""
-                        adjuntarPlacaVehiculo.dataset.id = (response.data.imagenes[1].id != null) ? response.data.imagenes[1].id : ""
-                        adjuntarPlacaVehiculo.dataset.imagen = (response.data.imagenes[1].link != null) ? response.data.imagenes[1].link : ""*/
-                        btnSubirVehiculo.value = "Actualizar foto"
-                        
-                        tipoVehiculo.setAttribute("disabled",true)
-                        noSerieVehiculo.setAttribute("disabled",true)
-                        marcaVehiculo.setAttribute("disabled",true)
-                        modeloVehicuo.setAttribute("disabled",true)
-                        anio.setAttribute("disabled",true)
-                        
-                    }else{
-                        $(".reiniciar-vehiculo").val("")
-                       noPlaca.value = temp
-                    }
-                }
-                }).fail(function (response) {
-        
-                });
-        }
-    }
-    validar_numero_serie(){
-        if(idvehiculo.value == 0){
-            $.ajax({
-                url: base_url_rest + 'vehiculos/noserie/'+noSerieVehiculo.value,
-                type: 'GET',
-                dataType: 'json',
-                beforeSend: function () {
-                },
-                success: function (response) {
-                    if(response.data != null){
-                        idvehiculo.value = response.data.id_vehiculo
-                        tipoVehiculo.value = response.data.id_tipo_vehiculo
-                        marcaVehiculo.value = response.data.marca
-                        modeloVehicuo.value = response.data.modelo
-                        anio.value = response.data.anio
-
-                        noSerieVehiculo.setAttribute("disabled",true)
-                        tipoVehiculo.setAttribute("disabled",true)
-                        marcaVehiculo.setAttribute("disabled",true)
-                        modeloVehicuo.setAttribute("disabled",true)
-                        anio.setAttribute("disabled",true)
-                    }else{
-                        idvehiculo.value = 0
-                        tipoVehiculo.value = ''
-                        marcaVehiculo.value = ''
-                        modeloVehicuo.value = ''
-                        anio.value = ''
-                    }
-                }
-                }).fail(function (response) {
-
-                });
-        }
-    }
-    /*peticion_repuve(ev) {
-
-        if(tipoVehiculo.value == 2 || tipoVehiculo.value == 7){
-            $.ajax({
-                async: false,
-                url: base_url + 'Utilidades/Ctrl_Servicios/getDatosVehiculos',
-                type: 'GET',
-                dataType: 'json',
-                global: false,
-                data: {
-                    endpoint: "repuvenacional",
-                    noserie: noSerieVehiculo.value,
-                    noplaca: noPlaca.value
-                },
-
-                beforeSend: function () {
-                    idvehiculo.value = 0
-                    ajuntarLateralVehiculo.dataset.imagen = ""
-                    ajuntarLateralVehiculo.dataset.id = ""
-                    adjuntarPlacaVehiculo.dataset.imagen = ""
-                    adjuntarPlacaVehiculo.dataset.id = ""
-					$("#errorSubirFotoPla").html("");
-					$("#errorSubirFotoLat").html("");
-					$("#errorSubirFacturaVehiculo").html("");
-
-                    $(marcaVehiculo).attr("class","reiniciar-vehiculo lectura")
-                    $(modeloVehicuo).attr("class","reiniciar-vehiculo lectura")
-                    $(anio).attr("class","reiniciar-vehiculo lectura")
-                    $(color).attr("class","reiniciar-vehiculo lectura")
-
-                    $(marcaVehiculo).attr("disabled","true")
-                    $(modeloVehicuo).attr("disabled","true")
-                    $(anio).attr("disabled","true")
-                    $(color).attr("disabled","true")
-                },
-                success: function (response) {
-
-                    if (response.data != null) {
-
-                        if(response.data[0].placa != '' && noPlaca.value == ''){
-                            noPlaca.value = response.data[0].placa
+    obtener_datos_contrato_info(){
+        $.ajax({
+            url: base_url+'Permisos/Ctrl_Permisos/getById',
+            type: 'GET',
+            dataType: 'json',
+            data : {
+                idpermiso : id_permiso
+            },
+            beforeSend: () => {
+                spinner.style.visibility="visible";
+            },
+            success: function(response){
+                if(response.data!=""){
+                    id_contrato = response.data.id_contrato
+                    id_persona_fisica = response.data.id_persona_fisica
+                    id_empresa = response.data.id_empresa
+    
+                    entidad.value = response.data.empresa
+                    referencia.value = response.data.numero_contrato
+                    tipoPermiso.value = response.data.id_tipo_permiso
+                    clientetEntidad.value = response.data.visita
+                    actividad.value = response.data.id_tipo_actividad
+                    vigencia.value = response.data.id_vigencia
+                    dias.value = response.data.dias
+    
+                    fechaInicio.value =  response.data.fecha_termino
+                    fechaTermino.value =  response.data.fecha_termino
+                    fechaInicio.setAttribute("min",  response.data.fecha_termino)
+    
+                    if(response.data.id_tipo_vigencia == 1){
+                        let dateArr = response.data.fecha_termino.split('-');
+                        let tempDate = new Date();
+                        let mm = dateArr[1] - 1; //Javascript considers 0 as Jan
+                        tempDate.setFullYear(dateArr[0]);
+                        tempDate.setMonth(mm);
+                        tempDate.setDate(dateArr[2]);
+                        tempDate.setDate(tempDate.getDate(dateArr[2]) + 1);//Add's one day
+    
+                        let userFriendlyMonth = (Number(tempDate.getMonth()) + 1); //user considers 1 as Jan
+                        if (userFriendlyMonth.toString().length < 2) {
+                            userFriendlyMonth = "0" + userFriendlyMonth;
                         }
-                        noSerieVehiculo.value = response.data[0].serie
-                        marcaVehiculo.value = response.data[0].marca
-                        modeloVehicuo.value = response.data[0].submarca
-                        anio.value = response.data[0].modelo
-                        color.value = response.data[0].color
-
-                        /*noPlaca.setAttribute("class","lectura")
-                        noPlaca.setAttribute("disabled",true)
-                        noSerieVehiculo.setAttribute("class","lectura")
-                        noSerieVehiculo.setAttribute("disabled",true)
-
-                        if (response.data_interna != null) {
-
-                            idvehiculo.value = response.data_interna.id
-                            noMotor.value = response.data_interna.numero_motor
-                            tipoVehiculo.value = response.data_interna.id_tipo_vehiculo
-                            tipoTarjetaCirculacion.value = response.data_interna.id_tipo_tarjeta_circulacion
-                            noTarjeta.value = response.data_interna.numero_tarjeta_circulacion
-                            tipodocumentoVeh.value = response.data_interna.id_tipo_documento
-                            noFacturaVeh.value = response.data_interna.numero_factura
-                            aseguradorasVeh.value = response.data_interna.id_tipo_aseguradora
-                            noPoliza.value = response.data_interna.numero_poliza
-                            //vigenciaPoliza.value = response.data_interna.vigencia_poliza
-                            periodoPago.value = response.data_interna.id_tipo_periodo
-                            periodoCobFechaInicio.value = response.data_interna.fecha_inicio_cobertura
-                            periodoCobFechaFin.value = response.data_interna.fecha_fin_cobertura
-                            //estatusVehiculo.value = response.data_interna.estatusvehiculo
-
-                            $(errornoMotor).html("")
-                            $(errortipoVehiculo).html("")
-                            $(errortipoTarjetaCirculacion).html("")
-                            $(errornoTarjeta).html("")
-                            $(errortipodocumentoVeh).html("")
-                            $(erroraseguradorasVeh).html("")
-                            $(errornoPoliza).html("")
-                            $(errorperiodoPago).html("")
-                            $(errorperiodoCobFechaInicio).html("")
-                            $(errorperiodoCobFechaFin).html("")
-                            //$(errorestatusVehiculo).html("")
-
-                            ajuntarLateralVehiculo.dataset.id = (response.data_interna.id_fotografia_lateral != null) ? response.data_interna.id_fotografia_lateral : ""
-                            ajuntarLateralVehiculo.dataset.imagen = response.data_interna.fotografia_lateral
-                            adjuntarPlacaVehiculo.dataset.id = (response.data_interna.id_fotografia_placa != null) ? response.data_interna.id_fotografia_placa : ""
-                            adjuntarPlacaVehiculo.dataset.imagen = response.data_interna.fotografia_placa
-                            btnSubirVehiculo.value = "Actualizar foto"
-                            $(errorSubirFotoVehiculo).html("")
-
-                             
-                            if (fechaTermino.value > response.data_interna.vigencia_poliza) {
-                                $(errorvigenciaPoliza).html("Debe estar vigente durante el periodo")
-                            } else {
-                                vigenciaPoliza.value = response.data_interna.vigencia_poliza
-                                $(errorvigenciaPoliza).html("")
+    
+                        let userFriendlyDay = (Number(tempDate.getDate()));
+                        if (userFriendlyDay.toString().length < 2) {
+                            userFriendlyDay = "0" + userFriendlyDay;
+                        }
+                        let dateadd = tempDate.getFullYear() + '-' + userFriendlyMonth + '-' + userFriendlyDay;
+    
+                        fechaInicio.value = dateadd
+                        fechaTermino.value = dateadd
+                        fechaInicio.setAttribute("min", dateadd)
+                    }
+                    
+                    recinto.value = response.data.id_recinto
+                    if(response.data.id_recinto_fiscalizado == null){
+                        divRecinto.style.display = 'none'
+                    }else{
+                        divRecinto.style.display = 'block'
+                    }
+                    nombreRecinto.value = response.data.id_recinto_fiscalizado
+                    motivo.value = response.data.motivo
+                    permisoGrupal.checked = (response.data.permiso_grupal == 1 ? true : false)
+                    curpResponsable.value = response.data.curp_responsable
+    
+                    if(response.data.id_tipo_vigencia == 2){
+                        divDias.style.display = ""
+                    }
+    
+                    if(response.data.permiso_grupal == 1){
+                        divCURPResp.style.display = ""
+                    }
+                }
+            },
+            complete: function(){
+                
+            }   
+        }).fail( function(response) {
+            
+        });
+    }
+    obtenerPersonal(){
+        $.ajax({
+            url: base_url + 'Permisos/Ctrl_Permisos/getPersonal',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                idpermiso: id_permiso
+            },
+            beforeSend: () => {
+                spinner.style.visibility = "visible";
+            },
+            success: function (response) {
+                if (response.data != "") {
+                    response.data.forEach(element => {
+                        $.ajax({
+                            url: base_url+'Usuarios/Ctrl_Personal/getByCURP',
+                            type: 'GET',
+                            dataType: 'json',
+                            global: false,
+                            data : {
+                                curp : element.curp
+                            },
+                            beforeSend: function(){
+                                idpersona.value = 0
+                                adjuntarLicencia.dataset.imagen = ""
+                                adjuntarLicencia.dataset.id = ""
+                                adjuntarPersonal.dataset.imagen = ""
+                                adjuntarPersonal.dataset.id = ""
+                                adjuntarIdentificacion.dataset.imagen = ""
+                                adjuntarIdentificacion.dataset.id = ""
+                            },
+                            success: function(response){
+            
+                                if(response.data != null){
+                                    tipoEmpleado.value = element.id_empleado
+                                    curp.value = element.curp
+                                    empresa.value = '0'
+                                    clavePatronal.value = '0'
+    
+                                    Permisos.prototype.validar_tipoPersona_nacionalidad(response.data.id_nacionalidad)
+    
+                                    nacionalidad.value = response.data.id_nacionalidad
+                                    
+                                    idpersona.value = response.data.id
+                                    idcontacto.value = response.data.id_contacto
+            
+                                    nombre.value = response.data.nombre
+                                    primerApellido.value = response.data.primer_apellido
+                                    segundoApellido.value = response.data.segundo_apellido
+            
+                                    numtelefono.value = response.data.telefono
+                                    correo.value = response.data.correo
+                                    numSeguroSocial.value = response.data.nss
+            
+                                    adjuntarLicencia.dataset.id = (response.data.id_imagen_licencia != null) ? response.data.id_imagen_licencia : ""
+                                    adjuntarIdentificacion.dataset.id = (response.data.id_imagen_identificacion != null) ? response.data.id_imagen_identificacion : ""
+                                    adjuntarPersonal.dataset.id = (response.data.id_imagen_persona != null) ? response.data.id_imagen_persona : ""
+            
+                                    if(response.data.numero_licencia != null && nacionalidad.value == 1){
+                                    
+                                        noLicenica.value = response.data.numero_licencia
+                                        chofer.checked = true
+                                        $(divLicencia).show()
+                                        $(errornoLicencia).html("")
+                                               
+                                        if(fechaTermino.value > response.data.fecha_expiracion_licencia){
+                                           $(errorfechaVenciminetoLic).html("Debe estar vigente durante el periodo") 
+                                        }else{
+                                            fechaVenciminetoLic.value = response.data.fecha_expiracion_licencia
+                                            adjuntarLicencia.dataset.imagen = response.data.fotografia_licencia
+                                            btnAdjuntarLicencia.value = 'Actualizar licencia'
+                                            $(errorSubirLicencia).html("")
+                                            $(errorfechaVenciminetoLic).html("")
+                                        }
+             
+                                    }else{
+                                        chofer.checked = false
+                                        $(divLicencia).hide()
+                                    }
+                                    
+                                    if(response.data.id_imagen_persona != null){
+                                        adjuntarPersonal.dataset.imagen = response.data.fotografia_persona
+                                        btnSubirPersonal.value = 'Actualizar foto'
+                                        $(errorSubirPersonal).html("")
+                                    }
+            
+                                    tipoIdentificacion.value = response.data.id_tipo_identificacion
+            
+                                    divFechaVencimiento.style.display = ""
+                                    divSubirDocumento.style.display = ""
+                                    divSubirfoto.style.display = ""
+                                    
+                                    switch (response.data.id_tipo_identificacion) {
+                                        case 1:
+                                            divClaveElector.style.display = ""
+                                            divPasaporte.style.display = "none"
+                                            divLibretaMar.style.display = "none"
+                                            divItinerario.style.display ="none"
+                                            claveElector.value = response.data.numero_identificacion
+            
+                                            if(fechaTermino.value > response.data.fecha_expiracion_identificacion){
+                                                $(errorfechaVenciminetoIdent).html("Debe estar vigente durante el periodo")    
+                                            }else{
+                                                fechaVenciminetoIdent.value = response.data.fecha_expiracion_identificacion
+                                                $(errorfechaVenciminetoIdent).html("")
+                                               
+                                                if(response.data.id_imagen_identificacion != null){
+                                                    adjuntarIdentificacion.dataset.imagen = response.data.fotografia_identificacion
+                                                    divSubirDocumento.style.display = ""
+                                                    btnSubirIdentificacion.value = 'Actualizar identificación'
+                                                    $(errorSubirIdentificacion).html("")
+                                                }
+                                            }
+            
+                                            $(errorine).html("")
+            
+                                            break;
+                                        case 2:
+                                            
+                                            divClaveElector.style.display = "none"
+                                            divPasaporte.style.display = ""
+                                            divLibretaMar.style.display = "none"
+                                            divItinerario.style.display ="none"
+                                            noPasaporte.value = response.data.numero_identificacion
+            
+                                            if(fechaTermino.value > response.data.fecha_expiracion_identificacion){
+                                                $(errorfechaVenciminetoIdent).html("Debe estar vigente durante el periodo")                                    
+                                              //  fechaVenciminetoIdent.value = ""
+                                            }else{
+                                                fechaVenciminetoIdent.value = response.data.fecha_expiracion_identificacion
+                                                $(errorfechaVenciminetoIdent).html("")
+                
+                                                if(response.data.id_imagen_identificacion != null){
+                                                    adjuntarIdentificacion.dataset.imagen = response.data.fotografia_identificacion
+                                                    divSubirDocumento.style.display = ""
+                                                    btnSubirIdentificacion.value = 'Actualizar identificación'
+                                                    $(errorSubirIdentificacion).html("")
+                                                }
+                                            }
+                                            
+                                            //$(errornoPasaporte).html("")
+            
+                                            break;
+                                        case 3:
+                                            divClaveElector.style.display = "none"
+                                            divPasaporte.style.display = "none"
+                                            divLibretaMar.style.display = ""
+                                            divItinerario.style.display ="none"
+                                            libretaMar.value = response.data.numero_identificacion
+                                            break;
+                                        case 4: 
+                                            divClaveElector.style.display = "none"
+                                            divPasaporte.style.display = "none"
+                                            divLibretaMar.style.display = "none"
+                                            divItinerario.style.display ="none"
+                                            break;
+                                        case 5:
+                                            divClaveElector.style.display = "none"
+                                            divPasaporte.style.display = "none"
+                                            divLibretaMar.style.display = "none"
+                                            divItinerario.style.display =""
+                                            itinerario.value = response.data.numero_identificacion
+                                            break;
+                                    }
+            
+                                    $(errornombre).html("")
+                                    $(errorprimerApellido).html("")
+                                    $(errornumtelefono).html("")
+                                    $(errorcorreo).html("")
+                                    $(errornumSeguroSocial).html("")
+                                    $(errortipoIdentificacion).html("")
+                                }
+                            },
+                            complete: function (){
+                                if(fotoIdentificacion && fotoIdentificacion && fotoPersona){
+                                    Permisos.prototype.agregar_personas(fotoLicencia,fotoIdentificacion,fotoPersona)
+                                }else{
+                                    Permisos.prototype.agregar_personas()
+                                }
                             }
-							
-							var temp = response.data_interna.fotografia_factura;var archivo = temp;var arc = temp.split("/");temp = arc[4];
-							var txt = "<input type='hidden' id='val_factura' value ='"+temp+"'>";  
-							$("#errorSubirFacturaVehiculo").html("<span class='color:#000'><a  id='tab_factura' href='/"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-							
-							var temp = response.data_interna.fotografia_lateral;var archivo = temp;var arc = temp.split("/");temp = arc[4];
-							var txt = "<input type='hidden' id='val_lateral' value ='"+temp+"'>";  
-							$("#errorSubirFotoLat").html("<span class='color:#000'><a id='tab_lateral' href='/"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-							
-							var temp = response.data_interna.fotografia_placa;var archivo = temp;var arc = temp.split("/");temp = arc[4];
-							var txt = "<input type='hidden' id='val_placa' value ='"+temp+"'>";  
-							$("#errorSubirFotoPla").html("<span class='color:#000'><a id='tab_placa' href='/"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-							
-							
-							errorSubirFotoLat
+                        }).fail( function(response) {
+                            if(response.responseText=="Sesion"){
+                                error_sesion();
+                            }
+                        });
+                    })
+                }
+            },
+            complete: function () {
+    
+            },
+        }).fail(function (response) {
+    
+        });
+    }
+    obtenerEquipoHerramienta(){
+        $.ajax({
+            url: base_url + 'Permisos/Ctrl_Permisos/getEquiposHerramientas',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                idpermiso: id_permiso
+            },
+            beforeSend: () => {
+                spinner.style.visibility = "visible";
+            },
+            success: function (response) {
+                if (response.data != "") {
+                    response.data.forEach(element => {
+                        $.ajax({
+                            url: base_url+'Permisos/Ctrl_Permisos/getEquipoBySerie',
+                            type: 'GET',
+                            dataType: 'json',
+                            global: false,
+                            data:{
+                                noserie: element.numero_serie
+                            },
+                            beforeSend: function(){
+                                idequipo.value = 0
+                                adjuntarEquipo.dataset.imagen = ""
+                                adjuntarEquipo.dataset.id = ""
+                            },
+                            success: function(response){
+                                if(response.data != null){
+    
+                                    divCaracteristicas.style.display = ""
+                                    divDocumento1.style.display = ""
+                                    divResguardo.style.display = ""
+                                    noSerieEquipo.value = element.numero_serie
+    
+                                  idequipo.value = response.data.id
+                                  tipoEquipo.value = response.data.id_tipo_equipo
+                                  modeloHerramienta.value = response.data.modelo
+                                  marcaHerramienta.value = response.data.marca
+                                  tipoDocumento.value = response.data.id_tipo_documento
+                                  noFacturaEquipo.value = response.data.numero_factura
+                                  adjuntarEquipo.dataset.id = (response.data.id_imagen_factura != null) ? response.data.id_imagen_factura : ""
+                                  adjuntarEquipo.dataset.imagen = response.data.factura_equipo
+                                  btnSubirEquipo.value = 'Actualizar documento'
+                                  //resguardo.value = response.data.id_personal
+                                  $("#resguardo option[data-id='" + response.data.id_personal +"']").attr("selected","selected");
+            
+                                  $(errortipoEquipo).html("")
+                                  $(errornoSerieEquipo).html("")
+                                  $(errormodeloHerramienta).html("")
+                                  $(errormarcaHerramienta).html("")
+                                  $(errortipoDocumento).html("")
+                                  $(errornoFacturaEquipo).html("")
+                                  $(errorHerramientaDuplicado).html("")
+                                  $(errorSubirFacturaEquipo).html("")
+                                  $(errorresguardo).html("")
+                                
+                                }
+                            },
+                            complete: function (){
+                                if(fotoFacturaEquipo){
+                                    Permisos.prototype.agregar_equipo(fotoFacturaEquipo)
+                                }else{
+                                    Permisos.prototype.agregar_equipo()
+                                }
+                            }
+                        }).fail(function(response){
+                            if(response.responseText=="Sesion"){
+                                error_sesion();
+                            } 
+                        });
+                    })
+                }
+            },
+        }).fail(function (response) {
+    
+        });
+    }
+    obternerMaterial(){
+
+    }
+    obtenerVehiculo(){
+        $.ajax({
+            url: base_url + 'Permisos/Ctrl_Permisos/getVehiculos',
+            type: 'GET',
+            dataType: 'json',
+            data: {
+                idpermiso: id_permiso
+            },
+            beforeSend: () => {
+                DTVehiculo.clear().draw();
+                spinner.style.visibility = "visible";
+            },
+            success: function (response) {
+                //divvehiculo.style.display = ''
+                if (response.data != "") {
+                    response.data.forEach(element => {
+                        $.ajax({
+                            async: false,
+                            url: base_url+'Permisos/Ctrl_Permisos/getVehiculosByPlacaPermiso',
+                            type: 'GET',
+                            dataType: 'json',
+                            global: false,
+                            data:{
+                                placa  : element.numero_placa,
+                                permiso  : id_permiso
+                            },
+            
+                            beforeSend: function(){
+                                idvehiculo.value = 0
+                                adjuntarVehiculoFactura.dataset.imagen= ""
+                                adjuntarVehiculoFactura.dataset.id= ""
+                                ajuntarLateralVehiculo.dataset.imagen= ""
+                                ajuntarLateralVehiculo.dataset.id= ""
+                                adjuntarPlacaVehiculo.dataset.imagen= ""
+                                adjuntarPlacaVehiculo.dataset.id= ""
+                            },
+                            success: function(response){
+                                
+                                if(response.data != null){
+                                    
+                                    noPlaca.value = response.data.numero_placa
+                                    noSerieVehiculo.value = response.data.numero_serie
+                                    marcaVehiculo.value = response.data.marca
+                                    modeloVehicuo.value = response.data.modelo
+                                    anio.value = response.data.anio
+                                    color.value = response.data.color
+            
+                                    noPlaca.setAttribute("class","lectura")
+                                    noPlaca.setAttribute("disabled",true)
+                                    noSerieVehiculo.setAttribute("class","lectura")
+                                    noSerieVehiculo.setAttribute("disabled",true)
+            
+                                    $(errornoPlaca).html("")
+                                    $(errornoSerieVehiculo).html("")
+            
+                                    idvehiculo.value = response.data.id
+                                    noMotor.value = response.data.numero_motor
+                                    tipoVehiculo.value = response.data.id_tipo_vehiculo
+                                    tipoTarjetaCirculacion.value = response.data.id_tipo_tarjeta_circulacion
+                                    noTarjeta.value = response.data.numero_tarjeta_circulacion
+                                    vigenciaTarjeta.value = response.data.vigencia_tarjeta_circulacion
+                                    tipodocumentoVeh.value = response.data.id_tipo_documento
+                                    noFacturaVeh.value = response.data.numero_factura
+                                    aseguradorasVeh.value = response.data.id_tipo_aseguradora
+                                    noPoliza.value = response.data.numero_poliza
+                                    vigenciaPoliza.value = response.data.vigencia_poliza
+                                    periodoPago.value = response.data.id_tipo_periodo
+                                    periodoCobFechaInicio.value = response.data.fecha_inicio_cobertura
+                                    periodoCobFechaFin.value = response.data.fecha_fin_cobertura
+                                    estatusVehiculo.value = response.data.estatusvehiculo
+                                    //selChofer.value = response.data.id_chofer
+                                    $("#selChofer option[data-id='" + response.data.id_chofer +"']").attr("selected","selected");
+    
+                                    $(errortipoVehiculo).html("")
+                                    $(errortipoTarjetaCirculacion).html("")
+                                    $(errornoTarjeta).html("")
+                                    $(errortipodocumentoVeh).html("")
+                                    $(erroraseguradorasVeh).html("")
+                                    $(errornoPoliza).html("")
+                                    $(errorperiodoPago).html("")
+                                    $(errorperiodoCobFechaInicio).html("")
+                                    $(errorperiodoCobFechaFin).html("")
+                                    $(errorestatusVehiculo).html("")
+        
+                                    adjuntarVehiculoFactura.dataset.id = (response.data.id_fotografia_factura != null) ? response.data.id_fotografia_factura : ""
+                                    adjuntarVehiculoFactura.dataset.imagen = response.data.fotografia_factura
+                                    btnSubirFacturaVehiculo.value = "Actualizar documento"
+                                    $(errorSubirFacturaVehiculo).html("")
+        
+                                    ajuntarLateralVehiculo.dataset.id = (response.data.id_fotografia_lateral != null) ? response.data.id_fotografia_lateral : ""
+                                    ajuntarLateralVehiculo.dataset.imagen = response.data.fotografia_lateral
+                                    adjuntarPlacaVehiculo.dataset.id = (response.data.id_fotografia_placa != null) ? response.data.id_fotografia_placa : ""
+                                    adjuntarPlacaVehiculo.dataset.imagen = response.data.fotografia_placa
+                                    btnSubirVehiculo.value = "Actualizar foto"
+                                    $(errorSubirFotoVehiculo).html("")
+        
+                                    /*if(fechaTermino.value > response.data.vigencia_tarjeta_circulacion){
+                                        $(errorvigenciaTarjeta).html("Debe estar vigente durante el periodo")    
+                                    }else{
+                                        vigenciaTarjeta.value = response.data.vigencia_tarjeta_circulacion
+                                        $(errorvigenciaTarjeta).html("")    
+                                    }
+                                    if(fechaTermino.value > response.data.vigencia_poliza){
+                                        $(errorvigenciaPoliza).html("Debe estar vigente durante el periodo")
+                                    }else{
+                                        vigenciaPoliza.value = response.data.vigencia_poliza
+                                        $(errorvigenciaPoliza).html("")
+                                    }*/
+                                }
+                              },
+                              complete: function (){
+                                  if(fotoFacturaVehiculo && fotoLateralVehiculo && fotoPlacaVehiculo){
+                                      Permisos.prototype.agregar_vehiculo(fotoFacturaVehiculo,fotoLateralVehiculo,fotoPlacaVehiculo)
+                                  }else{
+                                      Permisos.prototype.agregar_vehiculo()
+                                  }
+                            }
+                        }).fail(function(response){
+                            if(response.responseText=="Sesion"){
+                                error_sesion();
+                            }
+                        })
+                    })
+                }
+            }
+        }).fail(function (response) {
+    
+        });
+    }
+    peticion_repuve(ev) {
+
+        //  if(ev.target.value != ""){
+        $.ajax({
+            async: false,
+            url: base_url + 'Utilidades/Ctrl_Servicios/getDatosVehiculos',
+            type: 'GET',
+            dataType: 'json',
+            global: false,
+            data: {
+                endpoint: "repuvenacional",
+                noserie: noSerieVehiculo.value,
+                noplaca: noPlaca.value
+            },
+
+            beforeSend: function () {
+                idvehiculo.value = 0
+                adjuntarVehiculoFactura.dataset.imagen = ""
+                adjuntarVehiculoFactura.dataset.id = ""
+                ajuntarLateralVehiculo.dataset.imagen = ""
+                ajuntarLateralVehiculo.dataset.id = ""
+                adjuntarPlacaVehiculo.dataset.imagen = ""
+                adjuntarPlacaVehiculo.dataset.id = ""
+            },
+            success: function (response) {
+
+                if (response.data != null) {
+
+                    noPlaca.value = response.data[0].placa
+                    noSerieVehiculo.value = response.data[0].serie
+                    marcaVehiculo.value = response.data[0].marca
+                    modeloVehicuo.value = response.data[0].submarca
+                    anio.value = response.data[0].modelo
+                    color.value = response.data[0].color
+
+                    /*noPlaca.setAttribute("class","lectura")
+                    noPlaca.setAttribute("disabled",true)
+                    noSerieVehiculo.setAttribute("class","lectura")
+                    noSerieVehiculo.setAttribute("disabled",true)*/
+                    noMotor.setAttribute("class", "lectura")
+                    noMotor.setAttribute("disabled", true)
+
+                    $(errornoPlaca).html("")
+                    $(errornoSerieVehiculo).html("")
+
+                    if (response.data_interna != null) {
+
+                        idvehiculo.value = response.data_interna.id
+                        noMotor.value = response.data_interna.numero_motor
+                        tipoVehiculo.value = response.data_interna.id_tipo_vehiculo
+                        tipoTarjetaCirculacion.value = response.data_interna.id_tipo_tarjeta_circulacion
+                        noTarjeta.value = response.data_interna.numero_tarjeta_circulacion
+                        //vigenciaTarjeta.value = response.data_interna.vigencia_tarjeta_circulacion
+                        tipodocumentoVeh.value = response.data_interna.id_tipo_documento
+                        noFacturaVeh.value = response.data_interna.numero_factura
+                        aseguradorasVeh.value = response.data_interna.id_tipo_aseguradora
+                        noPoliza.value = response.data_interna.numero_poliza
+                        //vigenciaPoliza.value = response.data_interna.vigencia_poliza
+                        periodoPago.value = response.data_interna.id_tipo_periodo
+                        periodoCobFechaInicio.value = response.data_interna.fecha_inicio_cobertura
+                        periodoCobFechaFin.value = response.data_interna.fecha_fin_cobertura
+                        //estatusVehiculo.value = response.data_interna.estatusvehiculo
+
+                        $(errornoMotor).html("")
+                        $(errortipoVehiculo).html("")
+                        $(errortipoTarjetaCirculacion).html("")
+                        $(errornoTarjeta).html("")
+                        $(errortipodocumentoVeh).html("")
+                        $(erroraseguradorasVeh).html("")
+                        $(errornoPoliza).html("")
+                        $(errorperiodoPago).html("")
+                        $(errorperiodoCobFechaInicio).html("")
+                        $(errorperiodoCobFechaFin).html("")
+                        //$(errorestatusVehiculo).html("")
+
+                        adjuntarVehiculoFactura.dataset.id = (response.data_interna.id_fotografia_factura != null) ? response.data_interna.id_fotografia_factura : ""
+                        adjuntarVehiculoFactura.dataset.imagen = response.data_interna.fotografia_factura
+                        btnSubirFacturaVehiculo.value = "Actualizar documento"
+                        $(errorSubirFacturaVehiculo).html("")
+
+                        ajuntarLateralVehiculo.dataset.id = (response.data_interna.id_fotografia_lateral != null) ? response.data_interna.id_fotografia_lateral : ""
+                        ajuntarLateralVehiculo.dataset.imagen = response.data_interna.fotografia_lateral
+                        adjuntarPlacaVehiculo.dataset.id = (response.data_interna.id_fotografia_placa != null) ? response.data_interna.id_fotografia_placa : ""
+                        adjuntarPlacaVehiculo.dataset.imagen = response.data_interna.fotografia_placa
+                        btnSubirVehiculo.value = "Actualizar foto"
+                        $(errorSubirFotoVehiculo).html("")
+
+                        /*if (fechaTermino.value > response.data_interna.vigencia_tarjeta_circulacion) {
+                            $(errorvigenciaTarjeta).html("Debe estar vigente durante el periodo")
+                        } else {
+                            vigenciaTarjeta.value = response.data_interna.vigencia_tarjeta_circulacion
+                            $(errorvigenciaTarjeta).html("")
+                        }*/
+                        if (fechaTermino.value > response.data_interna.vigencia_poliza) {
+                            $(errorvigenciaPoliza).html("Debe estar vigente durante el periodo")
+                        } else {
+                            vigenciaPoliza.value = response.data_interna.vigencia_poliza
+                            $(errorvigenciaPoliza).html("")
                         }
-
-                        if(noMotor.value != ''){
-                            noMotor.setAttribute("class", "lectura")
-                            noMotor.setAttribute("disabled", true)
-                        }
-
-                        $(errornoPlaca).html("")
-                        $(errornoSerieVehiculo).html("")
-                    }else{
-                        $(marcaVehiculo).attr("class","reiniciar-vehiculo form-control")
-                        $(modeloVehicuo).attr("class","reiniciar-vehiculo form-control")
-                        $(anio).attr("class","reiniciar-vehiculo form-control")
-                        $(color).attr("class","reiniciar-vehiculo form-control")
-
-                        marcaVehiculo.removeAttribute("disabled")
-                        modeloVehicuo.removeAttribute("disabled")
-                        anio.removeAttribute("disabled")
-                        color.removeAttribute("disabled")
                     }
+
+
+
                 }
-            }).fail(function (response) {
-                if (response.responseText == "Sesion") {
-                    error_sesion();
-                }
-            })
-        }
-    }*/
+            }
+        }).fail(function (response) {
+            if (response.responseText == "Sesion") {
+                error_sesion();
+            }
+        })
+        //}
+    }
     agregar_personas(fotoLicencia, fotoIdentificacion, fotoPersona) {
         let validacion = true
 
@@ -3088,27 +3063,27 @@ class Permisos {
         $(errornoIssste).html("")
         $(errornoSeguro).html("")
         $(errorentidadGobierno).html("")
+        $(errorempresa).html("")
+        $(errorclavePatronal).html("")
         $(errornombre).html("")
         $(errorprimerApellido).html("")
         $(errornumtelefono).html("")
         $(errornoLicencia).html("")
         $(errorfechaVenciminetoLic).html("")
-        
+        $(errorSubirLicencia).html("")
         $(errortipoIdentificacion).html("")
         $(errorclaveElectoral).html("")
-        //$(errornumPasaporte).html("")
+        $(errornumPasaporte).html("")
         $(errorlibretaMar).html("")
         $(errorfechaVenciminetoIdent).html("")
-        //$(errorSubirIdentificacion).html("")
-        //$(errorSubirPersonal).html("")
-		//$(errorSubirLicencia).html("")
-		
-		var varlicencia = "";
+        $(errorSubirIdentificacion).html("")
+        $(errorSubirPersonal).html("")
 
         if (nacionalidad.value == "") {
             $(errornacionalidad).html("Campo obligatorio")
             validacion = false
         }
+
         if (tipoSeguro.value == "") {
             $(errortipoSeguro).html("Campo obligatorio")
             validacion = false
@@ -3128,20 +3103,12 @@ class Permisos {
                 validacion = false
             }
         }
-        if (nacionalidad.value == 1 && curp.value == "" || nacionalidad.value == 2 && tipoEmpleado.value == 1 && curp.value == "") {
+
+        if (nacionalidad.value == 1 && curp.value == "") {
             $(errorcurp).html("Campo obligatorio")
             validacion = false
         }
-        if(nacionalidad.value == 2){
-            if (nombre.value == "") {
-                $(errornombre).html("Campo obligatorio")
-                validacion = false
-            }
-            if (primerApellido.value == "") {
-                $(errorprimerApellido).html("Campo obligatorio")
-                validacion = false
-            }
-        }
+
         /*(tipoEmpleado.value != 5 && nacionalidad.value == 1 && numSeguroSocial.value == ""){
             $(errornumSeguroSocial).html("Campo obligatorio")
             validacion = false
@@ -3176,6 +3143,17 @@ class Permisos {
             $(errorclavePatronal).html("Campo obligatorio")
             validacion = false
         }*/
+
+        if (nombre.value == "") {
+            $(errornombre).html("Campo obligatorio")
+            validacion = false
+        }
+
+        if (primerApellido.value == "") {
+            $(errorprimerApellido).html("Campo obligatorio")
+            validacion = false
+        }
+
         if (numtelefono.value == "") {
             $(errornumtelefono).html("Campo obligatorio")
             validacion = false
@@ -3203,15 +3181,10 @@ class Permisos {
                 validacion = false
             }
 
-			var tmp= $("#val_licencia").val();		
-			if (typeof tmp  !== "undefined"){varlicencia = $("#val_licencia").val();}else {
-				$(errorSubirLicencia).html("Campo obligatorio"); validacion = false;
-			} 
-		
-            /*if (adjuntarLicencia.value == "" && adjuntarLicencia.dataset.imagen == "" && fotoLicencia == null) {
+            if (adjuntarLicencia.value == "" && adjuntarLicencia.dataset.imagen == "" && fotoLicencia == null) {
                 $(errorSubirLicencia).html("Campo obligatorio")
                 validacion = false
-            }*/
+            }
         }
 
         if (fechaTermino.value > fechaVenciminetoIdent.value) {
@@ -3224,7 +3197,7 @@ class Permisos {
         } else if ((tipoIdentificacion.value == 7 || tipoIdentificacion.value == 8) && claveElector.value == "") {
             $(errorclaveElectoral).html("Campo obligatorio")
             validacion = false
-        } else if ((tipoIdentificacion.value == 2 || tipoIdentificacion.value == 4) && noPasaporte.value == "") {
+        } else if (tipoIdentificacion.value == 2 && noPasaporte.value == "") {
             $(errornumPasaporte).html("Campo obligatorio")
             validacion = false
         } else if (tipoIdentificacion.value == 3 && libretaMar.value == "") {
@@ -3235,31 +3208,8 @@ class Permisos {
             $(errorfechaVenciminetoIdent).html("Campo obligatorio")
             validacion = false
         }
-		
-		var tmp= $("#val_identificacion").val();		
-		if (typeof tmp  !== "undefined"){}else {
-			$(errorSubirIdentificacion).html("Campo obligatorio"); validacion = false;
-		}
-		
-		var tmp= $("#val_personal").val();		
-		if (typeof tmp  !== "undefined"){}else {
-			$(errorSubirPersonal).html("Campo obligatorio"); validacion = false;
-		}
-        if(![1,7].includes(parseInt(tipoEmpleado.value))){
-            /*if(clavePatronal.value == ""){
-                errorclavePatronal.innerHTML = "Campo obligatorio"
-                validacion = false
-            }*/
-            if(empresa.value == ""){
-                errorempresa.innerHTML = "Campo obligatorio"
-                validacion = false
-            }
-            if(empresa_rfc.value == ""){
-                errorempresa_rfc.innerHTML = "Campo obligatorio"
-                validacion = false
-            }
-        }
-        /*if (tipoIdentificacion.value != "" && adjuntarIdentificacion.value == "" && adjuntarIdentificacion.dataset.imagen == "" && fotoIdentificacion == null) {
+
+        if (tipoIdentificacion.value != "" && adjuntarIdentificacion.value == "" && adjuntarIdentificacion.dataset.imagen == "" && fotoIdentificacion == null) {
             $(errorSubirIdentificacion).html("Campo obligatorio")
             validacion = false
         }
@@ -3268,27 +3218,25 @@ class Permisos {
             $(errorSubirPersonal).html("Campo obligatorio")
             validacion = false
         }
-		*/
+
         if (!validacion || errorEstructuraCURP || errorEstructuraCorreo || errorEstructuraINEIFE || errorEstructuraPasaporte) {
-              return false
+            return false
         }
-		 
         let datos = {
-			idempresa:(empresa.value != "" ? idempresa.value : id_empresa),
+
             idpersona: idpersona.value,
             id_personal_rest: id_personal_rest,
             idcontacto: idcontacto.value,
             tipoEmpleado: tipoEmpleado.value,
             nacionalidad: nacionalidad.value,
-            entidadGobierno: (entidadGobierno.value == '' ? 0 : entidadGobierno.value),
+            entidadGobierno: entidadGobierno.value,
             empresa: empresa.value,
             clavePatronal: clavePatronal.value,
-            rfc: empresa_rfc.value,
             tipoSeguro: tipoSeguro.value,
             numSeguroSocial: numSeguroSocial.value,
             noIssste: noIssste.value,
             noSeguro: noSeguro.value,
-            aseguradora: (aseguradoras.value == '' ? 0 : aseguradoras.value) ,
+            aseguradora: aseguradoras.value,
             curp: curp.value,
             nombre: nombre.value,
             primerApellido: primerApellido.value,
@@ -3305,41 +3253,27 @@ class Permisos {
             itinerario: itinerario.value,
             fechaVenciminetoLic: fechaVenciminetoLic.value,
             
-            idimagenlicencia:  (adjuntarLicencia.dataset.id != "") ? adjuntarLicencia.dataset.id : 0,
-            fotografiaLicencia: varlicencia,
+            idimagenlicencia: (adjuntarLicencia.dataset.id != "") ? adjuntarLicencia.dataset.id : 0,
+            fotografiaLicencia: (fotoLicencia) ? fotoLicencia : $("#adjuntarLicencia")[0].files[0],
 
             idimagenidentificacion: (adjuntarIdentificacion.dataset.id != "") ? adjuntarIdentificacion.dataset.id : 0,
-            fotografiaIdentificacion: $("#val_identificacion").val(),
+            fotografiaIdentificacion: (fotoIdentificacion) ? fotoIdentificacion : $("#adjuntarIdentificacion")[0].files[0],
 
-            idimagenpersona:  (adjuntarPersonal.dataset.id != "") ? adjuntarPersonal.dataset.id : 0,
-            fotografiapersona: $("#val_personal").val(),
+            idimagenpersona: (adjuntarPersonal.dataset.id != "") ? adjuntarPersonal.dataset.id : 0,
+            fotografiapersona: (fotoPersona) ? fotoPersona : $("#adjuntarPersonal")[0].files[0]
         }
-		 
+
         datosPersonal.forEach(element => {
-            
-            //VALIDACION PENDIENTE PARA REGISTROS SIN CURP  
-            /*if(nacionalidad.value == 1 || nacionalidad.value == 2 && tipoEmpleado.value == 1){
-                if(element["curp"] == datos["curp"] && validacion == true) {
-                    validacion = false;
-                }  
-            }else{
-                if(element["nombre"] == datos["nombre"] && element["primerApellido"] == datos["primerApellido"] && validacion == true){
-                    validacion = false;
-                }
-            }*/
-            if(datos["nacionalidad"] == 1){
-                if (element["curp"] == datos["curp"] && validacion == true) {
-                    validacion = false;
-                }
+            if (element["curp"] == datos["curp"] && validacion == true) {
+                validacion = false;
             }
         })
 
         if (chofer.checked) {
             vehiculotab.disabled = false
-        } 
-        /*else {
+        } else {
             vehiculotab.disabled = true
-        }*/
+        }
 
         if (!validacion) {
             $(errorPersonalDuplicado).html("El registro ya existe el la lista")
@@ -3348,29 +3282,22 @@ class Permisos {
             $(errorPersonalDuplicado).html("")
         )
         datosPersonal.push(datos)
-        /*if (permisoGrupal.checked == false && datosPersonal.length == 1) {
+
+        if (permisoGrupal.checked == false && datosPersonal.length == 1) {
             tipoEmpleado.setAttribute("disabled", true)
-        }*/
+        }
 
-        /*
-
-        '<div class="p-1">' +
-            '<a href="#!" title="Modificar">' +
-            '<span class="glyphicon glyphicon-pencil modificar-persona" data-id="' + (datosPersonal.length - 1) + '"></span' +
-            '</a>' +
-            '</div>' +
-
-            */
-
-		$("#errorSubirIdentificacion").html("");
-		$("#errorSubirPersonal").html("");
-		$("#errorSubirLicencia").html("");
         Permisos.prototype.obtener_personal()
         DTPersonal.row.add([
             '<center>' + tipoEmpleado.options[tipoEmpleado.selectedIndex].text + '</center>',
             '<center>' + datos.nombre + ' ' + datos.primerApellido + ' ' + datos.segundoApellido + '</center>',
             '<center>' + nacionalidad.options[nacionalidad.selectedIndex].text + '</center>',
             '<div class="d-flex justify-content-center" >' +
+            '<div class="p-1">' +
+            '<a href="#!" title="Modificar">' +
+            '<span class="glyphicon glyphicon-pencil modificar-persona" data-id="' + (datosPersonal.length - 1) + '"></span' +
+            '</a>' +
+            '</div>' +
             '<div class="p-1">' +
             '<a href="#!" title="Eliminar">' +
             '<span class="glyphicon glyphicon-trash eliminar" data-id="' + (datosPersonal.length - 1) + '"></span' +
@@ -3388,7 +3315,6 @@ class Permisos {
         divEntidad.style.display = "none"
         divEmpresa.style.display = "none"
         divClavePatronal.style.display = "none"
-        divRFC.style.display = "none"
         divTipoSeguro.style.display = "none"
         divNoSeguroSocial.style.display = "none"
         divNoIssste.style.display = "none"
@@ -3418,27 +3344,21 @@ class Permisos {
         document.getElementById('btnAdjuntarLicencia').value = 'Subir documento'
         document.getElementById('btnSubirIdentificacion').value = 'Subir identificación'
         document.getElementById('btnSubirPersonal').value = 'Subir foto'
-        
-        fotoLicencia = null
-        fotoIdentificacion = null 
-        fotoPersona = null
-
         errorEstructuraCURP = false
         errorEstructuraCorreo = false
         errorEstructuraINEIFE = false
         errorEstructuraPasaporte = false
     }
-    agregar_equipo(fotoFacturaEquipo, fotoEquipoAnexo, fotoEquipoRF) {
+    agregar_equipo(fotoFacturaEquipo) {
 
         let validacion = true;
 
-       // $(errorSubirFacturaEquipo).html("")
+        $(errorSubirFacturaEquipo).html("")
 
         if (tipoEquipo.value == "") {
             $(errortipoEquipo).html("Campo obligatorio")
             validacion = false
         }
-    
         if (noSerieEquipo.value == "") {
             $(errornoSerieEquipo).html("Campo obligatorio")
             validacion = false
@@ -3455,46 +3375,21 @@ class Permisos {
             $(errortipoDocumento).html("Campo obligatorio")
             validacion = false
         }
-        if (resguardo.value == "") {
-            $(errorresguardo).html("Campo obligatorio")
-            validacion = false
-        }
-
         if (noFacturaEquipo.value == "") {
             $(errornoFacturaEquipo).html("Campo obligatorio")
             validacion = false
         }
-
-        let fa = ''
-        let an = ''
-        let rf = ''
-        
-        var tmp= $("#val_equipo").val();		
-        if (typeof tmp  !== "undefined"){
-            fa = tmp
-        }else {
-            $(errorSubirFacturaEquipo).html("Campo obligatorio"); validacion = false;
+        if (resguardo.value == "") {
+            $(errorresguardo).html("Campo obligatorio")
+            validacion = false
         }
-
-        var tmp= $("#val_equipo_anexo").val();		
-        if (typeof tmp  !== "undefined"){
-            an = tmp
-        }
-
-        var tmp= $("#val_equipo_rf").val();		
-        if (typeof tmp  !== "undefined"){
-            rf = tmp
-        }
-
-
-        if(tipoEquipo.value == 5){
-            if(descripcionEquipo.value == ""){
-                $(errordescripcionEquipo).html("Campo obligatorio")
-                validacion = false
-            }
+        if (adjuntarEquipo.value == "" && adjuntarEquipo.dataset.imagen == "" && fotoFacturaEquipo == null) {
+            $(errorSubirFacturaEquipo).html("Campo obligatorio")
+            validacion = false
         }
 
         if (validacion) {
+
             let datos = {
                 idequipo: idequipo.value,
                 tipoEquipo: tipoEquipo.value,
@@ -3505,20 +3400,13 @@ class Permisos {
                 noFactura: noFacturaEquipo.value,
                 resguardo: resguardo.value,
                 idimagenfactura: (adjuntarEquipo.dataset.id != "") ? adjuntarEquipo.dataset.id : 0,
-                fotografiaFactura: fa,
-                idimagenAnexo: (adjuntarEquipoAnexo.dataset.id != "") ? adjuntarEquipoAnexo.dataset.id : 0,
-                fotografiaAnexo: an,
-                idimagenRF: (adjuntarEquipoRF.dataset.id != "") ? adjuntarEquiporRF.dataset.id : 0,
-                fotografiaRF: rf,
-                //fotografia          : $("#adjuntarEquipo")[0].files[0],
-                anexo29: anexo29.value,
-                descripcionEquipo : descripcionEquipo.value
-            } 
+                fotografiaFactura: (fotoFacturaEquipo) ? fotoFacturaEquipo : $("#adjuntarEquipo")[0].files[0]
+                //fotografia          : $("#adjuntarEquipo")[0].files[0]
+            }
+
             datosEquipos.forEach(element => {
-                if(datos["tipoEquipo"] != 5){
-                    if (element["noSerie"] == datos["noSerie"] && validacion == true) {
-                        validacion = false;
-                    }
+                if (element["noSerie"] == datos["noSerie"] && validacion == true) {
+                    validacion = false;
                 }
             })
 
@@ -3528,20 +3416,6 @@ class Permisos {
             } else (
                 $(errorHerramientaDuplicado).html("")
             )
-			$("#errorSubirFacturaEquipo").html(""); 
-			$("#errorSubirEquipoAnexo").html(""); 
-			$("#errorSubirEquipoRF").html(""); 
-
-            /*
-
-            '<div class="p-1">' +
-                '<a href="#!" title="Modificar">' +
-                '<span class="glyphicon glyphicon-pencil modificar-equipo" data-id="' + (datosEquipos.length - 1) + '"></span>' +
-                '</a>' +
-                '</div>' +
-
-                */
-
             datosEquipos.push(datos)
             DTEquipo.row.add([
                 '<center>' + tipoEquipo.options[tipoEquipo.selectedIndex].text + '</center>',
@@ -3549,6 +3423,11 @@ class Permisos {
                 '<center>' + datos.marca + '</center>',
                 '<center>' + datos.noSerie + '</center>',
                 '<div class="d-flex justify-content-center" >' +
+                '<div class="p-1">' +
+                '<a href="#!" title="Modificar">' +
+                '<span class="glyphicon glyphicon-pencil modificar-equipo" data-id="' + (datosEquipos.length - 1) + '"></span>' +
+                '</a>' +
+                '</div>' +
                 '<div class="p-1">' +
                 '<a href="#!" title="Eliminar">' +
                 '<span class="glyphicon glyphicon-trash eliminar" data-id="' + (datosEquipos.length - 1) + '"></span>' +
@@ -3559,29 +3438,14 @@ class Permisos {
             edicion_equipo = 0
             //Reincio de modales de carga de documentos
             adjuntarEquipo.value = ''
-            adjuntarEquipoAnexo.value = ''
-            adjuntarEquipoRF.value = ''
             //Reinicio de campos mostrados a inicio
             divCaracteristicas.style.display = "none"
             divDocumento1.style.display = "none"
             divResguardo.style.display = "none"
-            divOtros.style.display = "none"
             idequipo.value = 0
             //Reinicio de valores de campos
-            if (datosPersonal.length == 1) {
-                resguardo.classList.remove("reiniciar-equipo")
-            }else{
-                resguardo.classList.add("reiniciar-equipo")
-            }
             $(".reiniciar-equipo").val("")
             document.getElementById('btnSubirEquipo').value = 'Subir documento'
-            document.getElementById('btnSubirEquipoAnexo').value = 'Subir Anexo'
-            document.getElementById('btnSubirEquipoRF').value = 'Subir RF'
-            document.getElementById('btnSubirMaterial').value = 'Subir documento'
-            fotoFacturaEquipo = null
-            fotoEquipoAnexo = null
-            fotoEquipoRF = null
-            fotoMaterial = null
         }
     }
     agregar_material() {
@@ -3591,6 +3455,8 @@ class Permisos {
             $(errorresponsableMaterial).html("campo obligatorio")
             validacion = false
         }*/
+
+        responsableMaterial.disabled = true;
 
         if (tipoMaterial.value == "") {
             $(errortipoMaterial).html("Campo obligatorio")
@@ -3616,27 +3482,23 @@ class Permisos {
             let datos = {
                 responsable: responsableMaterial.value,
                 tipomaterial: tipoMaterial.value,
-                tipomedida:(tipoMedida.value == '' ? 0 : tipoMedida.value)   ,
+                tipomedida: tipoMedida.value,
                 cantidad: cantidad.value,
                 descripcion: descripcion.value
             }
 
-            /*
-
-            '<div class="p-1">' +
-                '<a href="#!" title="Modificar">' +
-                '<span class="glyphicon glyphicon-pencil modificar-material" data-id="' + (datosMaterial.length - 1) + '"></span>' +
-                '</a>' +
-                '</div>' +
-
-                */
             datosMaterial.push(datos)
             DTMaterial.row.add([
                 '<center>' + tipoMaterial.options[tipoMaterial.selectedIndex].text + '</center>',
                 '<center>' + cantidad.value + '</center>',
-                '<center>' +  tipoMedida.options[tipoMedida.selectedIndex].text + '</center>',
+                '<center>' + (tipoMaterial.value == 1 ? tipoMedida.options[tipoMedida.selectedIndex].text : '') + '</center>',
                 '<center>' + descripcion.value + '</center>',
                 '<div class="d-flex justify-content-center" >' +
+                '<div class="p-1">' +
+                '<a href="#!" title="Modificar">' +
+                '<span class="glyphicon glyphicon-pencil modificar-material" data-id="' + (datosMaterial.length - 1) + '"></span>' +
+                '</a>' +
+                '</div>' +
                 '<div class="p-1">' +
                 '<a href="#!" title="Eliminar">' +
                 '<span class="glyphicon glyphicon-trash eliminar" data-id="' + (datosMaterial.length - 1) + '"></span>' +
@@ -3651,13 +3513,12 @@ class Permisos {
             tipoMedida.value = ""
             cantidad.value = ""
             descripcion.value = ""
-
-            responsableMaterial.disabled = true;
+            divMedidas.style.display = "none"
         }
     }
     agregar_vehiculo(fotoFacturaVehiculo, fotoLateralVehiculo, fotoPlacaVehiculo) {
         let validacion = true
-        //$(errorSubirFacturaVehiculo).html("")
+        $(errorSubirFacturaVehiculo).html("")
         $(errorSubirFotoVehiculo).html("")
 
         if (noPlaca.value == "") {
@@ -3684,10 +3545,10 @@ class Permisos {
             $(errorvigenciaTarjeta).html("Campo obligatorio")
             validacion = false
         }*/
-        /*if (tipodocumentoVeh.value == "") {
+        if (tipodocumentoVeh.value == "") {
             $(errortipodocumentoVeh).html("Campo obligatorio")
             validacion = false
-        }*/
+        }
         /*if(noFacturaVeh.value == ""){
             $(errornoFacturaVeh).html("Campo obligatorio")
             validacion = false
@@ -3724,51 +3585,35 @@ class Permisos {
             $(errorselChofer).html("Campo obligatorio")
             validacion = false
         }
-		
-        /*if (ajuntarLateralVehiculo.value == "" && ajuntarLateralVehiculo.dataset.imagen == "" && fotoLateralVehiculo == null) {
+        if (adjuntarVehiculoFactura.value == "" && adjuntarVehiculoFactura.dataset.imagen == "" && fotoFacturaVehiculo == null) {
+            $(errorSubirFacturaVehiculo).html("Campo obligatorio")
+            validacion = false
+        }
+        if (ajuntarLateralVehiculo.value == "" && ajuntarLateralVehiculo.dataset.imagen == "" && fotoLateralVehiculo == null) {
             $(errorSubirFotoVehiculo).html("Campo obligatorio")
             validacion = false
         }
         if (adjuntarPlacaVehiculo.value == "" && adjuntarPlacaVehiculo.dataset.imagen == "" && fotoPlacaVehiculo == null) {
             $(errorSubirFotoVehiculo).html("Campo obligatorio")
             validacion = false
-        }*/
-		
-		var tmp= $("#val_lateral").val();		
-			if (typeof tmp  !== "undefined"){}else {
-				$(errorSubirFotoVehiculo).html("Campo obligatorio"); validacion = false;
-			}
-			
+        }
 
         if (noSerieVehiculo.value.length != 17 && noSerieVehiculo.value != "") {
             $(errornoSerieVehiculo).html("Deben ser 17 caracteres")
             validacion = false
         }
         if (noMotor.value != "") {
-            if (noMotor.value.length < 4 || noMotor.value.length > 25) {
-                $(errornoMotor).html("Deben ser entre 4 y 25 caracteres")
+            if (noMotor.value.length < 6 || noMotor.value.length > 10) {
+                $(errornoMotor).html("Deben ser entre 6 y 10 caracteres")
                 validacion = false
             }
         }
-
-        if(anio.value>'2021'){
-            erroranio.innerHTML = 'Información no válida'
-            return
-        }
-
         /*if(noMotor.value == ""){
             $(errornoMotor).html("Campo obligatorio")
             validacion = false
         }*/
 
         if (validacion) {
-
-            let elemVehiculos = document.getElementsByClassName('reiniciar-vehiculo')
-            for (let i = 0; i < elemVehiculos.length; i++) {  
-                elemVehiculos[i].removeAttribute("disabled")
-            }
-
-
             let datos = {
                 idvehiculo: idvehiculo.value,
                 noPlaca: noPlaca.value,
@@ -3776,22 +3621,31 @@ class Permisos {
                 noMotor: noMotor.value,
                 marca: marcaVehiculo.value,
                 modelo: modeloVehicuo.value,
-                anio: (anio.value == '' ? 0 : anio.value),
+                anio: anio.value,
                 color: color.value,
                 tipoVehiculo: tipoVehiculo.value,
                 tipoTarCircu: tipoTarjetaCirculacion.value,
                 noTarjeta: noTarjeta.value,
+                //vigenciaTarjete: vigenciaTarjeta.value,
+                tipoDocumento: tipodocumentoVeh.value,
+                noFactura: noFacturaVeh.value,
+                idimagenfactura: (adjuntarVehiculoFactura.dataset.id != "") ? adjuntarVehiculoFactura.dataset.id : 0,
+                documentoFactura: (fotoFacturaVehiculo) ? fotoFacturaVehiculo : $("#adjuntarVehiculoFactura")[0].files[0],
+                //documentoFactura        : $("#adjuntarVehiculoFactura")[0].files[0],
                 aseguradora: aseguradorasVeh.value,
                 noPoliza: noPoliza.value,
                 vigenciaPoliza: vigenciaPoliza.value,
                 periodoPago: periodoPago.value,
                 periodoFechaInicio: periodoCobFechaInicio.value,
                 periodoFechaFin: periodoCobFechaFin.value,
+                //estatusVehiculo         : estatusVehiculo.value,
                 chofer: selChofer.value,
-                idfotografiaLateral:  0,
-                fotografiaLateral: $("#val_lateral").val(),
-                idfotografiaPlaca:  0,
-                fotografiaPlaca: $("#val_placa").val(),
+                idfotografiaLateral: (ajuntarLateralVehiculo.dataset.id != "") ? ajuntarLateralVehiculo.dataset.id : 0,
+                fotografiaLateral: (fotoLateralVehiculo) ? fotoLateralVehiculo : $("#ajuntarLateralVehiculo")[0].files[0],
+                //fotografiaLateral       : $("#ajuntarLateralVehiculo")[0].files[0],
+                idfotografiaPlaca: (adjuntarPlacaVehiculo.dataset.id != "") ? adjuntarPlacaVehiculo.dataset.id : 0,
+                //fotografiaPlaca         : $("#adjuntarPlacaVehiculo")[0].files[0],
+                fotografiaPlaca: (fotoPlacaVehiculo) ? fotoPlacaVehiculo : $("#adjuntarPlacaVehiculo")[0].files[0]
             }
 
             datosVehiculos.forEach(element => {
@@ -3799,8 +3653,6 @@ class Permisos {
                     validacion = false;
                 }
             })
-			
-			
 
             if (!validacion) {
                 $(errorVehiculoDuplicado).html("El registro ya existe el la lista")
@@ -3808,11 +3660,7 @@ class Permisos {
             } else (
                 $(errorVehiculoDuplicado).html("")
             )
-			$("#errorSubirFacturaVehiculo").html("");			
-			$("#errorSubirFotoVehiculo").html(""); 
-			$("#errorSubirFotoLat").html(""); 
-			$("#errorSubirFotoPla").html(""); 
-			
+
             datosVehiculos.push(datos)
             DTVehiculo.row.add([
                 '<center>' + datos.noPlaca + '</center>',
@@ -3823,6 +3671,11 @@ class Permisos {
                 '<center>' + (datos.chofer != null ? 'SI' : 'NO') + '</center>',
                 '<div class="d-flex justify-content-center" >' +
                 '<div class="p-1">' +
+                '<a href="#!" title="Modificar">' +
+                '<span class="glyphicon glyphicon-pencil modificar-vehiculo" data-id="' + (datosVehiculos.length - 1) + '"></span>' +
+                '</a>' +
+                '</div>' +
+                '<div class="p-1">' +
                 '<a href="#!" title="Eliminar">' +
                 '<span class="glyphicon glyphicon-trash eliminar" data-id="' + (datosVehiculos.length - 1) + '"></span>' +
                 '</a>' +
@@ -3831,6 +3684,7 @@ class Permisos {
             ]).draw(false)
             edicion_vehiculo = 0
             //Reincio de modales de carga de documentos
+            adjuntarVehiculoFactura.value = ''
             ajuntarLateralVehiculo.value = ''
             adjuntarPlacaVehiculo.value = ''
             fotografiaLateral.style.display = ""
@@ -3847,11 +3701,8 @@ class Permisos {
             //Reinicio de valores de campos
             idvehiculo.value = 0
             $(".reiniciar-vehiculo").val("")
+            document.getElementById('btnSubirFacturaVehiculo').value = 'Subir documento'
             document.getElementById('btnSubirVehiculo').value = 'Subir archivo'
-
-            fotoFacturaVehiculo = null
-            fotoLateralVehiculo = null
-            fotoPlacaVehiculo = null
         }
     }
     confirmar_almacenamiento() {
@@ -3866,10 +3717,10 @@ class Permisos {
             }
         }
 
-        /*if (fechaInicio.value < actual_tmp) {
+        if (fechaInicio.value < actual_tmp) {
             errorfechaInicio.innerHTML = "Fecha fuera de rango"
             validacion = false
-        }*/
+        }
 
         if (datosPersonal.length == 0) {
             peticion_fallida('Debe haber al menos una persona en el listado para poder guardar el permiso.');
@@ -3877,107 +3728,358 @@ class Permisos {
             validacion = false
         }
 
-        if (permisoGrupal.checked) {
-            if(curpResponsable.value != ""){
-                let indexPersonal = datosPersonal.findIndex(e => e.curp === curpResponsable.value)
-                if (indexPersonal == -1) {
-                    peticion_fallida("La CURP del titular del permiso debe coincidir con alguna persona registrada.")
-                    validacion = false
-                    $(curpResponsable).focus()
-                }else{
-                    errorcurpResponsable.innerHTML = ""
-                }
-            }else{
+        if (curpResponsable.value != "" && permisoGrupal.checked) {
+            let indexPersonal = datosPersonal.findIndex(e => e.curp === curpResponsable.value)
+            if (indexPersonal == -1) {
+                peticion_fallida("El titular del permiso no se encuentra registrado en el listado del personal")
                 validacion = false
-                $(curpResponsable).focus()
-                errorcurpResponsable.innerHTML = "Campo obligatorio"
             }
         }
 
         if (validacion) {
             pedir_confirmacion_guardar();
-            //document.getElementById("confirmar_guardar").focus();
-        } /*else {
+        } else {
             $(tipoPermiso).focus()
-        }*/
+        }
     }
     realizar_almacenamiento_pases() {
         confirmar_guardar.disabled = true;
         btnGuardar.disabled = true;
         estatus_pase = 1
-        if ((datosEquipos.length > 0 || datosMaterial.length > 0) && ![2,3,4].includes(recinto.value*1)) {
+        if (datosEquipos.length > 0 || datosMaterial.length > 0) {
             estatus_pase = 2
         }
-
-        if(actividad.value == 17 && ![2,3,4].includes(recinto.value*1)){
-            estatus_pase = 2
-        }
-
-        if(enviar_migracion.checked){
-            if(estatus_pase == 1){
-                estatus_pase = 3
-            }else{
+        if (actividad.value == 16) {
+            if (estatus_pase == 2)
                 estatus_pase = 4
-            }
+            else
+                estatus_pase = 3
         }
-        //let formData = new FormData();
-		/*
-		  let datos = {
 
-            idpersona: idpersona.value,
-		*/
-
-		var dat = {
-        idempresa       : id_empresa,
-        idpersona       : id_persona_fisica,
-        idcontratos     : id_contrato,
-        idtipopermiso   : tipoPermiso.value,
-        visita          : clientetEntidad.value,
-        idtipoactividad : actividad.value,
-        idtipovigencia  : vigencia.value,
-        dias            :(dias.value == "" ? 0 : dias.value),
-        fechainicio     :fechaInicio.value,
-        fechatermino    : fechaTermino.value,
-        idrecinto       :recinto.value,
-        idfiscalizado   : (nombreRecinto.value == '' ? 0 : nombreRecinto.value),
-        motivo          : motivo.value,
-        permisogrupal   :(permisoGrupal.checked ? 1 : 0),
-        estatus         : estatus_pase,
-        curpresponsable : curpResponsable.value,
-		}
+        let formData = new FormData();
+        formData.append("idempresa", id_empresa)
+        formData.append("idpersona", id_persona_fisica)
+        formData.append("idcontrato", id_contrato)
+        formData.append("idtipopermiso", tipoPermiso.value)
+        formData.append("visita", clientetEntidad.value)
+        formData.append("idtipoactividad", actividad.value)
+        formData.append("idtipovigencia", vigencia.value)
+        formData.append("dias", (dias.value == "" ? 0 : dias.value))
+        formData.append("fechainicio", fechaInicio.value)
+        formData.append("fechatermino", fechaTermino.value)
+        formData.append("idrecinto", recinto.value)
+        formData.append("idfiscalizado", (nombreRecinto.value == '' ? null : nombreRecinto.value))
+        formData.append("motivo", motivo.value)
+        formData.append("permisogrupal", (permisoGrupal.checked ? 1 : 0))
+        formData.append("estatus", estatus_pase)
+        formData.append("curpresponsable", curpResponsable.value)
+        formData.append([csrf.name], csrf.value)
 
         $.ajax({
             url: base_url + 'Permisos/Ctrl_Permisos/addPermiso',
             type: 'POST',
-            data: {
-                datos : JSON.stringify({
-                    "permiso":dat,
-                    "persona":( datosPersonal), 
-                    "equipo": (datosEquipos),
-                    "material": (datosMaterial),
-                    "vehiculo": (datosVehiculos)
-                })
-            },
-			beforeSend: function () {
+            data: formData,
+            global: false,
+            processData: false,
+            contentType: false,
+            beforeSend: function () {
                 $("#modal_confirmar_guardar").modal("hide");
                 spinner.style.visibility = "visible";
-            },			
+            },
             success: function (response) {
+                csrf.value = response.token;
                 if (response.status) {
-                    Permisos.prototype.reiniciar_campos()
-                    registro_exitoso(response.message+": Número de solicitud "+response.data.idpermiso);
+                    id_permiso = response.data.id
+                    Permisos.prototype.realizar_almacenamiento_personal()
                 } else {
                     confirmar_guardar.disabled = false;
                     btnGuardar.disabled = false;
                     peticion_fallida(response.message);
+                    spinner.style.visibility = "hidden";
+                }
+            },
+            error: (xhr, ajaxOptions, thrownError) => {
+                spinner.style.visibility = "hidden";
+                confirmar_guardar.disabled = false;
+                btnGuardar.disabled = false;
+                peticion_fallida(thrownError);
+                // csrf.value = xhr.responseJSON.token;
+            }
+        }).fail(function (response) {
+            spinner.style.visibility = "hidden";
+            confirmar_guardar.disabled = false;
+            btnGuardar.disabled = false;
+            if (response.responseText == "Sesion") {
+                error_sesion();
+            }
+        })
+    }
+    realizar_almacenamiento_personal() {
+        $('#personaltab').trigger('click')
+        let formData = new FormData();
+        for (let index = 0; index < datosPersonal.length; index++) {
+            formData.append("idpermiso[" + index + "]", id_permiso)
+            formData.append("idpersonafisica[" + index + "]", id_persona_fisica)
+            formData.append("idempresa[" + index + "]", (empresa.value != "" ? idempresa.value : id_empresa))
+            formData.append("estatus_pase[" + index + "]", estatus_pase)
+            formData.append("idpersonal[" + index + "]", datosPersonal[index].idpersona)
+            formData.append("id_personal_rest[" + index + "]", datosPersonal[index].id_personal_rest)
+            formData.append("idcontacto[" + index + "]", datosPersonal[index].idcontacto)
+            formData.append("tipoEmpleado[" + index + "]", datosPersonal[index].tipoEmpleado)
+            formData.append("nacionalidad[" + index + "]", datosPersonal[index].nacionalidad)
+            formData.append("entidadGobierno[" + index + "]", (datosPersonal[index].entidadGobierno == "" ? null : datosPersonal[index].entidadGobierno))
+            formData.append("empresa[" + index + "]", datosPersonal[index].empresa)
+            formData.append("clavePatronal[" + index + "]", datosPersonal[index].clavePatronal)
+            formData.append("numSeguroSocial[" + index + "]", datosPersonal[index].numSeguroSocial)
+            formData.append("noIssste[" + index + "]", datosPersonal[index].noIssste)
+            formData.append("noSeguro[" + index + "]", datosPersonal[index].noSeguro)
+            formData.append("aseguradora[" + index + "]", (datosPersonal[index].aseguradora == "" ? null : datosPersonal[index].aseguradora))
+            formData.append("curp[" + index + "]", datosPersonal[index].curp)
+            formData.append("nombre[" + index + "]", datosPersonal[index].nombre)
+            formData.append("primerApellido[" + index + "]", datosPersonal[index].primerApellido)
+            formData.append("segundoApellido[" + index + "]", datosPersonal[index].segundoApellido)
+            formData.append("numtelefono[" + index + "]", datosPersonal[index].numtelefono)
+            formData.append("correo[" + index + "]", datosPersonal[index].correo)
+            formData.append("chofer[" + index + "]", datosPersonal[index].chofer)
+            formData.append("noLicenica[" + index + "]", datosPersonal[index].noLicencia)
+            formData.append("fechaVenciminetoLic[" + index + "]", datosPersonal[index].fechaVenciminetoLic)
+            formData.append("fechaVenciminetoIdent[" + index + "]", datosPersonal[index].fechaVenciminetoIdent)
+            formData.append("tipoIdentificacion[" + index + "]", datosPersonal[index].tipoIdentificacion)
+            formData.append("claveElector[" + index + "]", datosPersonal[index].claveElector)
+            formData.append("noPasaporte[" + index + "]", datosPersonal[index].noPasaporte)
+            formData.append("libretaMar[" + index + "]", datosPersonal[index].libretaMar)
+            formData.append("itinerario[" + index + "]", datosPersonal[index].itinerario)
+            formData.append("idimagenlicencia[" + index + "]", datosPersonal[index].idimagenlicencia);
+            formData.append("fotografiaLicencia-" + index, datosPersonal[index].fotografiaLicencia);
+            formData.append("idimagenidentificacion[" + index + "]", datosPersonal[index].idimagenidentificacion);
+            formData.append("fotografiaIdentificacion-" + index, datosPersonal[index].fotografiaIdentificacion);
+            formData.append("idimagenpersona[" + index + "]", datosPersonal[index].idimagenpersona);
+            formData.append("fotografiapersona" + index, datosPersonal[index].fotografiapersona);
+            formData.append([csrf.name], csrf.value);
+        }
+
+        $.ajax({
+            url: base_url + 'Permisos/Ctrl_Permisos/addPersonal',
+            type: 'POST',
+            data: formData,
+            global: false,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                csrf.value = response.token;
+                if (response.status) {
+                    personalAlmacenado = response.data
+                    if (datosEquipos.length > 0) {
+                        Permisos.prototype.realizar_almacenamiento_equipos()
+                    } else if (datosMaterial.length > 0) {
+                        Permisos.prototype.realizar_almacenamiento_materiales()
+                    } else if (datosVehiculos.length > 0) {
+                        Permisos.prototype.realizar_almacenamiento_vehiculos()
+                    } else {
+                        Permisos.prototype.reiniciar_campos()
+                        registro_exitoso(response.message);
+                        spinner.style.visibility = "hidden";
+                    }
+                } else {
+                    confirmar_guardar.disabled = false;
+                    btnGuardar.disabled = false;
+                    peticion_fallida(response.message);
+                    spinner.style.visibility = "hidden";
+                }
+            },
+            error: (xhr, ajaxOptions, thrownError) => {
+                spinner.style.visibility = "hidden";
+                confirmar_guardar.disabled = false;
+                btnGuardar.disabled = false;
+                peticion_fallida(thrownError);
+                // csrf.value = xhr.responseJSON.token;
+            }
+        }).fail(function (response) {
+            spinner.style.visibility = "hidden";
+            if (response.responseText == "Sesion") {
+                error_sesion();
+            }
+        })
+    }
+    realizar_almacenamiento_equipos() {
+        let formData = new FormData();
+        for (let index = 0; index < datosEquipos.length; index++) {
+            formData.append("idpermiso[" + index + "]", id_permiso)
+            formData.append("idempresa[" + index + "]", id_empresa)
+            formData.append("idpersonafisica[" + index + "]", id_persona_fisica)
+            formData.append("idequipo[" + index + "]", datosEquipos[index].idequipo)
+            formData.append("tipoEquipo[" + index + "]", datosEquipos[index].tipoEquipo)
+            formData.append("modelo[" + index + "]", datosEquipos[index].modelo)
+            formData.append("marca[" + index + "]", datosEquipos[index].marca)
+            formData.append("noSerie[" + index + "]", datosEquipos[index].noSerie)
+            formData.append("tipoDocumento[" + index + "]", datosEquipos[index].tipoDocumento)
+            formData.append("noFactura[" + index + "]", datosEquipos[index].noFactura)
+            formData.append("resguardo[" + index + "]", personalAlmacenado[datosEquipos[index].resguardo])
+            formData.append("idimagenfactura[" + index + "]", datosEquipos[index].idimagenfactura)
+            formData.append("fotografiaFactura-" + index, datosEquipos[index].fotografiaFactura);
+            //formData.append("fotografia-"+index,datosEquipos[index].fotografia);
+            formData.append([csrf.name], csrf.value);
+        }
+        $.ajax({
+            url: base_url + 'Permisos/Ctrl_Permisos/addEquipos',
+            type: 'POST',
+            data: formData,
+            global: false,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                csrf.value = response.token;
+                if (response.status) {
+                    if (datosMaterial.length > 0) {
+                        Permisos.prototype.realizar_almacenamiento_materiales()
+                    } else {
+                        Permisos.prototype.reiniciar_campos()
+                        registro_exitoso(response.message);
+                        spinner.style.visibility = "hidden";
+                    }
+                } else {
+                    confirmar_guardar.disabled = false;
+                    btnGuardar.disabled = false;
+                    peticion_fallida(response.message);
+                    spinner.style.visibility = "hidden";
                 }
             },
             error: (xhr, ajaxOptions, thrownError) => {
                 confirmar_guardar.disabled = false;
                 btnGuardar.disabled = false;
-                peticion_fallida();
+                spinner.style.visibility = "hidden";
+                peticion_fallida(thrownError);
+                // csrf.value = xhr.responseJSON.token;
             }
         }).fail(function (response) {
+            spinner.style.visibility = "hidden";
+            if (response.responseText == "Sesion") {
+                error_sesion();
+            }
+        })
+    }
+    realizar_almacenamiento_materiales() {
+        let formData = new FormData();
+        for (let index = 0; index < datosMaterial.length; index++) {
+            formData.append("idpermiso[" + index + "]", id_permiso)
+            formData.append("idmaterial[" + index + "]", 0)
+            formData.append("idpersonal[" + index + "]", personalAlmacenado[datosMaterial[index].responsable])
+            formData.append("idtipomaterial[" + index + "]", datosMaterial[index].tipomaterial)
+            formData.append("idtipomedida[" + index + "]", (datosMaterial[index].tipomedida != "" ? datosMaterial[index].tipomedida : null))
+            formData.append("cantidad[" + index + "]", datosMaterial[index].cantidad)
+            formData.append("descripcion[" + index + "]", datosMaterial[index].descripcion)
+            formData.append("responsable", personalAlmacenado[datosMaterial[index].responsable])
+            formData.append("id_permiso", id_permiso)
+            formData.append([csrf.name], csrf.value);
+        }
+
+        $.ajax({
+            url: base_url + 'Permisos/Ctrl_Permisos/addMateriales',
+            type: 'POST',
+            data: formData,
+            global: false,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                csrf.value = response.token;
+                if (response.status) {
+                    if (datosVehiculos.length > 0) {
+                        Permisos.prototype.realizar_almacenamiento_vehiculos()
+                    } else {
+                        Permisos.prototype.reiniciar_campos()
+                        registro_exitoso(response.message);
+                        spinner.style.visibility = "hidden";
+                    }
+                } else {
+                    confirmar_guardar.disabled = false;
+                    btnGuardar.disabled = false;
+                    peticion_fallida(response.message);
+                    spinner.style.visibility = "hidden";
+                }
+            },
+            error: (xhr, ajaxOptions, thrownError) => {
+                confirmar_guardar.disabled = false;
+                btnGuardar.disabled = false;
+                spinner.style.visibility = "hidden";
+                peticion_fallida(thrownError);
+                // csrf.value = xhr.responseJSON.token;
+            }
+        }).fail(function (response) {
+            spinner.style.visibility = "hidden";
+            if (response.responseText == "Sesion") {
+                error_sesion();
+            }
+        })
+    }
+    realizar_almacenamiento_vehiculos() {
+        let formData = new FormData();
+        for (let index = 0; index < datosVehiculos.length; index++) {
+            //formData.append("idvehiculo["+index+"]",id_vehiciulo)
+            formData.append("idvehiculo[" + index + "]", datosVehiculos[index].idvehiculo)
+            formData.append("idpermiso[" + index + "]", id_permiso)
+            formData.append("idempresa[" + index + "]", id_empresa)
+            formData.append("id_empresa_rest[" + index + "]", id_empresa)
+            formData.append("idpersonafisica[" + index + "]", id_persona_fisica)
+            formData.append("idvehiculo[" + index + "]", 0)
+            formData.append("noPlaca[" + index + "]", datosVehiculos[index].noPlaca)
+            formData.append("noSerie[" + index + "]", datosVehiculos[index].noSerie)
+            formData.append("noMotor[" + index + "]", datosVehiculos[index].noMotor)
+            formData.append("marca[" + index + "]", datosVehiculos[index].marca)
+            formData.append("modelo[" + index + "]", datosVehiculos[index].modelo)
+            formData.append("anio[" + index + "]", datosVehiculos[index].anio)
+            formData.append("color[" + index + "]", datosVehiculos[index].color)
+            formData.append("tipoVehiculo[" + index + "]", datosVehiculos[index].tipoVehiculo)
+            formData.append("tipoTarCircu[" + index + "]", datosVehiculos[index].tipoTarCircu)
+            formData.append("noTarjeta[" + index + "]", datosVehiculos[index].noTarjeta)
+            //formData.append("vigenciaTarjete[" + index + "]", datosVehiculos[index].vigenciaTarjete)
+            formData.append("tipoDocumento[" + index + "]", datosVehiculos[index].tipoDocumento)
+            formData.append("noFactura[" + index + "]", datosVehiculos[index].noFactura)
+            formData.append("aseguradora[" + index + "]", datosVehiculos[index].aseguradora)
+            formData.append("noPoliza[" + index + "]", datosVehiculos[index].noPoliza)
+            formData.append("vigenciaPoliza[" + index + "]", datosVehiculos[index].vigenciaPoliza)
+            formData.append("periodoPago[" + index + "]", datosVehiculos[index].periodoPago)
+            formData.append("periodoFechaInicio[" + index + "]", datosVehiculos[index].periodoFechaInicio)
+            formData.append("periodoFechaFin[" + index + "]", datosVehiculos[index].periodoFechaFin)
+            //formData.append("estatusVehiculo["+index+"]",datosVehiculos[index].estatusVehiculo)
+            formData.append("chofer[" + index + "]", personalAlmacenado[datosVehiculos[index].chofer])
+            formData.append("idimagenfactura[" + index + "]", datosPersonal[index].idimagenfactura);
+            formData.append("fotografiaFactura-" + index, datosVehiculos[index].documentoFactura);
+            formData.append("idfotografiaLateral[" + index + "]", datosPersonal[index].idfotografiaLateral);
+            formData.append("fotografiaLateral-" + index, datosVehiculos[index].fotografiaLateral);
+            formData.append("idfotografiaPlaca[" + index + "]", datosPersonal[index].idfotografiaPlaca);
+            formData.append("fotografiaPlaca-" + index, datosVehiculos[index].fotografiaPlaca);
+            formData.append([csrf.name], csrf.value);
+        }
+
+        $.ajax({
+            url: base_url + 'Permisos/Ctrl_Permisos/addVehiculos',
+            type: 'POST',
+            data: formData,
+            global: false,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+                csrf.value = response.token;
+                if (response.status) {
+                    Permisos.prototype.reiniciar_campos()
+                    registro_exitoso(response.message);
+                    spinner.style.visibility = "hidden";
+                } else {
+                    confirmar_guardar.disabled = false;
+                    btnGuardar.disabled = false;
+                    peticion_fallida(response.message);
+                    spinner.style.visibility = "hidden";
+                }
+            },
+            error: (xhr, ajaxOptions, thrownError) => {
+                spinner.style.visibility = "hidden";
+                confirmar_guardar.disabled = false;
+                btnGuardar.disabled = false;
+                peticion_fallida(thrownError);
+                // csrf.value = xhr.responseJSON.token;
+            }
+        }).fail(function (response) {
+            spinner.style.visibility = "hidden";
             if (response.responseText == "Sesion") {
                 error_sesion();
             }
@@ -4000,7 +4102,6 @@ class Permisos {
         confirmar_guardar.disabled = false;
         btnGuardar.disabled = false;
         $(".reiniciar-pase").val("")
-        $(".form-control").val("")
     }
 }
 const per = new Permisos()
@@ -4014,19 +4115,13 @@ $(tabPersonal).on('click', '.eliminar', function (ev) {
     per.obtener_personal()
     tipoEmpleado.removeAttribute("disabled")
     $(errorcurpResponsable).html("")
-    if(datosPersonal.length <= 1){
-        permisoGrupal.checked = false
-        curpResponsable.value = ""
-        divCURPResp.style.display = "none"
-    }else{
-        permisoGrupal.checked = true
-        divCURPResp.style.display = ""
-    }
 });
+
 $(tabEquipoHerramienta).on('click', '.eliminar', function (ev) {
     datosEquipos.splice(ev.target.dataset.id, 1);
     DTEquipo.row($(this).parents('tr')).remove().draw();
 });
+
 $(tabVehiculos).on('click', '.eliminar', function (ev) {
     datosVehiculos.splice(ev.target.dataset.id, 1);
     DTVehiculo.row($(this).parents('tr')).remove().draw();
@@ -4049,13 +4144,8 @@ $(tabEquipoHerramienta).on('click', '.modificar-equipo', function (ev) {
     tipoDocumento.value = datosEquipos[ev.target.dataset.id].tipoDocumento
     noFacturaEquipo.value = datosEquipos[ev.target.dataset.id].noFactura
     fotoFacturaEquipo = datosEquipos[ev.target.dataset.id].fotografiaFactura
-    fotoEquipoAnexo = datosEquipos[ev.target.dataset.id].fotografiaAnexo
-    fotoEquipoRF = datosEquipos[ev.target.dataset.id].fotografiaRF
     resguardo.value = datosEquipos[ev.target.dataset.id].resguardo
     btnSubirEquipo.value = "Actualizar documento"
-    btnSubirEquipoAnexo.value = "Actualizar documento"
-    btnSubirEquipoRF.value = "Actualizar documento"
-    btnSubirMaterial.value = "Actualizar documento"
 
     divCaracteristicas.style.display = ""
     divDocumento1.style.display = ""
@@ -4069,43 +4159,9 @@ $(tabEquipoHerramienta).on('click', '.modificar-equipo', function (ev) {
     $(errornoFacturaEquipo).html("")
     $(errorresguardo).html("")
     $(errorSubirFacturaEquipo).html("")
-    $(errorSubirEquipoAnexo).html("")
-    $(errorSubirEquipoRF).html("")
-	
-	var temp = datosEquipos[ev.target.dataset.id].fotografiaFactura;
-	var archivo = "/assets/uploads/permisos/equipos/"+temp;
-	var txt = "<input type='hidden' id='val_equipo' value ='"+temp+"'>";
-	$("#errorSubirFacturaEquipo").html("<span class='color:#000'><a href='"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-	
-    var temp = datosEquipos[ev.target.dataset.id].fotografiaAnexo;
-	var archivo = "/assets/uploads/permisos/equipos/"+temp;
-	var txt = "<input type='hidden' id='val_equipo_anexo' value ='"+temp+"'>";
-	$("#errorSubirEquipoAnexo").html("<span class='color:#000'><a href='"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);
-
-    var temp = datosEquipos[ev.target.dataset.id].fotografiaRF;
-	var archivo = "/assets/uploads/permisos/equipos/"+temp;
-	var txt = "<input type='hidden' id='val_equipo_rf' value ='"+temp+"'>";
-	$("#errorSubirEquipoRF").html("<span class='color:#000'><a href='"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-	
 
     $(btnSubirEquipo).on('click', function (ev) {
-        $(btnSubirEquipo).val("Actualizar documento")
         per.previsualizar_modificar_equipo(fotoFacturaEquipo)
-    })
-
-    $(btnSubirEquipoAnexo).on('click', function (ev) {
-        $(btnSubirEquipoAnexo).val("Actualizar Anexo")
-        per.previsualizar_modificar_equipo_anexo(fotoEquipoAnexo)
-    })
-
-    $(btnSubirEquipoRF).on('click', function (ev) {
-        $(btnSubirEquipoRF).val("Actualizar RF")
-        per.previsualizar_modificar_equipo_rf(fotoEquipoRF)
-    })
-
-    $(btnSubirMaterial).on('click', function (ev) {
-        $(btnSubirMaterial).val("Actualizar documento")
-        per.previsualizar_modificar_material(fotoMaterial)
     })
 
     datosEquipos.splice(ev.target.dataset.id, 1);
@@ -4137,9 +4193,9 @@ $(tabVehiculos).on('click', '.modificar-vehiculo', function (ev) {
     tipoTarjetaCirculacion.value = datosVehiculos[ev.target.dataset.id].tipoTarCircu
     noTarjeta.value = datosVehiculos[ev.target.dataset.id].noTarjeta
     //vigenciaTarjeta.value = datosVehiculos[ev.target.dataset.id].vigenciaTarjete
-    //tipodocumentoVeh.value = datosVehiculos[ev.target.dataset.id].tipoDocumento
-    //noFacturaVeh.value = datosVehiculos[ev.target.dataset.id].noFactura
-    //fotoFacturaVehiculo = datosVehiculos[ev.target.dataset.id].documentoFactura
+    tipodocumentoVeh.value = datosVehiculos[ev.target.dataset.id].tipoDocumento
+    noFacturaVeh.value = datosVehiculos[ev.target.dataset.id].noFactura
+    fotoFacturaVehiculo = datosVehiculos[ev.target.dataset.id].documentoFactura
     aseguradorasVeh.value = datosVehiculos[ev.target.dataset.id].aseguradora
     noPoliza.value = datosVehiculos[ev.target.dataset.id].noPoliza
     vigenciaPoliza.value = datosVehiculos[ev.target.dataset.id].vigenciaPoliza
@@ -4150,20 +4206,12 @@ $(tabVehiculos).on('click', '.modificar-vehiculo', function (ev) {
     selChofer.value = datosVehiculos[ev.target.dataset.id].chofer
     fotoLateralVehiculo = datosVehiculos[ev.target.dataset.id].fotografiaLateral
     fotoPlacaVehiculo = datosVehiculos[ev.target.dataset.id].fotografiaPlaca
+    btnSubirFacturaVehiculo.value = "Actualizar documento"
     btnSubirVehiculo.value = "Actualizar foto"
 
-    var temp = fotoFacturaVehiculo;var archivo = temp;var arc = temp.split("/");temp = arc[4];
-	var txt = "<input type='hidden' id='val_factura' value ='"+temp+"'>";  
-	$("#errorSubirFacturaVehiculo").html("<span class='color:#000'><a  id='tab_factura' href='/"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-	
-	var temp = fotoLateralVehiculo;var archivo = temp;var arc = temp.split("/");temp = arc[4];
-	var txt = "<input type='hidden' id='val_lateral' value ='"+temp+"'>";  
-	$("#errorSubirFotoLat").html("<span class='color:#000'><a id='tab_lateral' href='/"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-	
-	var temp = fotoPlacaVehiculo;var archivo = temp;var arc = temp.split("/");temp = arc[4];
-	var txt = "<input type='hidden' id='val_placa' value ='"+temp+"'>";  
-	$("#errorSubirFotoPla").html("<span class='color:#000'><a id='tab_placa' href='/"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);
-
+    $(btnSubirFacturaVehiculo).on('click', function (ev) {
+        per.previsualizar_modificar_facturaVehiculo(fotoFacturaVehiculo)
+    })
     $(btnSubirVehiculo).on('click', function (ev) {
         per.previsualizar_modificar_lateralVehiculo(fotoLateralVehiculo)
     })
@@ -4189,8 +4237,8 @@ $(tabVehiculos).on('click', '.modificar-vehiculo', function (ev) {
     $(errortipoTarjetaCirculacion).html("")
     $(errornoTarjeta).html("")
     //$(errorvigenciaTarjeta).html("")
-    
-    //$(errortipodocumentoVeh).html("")
+    $(errortipodocumentoVeh).html("")
+    $(erroradjuntarVehiculoFactura).html("")
     $(erroraseguradorasVeh).html("")
     $(errornoPoliza).html("")
     $(errorvigenciaPoliza).html("")
@@ -4199,7 +4247,7 @@ $(tabVehiculos).on('click', '.modificar-vehiculo', function (ev) {
     $(errorperiodoCobFechaFin).html("")
     //$(errorestatusVehiculo).html("")
     $(errorselChofer).html("")
-    //$(errorSubirFacturaVehiculo).html("")
+    $(errorSubirFacturaVehiculo).html("")
     $(errorSubirFotoVehiculo).html("")
 
 })
@@ -4216,7 +4264,6 @@ $(tabPersonal).on('click', '.modificar-persona', function (ev) {
     entidadGobierno.value = datosPersonal[ev.target.dataset.id].entidadGobierno
     empresa.value = datosPersonal[ev.target.dataset.id].empresa
     clavePatronal.value = datosPersonal[ev.target.dataset.id].clavePatronal
-    empresa_rfc.value = datosPersonal[ev.target.dataset.id].rfc
     tipoSeguro.value = datosPersonal[ev.target.dataset.id].tipoSeguro
 
     if (tipoSeguro.value == 1) {
@@ -4335,9 +4382,7 @@ $(tabPersonal).on('click', '.modificar-persona', function (ev) {
             itinerario.value = datosPersonal[ev.target.dataset.id].itinerario
             break;
     }
-	 
 
-		
     $(errorPersonalDuplicado).html("")
     $(errornacionalidad).html("")
     $(errornumSeguroSocial).html("")
@@ -4360,24 +4405,7 @@ $(tabPersonal).on('click', '.modificar-persona', function (ev) {
     $(errorfechaVenciminetoIdent).html("")
     $(errorSubirIdentificacion).html("")
     $(errorSubirPersonal).html("")
-	
-	var temp = datosPersonal[ev.target.dataset.id].fotografiaIdentificacion;
-	var archivo = "/assets/uploads/permisos/personal/"+temp;
-	var txt = "<input type='hidden' id='val_identificacion' value ='"+temp+"'>";
-	$("#errorSubirIdentificacion").html("<span class='color:#000'><a href='"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-	
-	var temp = datosPersonal[ev.target.dataset.id].fotografiapersona;
-	var archivo = "/assets/uploads/permisos/personal/"+temp;
-	var txt = "<input type='hidden' id='val_personal' value ='"+temp+"'>";
-	$("#errorSubirPersonal").html("<span class='color:#000'><a href='"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-	
-	var temp = datosPersonal[ev.target.dataset.id].fotografiaLicencia;
-	if (temp != ""){
-		var archivo = "/assets/uploads/permisos/personal/"+temp;
-		var txt = "<input type='hidden' id='val_licencia' value ='"+temp+"'>";
-		$("#errorSubirLicencia").html("<span class='color:#000'><a href='"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);
-	}
-	
+
     $(btnAdjuntarLicencia).on('click', function (ev) {
         per.previsualizar_modificar_licenciaPersona(fotoLicencia)
     })
@@ -4401,9 +4429,6 @@ $(tabPersonal).on('click', '.modificar-persona', function (ev) {
             num = num - 1;
         elements[index].dataset.id = num;
     };
-	
-		
-	
 })
 $(tabMaterial).on('click', '.modificar-material', function (ev) {
     if(eidicion_material == 1){
@@ -4414,7 +4439,12 @@ $(tabMaterial).on('click', '.modificar-material', function (ev) {
 
     responsableMaterial.value = datosMaterial[ev.target.dataset.id].responsable
     tipoMaterial.value = datosMaterial[ev.target.dataset.id].tipomaterial
-    tipoMedida.value = datosMaterial[ev.target.dataset.id].tipomedida
+    if (tipoMaterial.value == 1) {
+        divMedidas.style.display = ""
+        tipoMedida.value = datosMaterial[ev.target.dataset.id].tipomedida
+    } else {
+        divMedidas.style.display = "none"
+    }
     cantidad.value = datosMaterial[ev.target.dataset.id].cantidad
     descripcion.value = datosMaterial[ev.target.dataset.id].descripcion
 
@@ -4465,7 +4495,7 @@ $("#btnRegresar").click((e) => {
     if (cambios == 1)
         pedir_confirmar_regresar();
     else
-        window.location.href = base_url + url_regreso;
+        window.location.href = base_url + 'Permisos/Ctrl_Permisos';
 });
 
 $("#nacionalidad").change(function () {
@@ -4528,267 +4558,3 @@ $('.siguiente').click(function () {
 $('.anterior').click(function () {
     $('.nav-tabs > .active').prev('li').find('a').trigger('click');
 });
-
-function previsualizar_archivo(files,capa){
-	
-		var num = (files.length)-1;
-		
-        var fileReader = new FileReader();
-        var file = files[num].getNative();
-        $("#"+capa).html('<div></div>');
-        fileReader.onload = () => {
-            var TheFileContents = fileReader.result;
-            if (file.type == 'application/pdf') {
-                $("#"+capa).css({"overflow":"", "height":"", "overflow-y":""});
-                $("#"+capa).html('<object> <embed src="'+TheFileContents+'" width="100%" height="300px"/></object>');
-            } else {
-                $("#"+capa).css({"overflow":"hidden", "height":"300px", "overflow-y":"scroll"});
-                $("#"+capa).html('<div class="img-zoom-container"><img id="myimage" width="100%" src="' + TheFileContents + '"/>');
- 
-            }
-        };
-        fileReader.readAsDataURL(file);
-}
-        
-
- 
-var upDoc = new plupload.Uploader({
-    browse_button: 'adjuntarIdentificacion', // this can be an id of a DOM element or the DOM element itself
-    url: base_url+'upload/uploadPermisos/personal',
-    chunk_size: '1mb',
-    max_file_count: 1,
-    multi_selection: false,
-    unique_names: true,
-    multipart_params: {     [csrf.name] : csrf.value  },
-    filters: {max_file_size : '20mb', mime_types: [{ title: "Jpg", extensions: "jpg" },{ title: "PNG", extensions: "png" },{ title: "Pdf", extensions: "pdf" },{ title: "Jpeg", extensions: "jpeg" }]},
-    init: {
-        PostInit: function () { document.getElementById('btnAceptarAdjuntarIdentificacion').onclick = function () { upDoc.start();return false;}},
-        Error: function(up, err) {if(err.code == -600)$(erroradjuntarContrato).html("El maximo tamañ±o de archivo es de 20mb")},
-        Browse: function (up) { if (up.files.length > 0) up.removeFile(up.files[0]);         },
-        FilesAdded: function (up, files) {  previsualizar_archivo(up.files,"pdfViewerIdentificacion"); },			
-        UploadProgress: function (up, file) {			
-            var span = document.getElementById('errorSubirIdentificacion'); //Capa muestra avance
-            span.innerHTML = '<span style="color:#000;"> Cargando archivo: ' + file.percent + '%</span>';            
-        },
-		BeforeUpload: function (up, file) {
-             
-        },
-        FileUploaded: function (up, file, info) {
-			var archivo = "/assets/uploads/permisos/personal/"+file.target_name;
-			var txt = "<input type='hidden' id='val_identificacion' value ='"+file.target_name+"'>";
-			$("#errorSubirIdentificacion").html("<span class='color:#000'><a href='"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-            info = JSON.parse(info.response)	
-        },
-    }
-});upDoc.init();
-
-
-// Upload Subir PErsonal
-var uppersona = new plupload.Uploader({
-    browse_button: 'adjuntarPersonal', // this can be an id of a DOM element or the DOM element itself
-    url: base_url+'upload/uploadPermisos/personal',
-    chunk_size: '1mb',
-    max_file_count: 1,
-    multi_selection: false,
-    unique_names: true,
-    multipart_params: {     [csrf.name] : csrf.value  },
-    filters: {max_file_size : '20mb', mime_types: [{ title: "Jpg", extensions: "jpg" },{ title: "PNG", extensions: "png" }]},
-    init: {
-        PostInit: function () { document.getElementById('btnAceptarAdjuntarPersonal').onclick = function () { uppersona.start();return false;}},
-        Error: function(up, err) {if(err.code == -600)$(erroradjuntarContrato).html("El maximo tamañ±o de archivo es de 20mb")},
-        Browse: function (up) { if (up.files.length > 0)                up.removeFile(up.files[0]);         },
-        FilesAdded: function (up, files) {  previsualizar_archivo(up.files,"pdfViewerPersonal"); },			
-        UploadProgress: function (up, file) {			
-            var span = document.getElementById('errorSubirPersonal'); //Capa muestra avance
-            span.innerHTML = '<span style="color:#000;"> Cargando archivo: ' + file.percent + '%</span>';            
-        },
-        FileUploaded: function (up, file, info) {
-			var archivo = "/assets/uploads/permisos/personal/"+file.target_name;
-			var txt = "<input type='hidden' id='val_personal' value ='"+file.target_name+"'>";
-			$("#errorSubirPersonal").html("<span class='color:#000'><a href='"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-            info = JSON.parse(info.response)	
-        },
-    }
-});uppersona.init();
-
-// Upload Subir Licencia
-var uplicencia = new plupload.Uploader({
-    browse_button: 'adjuntarLicencia', // this can be an id of a DOM element or the DOM element itself
-    url: base_url+'upload/uploadPermisos/personal',
-    chunk_size: '1mb',
-    max_file_count: 1,
-    multi_selection: false,
-    unique_names: true,
-    multipart_params: {     [csrf.name] : csrf.value  },
-    filters: {max_file_size : '20mb', mime_types: [{ title: "Jpg", extensions: "jpg" },{ title: "PNG", extensions: "png" }]},
-    init: {
-        PostInit: function () { document.getElementById('btnAceptarAdjuntarLicencia').onclick = function () { uplicencia.start();return false;}},
-        Error: function(up, err) {if(err.code == -600)$(erroradjuntarContrato).html("El maximo tamañ±o de archivo es de 20mb")},
-        Browse: function (up) { if (up.files.length > 0)                up.removeFile(up.files[0]);         },
-        FilesAdded: function (up, files) {  previsualizar_archivo(up.files,"pdfViewerLicencia"); },			
-        UploadProgress: function (up, file) {			
-            var span = document.getElementById('errorSubirLicencia'); //Capa muestra avance
-            span.innerHTML = '<span style="color:#000;"> Cargando archivo: ' + file.percent + '%</span>';            
-        },
-        FileUploaded: function (up, file, info) {
-			var archivo = "/assets/uploads/permisos/personal/"+file.target_name;
-			var txt = "<input type='hidden' id='val_licencia' value ='"+file.target_name+"'>";
-			$("#errorSubirLicencia").html("<span class='color:#000'><a href='"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-            info = JSON.parse(info.response)	
-        },
-    }
-});uplicencia.init();
-
-
-// Upload Subir Equipo
-var upequiepo = new plupload.Uploader({
-    browse_button: 'adjuntarEquipo', // this can be an id of a DOM element or the DOM element itself
-    url: base_url+'upload/uploadPermisos/equipos',
-    chunk_size: '1mb',
-    max_file_count: 1,
-    multi_selection: false,
-    unique_names: true,
-    multipart_params: {     [csrf.name] : csrf.value  },
-    filters: {max_file_size : '20mb', mime_types: [{ title: "Jpg", extensions: "jpg" },{ title: "PNG", extensions: "png"}, {extensions: "pdf"}, {extensions: "PDF"}]},
-    init: {
-        PostInit: function () { document.getElementById('btnAceptarAdjuntarEquipo').onclick = function () { upequiepo.start();return false;}},
-        Error: function(up, err) {if(err.code == -600)$(erroradjuntarContrato).html("El maximo tamañ±o de archivo es de 20mb")},
-        Browse: function (up) { if (up.files.length > 0)                up.removeFile(up.files[0]);         },
-        FilesAdded: function (up, files) {  previsualizar_archivo(up.files,"pdfViewerEquipo"); },			
-        UploadProgress: function (up, file) {			
-            var span = document.getElementById('errorSubirFacturaEquipo'); //Capa muestra avance
-            span.innerHTML = '<span style="color:#000;"> Cargando archivo: ' + file.percent + '%</span>';            
-        },
-        FileUploaded: function (up, file, info) {
-			var archivo = "/assets/uploads/permisos/equipos/"+file.target_name;
-			var txt = "<input type='hidden' id='val_equipo' value ='"+file.target_name+"'>";
-			$("#errorSubirFacturaEquipo").html("<span class='color:#000'><a href='"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-            info = JSON.parse(info.response)	
-        },
-    }
-});upequiepo.init();
-
-// Upload Subir Equipo Anexo
-var upequiepoAnexo = new plupload.Uploader({
-    browse_button: 'adjuntarEquipoAnexo', // this can be an id of a DOM element or the DOM element itself
-    url: base_url+'upload/uploadPermisos/equipos',
-    chunk_size: '1mb',
-    max_file_count: 1,
-    multi_selection: false,
-    unique_names: true,
-    multipart_params: {     [csrf.name] : csrf.value  },
-    filters: {max_file_size : '20mb', mime_types: [{ title: "Jpg", extensions: "jpg" },{ title: "PNG", extensions: "png"}, {extensions: "pdf"}, {extensions: "PDF"}]},
-    init: {
-        PostInit: function () { document.getElementById('btnAceptarAdjuntarEquipoAnexo').onclick = function () { upequiepoAnexo.start();return false;}},
-        Error: function(up, err) {if(err.code == -600)$(erroradjuntarContrato).html("El maximo tamañ±o de archivo es de 20mb")},
-        Browse: function (up) { if (up.files.length > 0)                up.removeFile(up.files[0]);         },
-        FilesAdded: function (up, files) {  previsualizar_archivo(up.files,"pdfViewerEquipoAnexo"); },			
-        UploadProgress: function (up, file) {			
-            var span = document.getElementById('errorSubirEquipoAnexo'); //Capa muestra avance
-            span.innerHTML = '<span style="color:#000;"> Cargando archivo: ' + file.percent + '%</span>';            
-        },
-        FileUploaded: function (up, file, info) {
-			var archivo = "/assets/uploads/permisos/equipos/"+file.target_name;
-			var txt = "<input type='hidden' id='val_equipo_anexo' value ='"+file.target_name+"'>";
-			$("#errorSubirEquipoAnexo").html("<span class='color:#000'><a href='"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-            info = JSON.parse(info.response)	
-        },
-    }
-});upequiepoAnexo.init();
-
-// Upload Subir Equipo RF
-var upequiepoRF = new plupload.Uploader({
-    browse_button: 'adjuntarEquipoRF', // this can be an id of a DOM element or the DOM element itself
-    url: base_url+'upload/uploadPermisos/equipos',
-    chunk_size: '1mb',
-    max_file_count: 1,
-    multi_selection: false,
-    unique_names: true,
-    multipart_params: {     [csrf.name] : csrf.value  },
-    filters: {max_file_size : '20mb', mime_types: [{ title: "Jpg", extensions: "jpg" },{ title: "PNG", extensions: "png"}, {extensions: "pdf"}, {extensions: "PDF"}]},
-    init: {
-        PostInit: function () { document.getElementById('btnAceptarAdjuntarEquipoRF').onclick = function () { upequiepoRF.start();return false;}},
-        Error: function(up, err) {if(err.code == -600)$(erroradjuntarContrato).html("El maximo tamañ±o de archivo es de 20mb")},
-        Browse: function (up) { if (up.files.length > 0)                up.removeFile(up.files[0]);         },
-        FilesAdded: function (up, files) {  previsualizar_archivo(up.files,"pdfViewerEquipoRF"); },			
-        UploadProgress: function (up, file) {			
-            var span = document.getElementById('errorSubirEquipoRF'); //Capa muestra avance
-            span.innerHTML = '<span style="color:#000;"> Cargando archivo: ' + file.percent + '%</span>';            
-        },
-        FileUploaded: function (up, file, info) {
-			var archivo = "/assets/uploads/permisos/equipos/"+file.target_name;
-			var txt = "<input type='hidden' id='val_equipo_rf' value ='"+file.target_name+"'>";
-			$("#errorSubirEquipoRF").html("<span class='color:#000'><a href='"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-            info = JSON.parse(info.response)	
-        },
-    }
-});upequiepoRF.init()
-
-// Upload VEhiculo lateral
-var uplate = new plupload.Uploader({
-    browse_button: 'ajuntarLateralVehiculo', // this can be an id of a DOM element or the DOM element itself
-    url: base_url+'upload/uploadPermisos/vehiculos',
-    chunk_size: '1mb',
-    max_file_count: 1,
-    multi_selection: false,
-    unique_names: true,
-    multipart_params: {     [csrf.name] : csrf.value  },
-    filters: {max_file_size : '20mb', mime_types: [{ title: "Jpg", extensions: "jpg" },{ title: "PNG", extensions: "png" }]},
-    init: {
-        PostInit: function () { $(btnSiguienteAdjuntarVehiculo).hide(); document.getElementById('btnAceptarAdjuntarVechiculo').onclick = function () { uplate.start();return false;}},
-        Error: function(up, err) {if(err.code == -600)$(erroradjuntarContrato).html("El maximo tamañ±o de archivo es de 20mb")},
-        Browse: function (up) { if (up.files.length > 0)                up.removeFile(up.files[0]);         },
-        FilesAdded: function (up, files) {  $(btnSiguienteAdjuntarVehiculo).show(); previsualizar_archivo(up.files,"pdfViewerVehiculo"); },		
-			BeforeUpload: function (up, file) {
-            // Called right before the upload for a given file starts, can be used to cancel it if required
-            $(modalVehiculo).modal('toggle');
-			        },		
-        UploadProgress: function (up, file) {			
-            var span = document.getElementById('errorSubirFotoLat'); //Capa muestra avance
-            span.innerHTML = '<span style="color:#000;"> Cargando archivo: ' + file.percent + '%</span>';            
-        },
-        FileUploaded: function (up, file, info) {
-			var archivo = "/assets/uploads/permisos/vehiculos/"+file.target_name;
-			var txt = "<input type='hidden' id='val_lateral' value ='"+file.target_name+"'>";
-			$("#errorSubirFotoLat").html("<span class='color:#000'><a id='tab_lateral' href='"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-            info = JSON.parse(info.response)	
-        },
-    }
-});uplate.init();
-
-
-// Upload VEhiculo placa
-var upplaca = new plupload.Uploader({
-    browse_button: 'adjuntarPlacaVehiculo', // this can be an id of a DOM element or the DOM element itself
-    url: base_url+'upload/uploadPermisos/vehiculos',
-    chunk_size: '1mb',
-    max_file_count: 1,
-    multi_selection: false,
-    unique_names: true,
-    multipart_params: {     [csrf.name] : csrf.value  },
-    filters: {max_file_size : '20mb', mime_types: [{ title: "Jpg", extensions: "jpg" },{ title: "PNG", extensions: "png" }]},
-    init: {
-        PostInit: function () { $(btnAceptarAdjuntarVechiculo).hide(); $( "#btnAceptarAdjuntarVechiculo" ).click(function() {
-
-                upplaca.start();
-                return false;
-            });},
-        Error: function(up, err) {if(err.code == -600)$(erroradjuntarContrato).html("El maximo tamañ±o de archivo es de 20mb")},
-        Browse: function (up) { if (up.files.length > 0)                up.removeFile(up.files[0]);         },
-        FilesAdded: function (up, files) {   $(btnSiguienteAdjuntarVehiculo).hide();
-            $(btnAceptarAdjuntarVechiculo).show(); previsualizar_archivo(up.files,"pdfViewerVehiculo"); },			
-        UploadProgress: function (up, file) {			
-            var span = document.getElementById('errorSubirFotoPla'); //Capa muestra avance
-            span.innerHTML = '<span style="color:#000;"> Cargando archivo: ' + file.percent + '%</span>';            
-        },
-        FileUploaded: function (up, file, info) {
-			var archivo = "/assets/uploads/permisos/vehiculos/"+file.target_name;
-			var txt = "<input type='hidden' id='val_placa' value ='"+file.target_name+"'>";
-			$("#errorSubirFotoPla").html("<span class='color:#000'><a id='tab_placa' href='"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
-            info = JSON.parse(info.response)	
-        },
-    }
-});upplaca.init();
-
-
-
