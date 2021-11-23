@@ -373,10 +373,12 @@ class Ctrl_Permisos extends Sesion {
 
 				foreach ($response['data'] as $value){
 					if($value->id_empresa != null){
-						$clave = array_search($value->id_empresa, $dataWS['data']);
-						//if(isset($dataWS['data']['nombre'])){
-						$empresa_name = $dataWS['data'][$clave]['nombre'];
-						//}
+						foreach ($dataWS['data'] as $empresas) {
+							if($empresas['id'] == $value->id_empresa){
+								$empresa_name = $empresas['nombre'];
+								break;
+							}
+						}
 					}
 					$value->empresa = $empresa_name;
 					$empresa_name = '';
