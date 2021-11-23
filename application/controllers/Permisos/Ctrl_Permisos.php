@@ -448,14 +448,28 @@ class Ctrl_Permisos extends Sesion {
 
 				$response = $this->Permisos->getGridPermisos($datos);
 
-				foreach ($response['data'] as $value) {
+				/*foreach ($response['data'] as $value) {
 					if($value->id_empresa != null){
 						$dataWS = $this->getEmpressName($value->id_empresa);
 						if(isset($dataWS['data']['nombre'])){
 							$value->empresa = $dataWS['data']['nombre'];
 						}
 					}
+				}*/
 
+				$dataWS = $this->getEmpresas();
+
+				foreach ($response['data'] as $value){
+					if($value->id_empresa != null){
+						foreach ($dataWS['data'] as $empresas) {
+							if($empresas['id'] == $value->id_empresa){
+								$empresa_name = $empresas['nombre'];
+								break;
+							}
+						}
+					}
+					$value->empresa = $empresa_name;
+					$empresa_name = '';
 				}
 			}else{
 				$response['data'] = 'Petición inválida';
@@ -490,7 +504,7 @@ class Ctrl_Permisos extends Sesion {
 				);
 				$response = $this->Permisos->getAllFiltro($datos);
 
-				foreach ($response['data'] as $value) {
+				/*foreach ($response['data'] as $value) {
 					if($value->id_empresa != null){
 						$dataWS = $this->getEmpressName($value->id_empresa);
 						if(isset($dataWS['data']['nombre'])){
@@ -498,6 +512,21 @@ class Ctrl_Permisos extends Sesion {
 						}
 					}
 
+				}*/
+
+				$dataWS = $this->getEmpresas();
+
+				foreach ($response['data'] as $value){
+					if($value->id_empresa != null){
+						foreach ($dataWS['data'] as $empresas) {
+							if($empresas['id'] == $value->id_empresa){
+								$empresa_name = $empresas['nombre'];
+								break;
+							}
+						}
+					}
+					$value->empresa = $empresa_name;
+					$empresa_name = '';
 				}
 			}else{
 				$response['data'] = 'Petición inválida';
@@ -551,7 +580,7 @@ class Ctrl_Permisos extends Sesion {
 					$response = $this->Permisos->getFiltroByUser($datos);
 				}
 
-				foreach ($response['data'] as $value) {
+				/*foreach ($response['data'] as $value) {
 					if($value->id_empresa != null){
 						$dataWS = $this->getEmpressName($value->id_empresa);
 						if(isset($dataWS['data']['nombre'])){
@@ -559,6 +588,21 @@ class Ctrl_Permisos extends Sesion {
 						}
 					}
 
+				}*/
+
+				$dataWS = $this->getEmpresas();
+
+				foreach ($response['data'] as $value){
+					if($value->id_empresa != null){
+						foreach ($dataWS['data'] as $empresas) {
+							if($empresas['id'] == $value->id_empresa){
+								$empresa_name = $empresas['nombre'];
+								break;
+							}
+						}
+					}
+					$value->empresa = $empresa_name;
+					$empresa_name = '';
 				}
 			}
 			/*if ($this->input->is_ajax_request()) {
