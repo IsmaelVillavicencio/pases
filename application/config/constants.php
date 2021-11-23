@@ -115,5 +115,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
 date_default_timezone_set('America/Mexico_City');
 $FechaActualizacion= date('Y-m-d H:i');
 $HoraActualizacion= date('H:i');
+$FechaActual = date('Y-m-d');
 define("FECHA_ACTUALIZACION",$FechaActualizacion);
 define("HORA_ACTUALIZACION",$HoraActualizacion);
+define("FECHA_ACTUAL",$FechaActual);
