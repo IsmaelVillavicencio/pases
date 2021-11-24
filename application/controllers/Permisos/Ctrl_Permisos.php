@@ -2507,4 +2507,32 @@ class Ctrl_Permisos extends Sesion {
 		$this->load->view('modales/confirmar_baja_motivo');
 		$this->load->view('template/footer');
 	}
+	
+	public function ExtenderPermiso(){
+		$response = [
+			'status' 	=> false,
+			'message'	=> '',
+			'data'		=> null
+		];
+		try {
+			if ($this->input->is_ajax_request()) {
+				if (!$this->input->post()){
+					$response['data'] = 'Petición inválida';
+					throw new Exception('Petición inválida');
+				}
+				$datos = $this->security->xss_clean($this->input->post());
+				$response = $this->Permisos->ExtenderPermiso($datos);
+			}else{
+				$response['data'] = 'Petición inválida';
+				throw new Exception('Petición inválida');
+			}
+		} 
+		catch (Exception $e) {
+			header("HTTP/1.0 400 " . utf8_decode($e->getMessage()));
+		}
+		
+		header('Content-type: application/json');
+		echo json_encode($response);
+		exit;
+	}
 }
