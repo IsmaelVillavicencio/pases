@@ -196,6 +196,7 @@ class Permisos {
                 }
             })
         }
+        /*
         empresa.addEventListener("keydown",(ev)=>{
             if(ev.keyCode == 219){
                 ev.preventDefault()
@@ -210,7 +211,7 @@ class Permisos {
                 elementError.innerHTML = ''
             }
         })
-
+*/
         curp.addEventListener("keydown", (ev) => {
             if (ev.keyCode != 16) {
                 this.validaciones = new VALIDACIONES();
@@ -2434,7 +2435,7 @@ class Permisos {
         };
         fileReader.readAsDataURL(fotoPlacaVehiculo);
     }
-   /* obtener_datos_contrato() {
+    /* obtener_datos_contrato() {
         if(id_empresa != 0){
             $.ajax({
                 url: base_url + 'Usuarios/Ctrl_Empresas/getById',
@@ -2485,6 +2486,7 @@ class Permisos {
         }
     }*/
     obtener_tipos_permisos() {
+
         $.ajax({
             url: base_url + 'Catalogos/Ctrl_TiposPermisos/getByEstatus',
             type: 'GET',
@@ -2501,9 +2503,12 @@ class Permisos {
                 });
             },
             complete: function() {
-                id_empresa = _id_empresa_rest
-                id_contrato = idcontratovigenteusuario
-                entidad.value = _empresa
+                //id_empresa = _id_empresa_rest
+				id_empresa = IdEmpresa;
+				id_contrato = idcontratovigenteusuario
+				referencia.value = idcontratovigenteusuario
+				//entidad.value = _empresa
+				entidad.value = $('#empresa').val();
             }
         }).fail(function (response) {
 
@@ -3272,16 +3277,18 @@ class Permisos {
         if (!validacion || errorEstructuraCURP || errorEstructuraCorreo || errorEstructuraINEIFE || errorEstructuraPasaporte) {
               return false
         }
-		 
+		
         let datos = {
-			idempresa:(empresa.value != "" ? idempresa.value : id_empresa),
+			//idempresa:(empresa.value != "" ? idempresa.value : id_empresa),
+            idempresa: id_empresa,
             idpersona: idpersona.value,
             id_personal_rest: id_personal_rest,
             idcontacto: idcontacto.value,
             tipoEmpleado: tipoEmpleado.value,
             nacionalidad: nacionalidad.value,
             entidadGobierno: (entidadGobierno.value == '' ? 0 : entidadGobierno.value),
-            empresa: empresa.value,
+            //empresa: empresa.value,
+            empresa: $('#empresa').val(),
             clavePatronal: clavePatronal.value,
             rfc: empresa_rfc.value,
             tipoSeguro: tipoSeguro.value,
@@ -3313,6 +3320,11 @@ class Permisos {
 
             idimagenpersona:  (adjuntarPersonal.dataset.id != "") ? adjuntarPersonal.dataset.id : 0,
             fotografiapersona: $("#val_personal").val(),
+
+            fotografiasAdicionales: [],
+			idseliminar: '',
+			
+			opcion: 1
         }
 		 
         datosPersonal.forEach(element => {

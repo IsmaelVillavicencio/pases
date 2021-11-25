@@ -979,3 +979,6 @@
 </div>
 <br>
 <br>
+<script>
+	var IdEmpresa = <?php echo $this->session->_id_empresa ?>;
+</script>
