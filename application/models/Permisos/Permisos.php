@@ -2714,4 +2714,30 @@ class Permisos extends CI_Model
 			'data'		=> $respuesta
 		];
     }
+    
+    /*
+    *Nombre:        ExtenderPermiso
+    *Parámetros:    {} => 
+    *Descripción:   Se utiliza para extender un permiso
+    */
+    public function ExtenderPermiso($datos){
+        $sp = "EXEC sp_ExtiendePase ".$datos['id_permiso'].", ".$this->db->escape($datos['fini']).", ".$this->db->escape($datos['ffin'])."";
+        $respuesta = $this->db->query($sp)->row();
+        if($respuesta->Error == 1){
+            $response = [
+                'status' 	=> false,
+                'message'	=> 'No fue posible realizar la actualización',
+                'data'		=> null,
+                'token' 	=> $this->security->get_csrf_hash()
+            ];
+        }else{
+            $response = [
+                'status' 	=> true,
+                'message'	=> 'Registro Exitoso',
+                'data'		=> ['idpermiso' => $respuesta->id_permiso],
+                'token' 	=> $this->security->get_csrf_hash()
+            ];
+        }
+        return $response;
+    }
 }

@@ -338,13 +338,13 @@ class Permisos{
 
                         //if( (Area == 4 || Area == 8) && element.id_estatus_pase == 11){
                         if( (Area == 4 || Area == 8) && element.id_estatus_pase == 11){
-                            if(element.bext){
+                            //if(element.bext){
                                 extender = '<div class="p-1">'+
                                     '<a href="#!" title="Extender">'+
                                         '<span class="icon-calendar extender" data-id="'+element.id+'"></span>'+
                                     '</a>'+
                                 '</div>';
-                            }
+                            //}
                             /*duplicar = '<div class="p-1">'+
                                 '<a href="#!"  title="Duplicar">'+
                                     '<span class="glyphicon glyphicon-repeat duplicar" data-id="'+element.id+'"></span>'+
