@@ -11,7 +11,7 @@ var fotoFacturaEquipo = null
 var fotoEquipoAnexo = null
 var fotoEquipoRF = null
 var fotoMaterial = null
-var fotoFacturaVehiculo = null
+//var fotoFacturaVehiculo = null
 var fotoLateralVehiculo = null
 var fotoPlacaVehiculo = null
 var fotoLicencia = null
@@ -3397,6 +3397,9 @@ class Permisos {
             }
         })
 
+        if (chofer.checked) {
+            vehiculotab.disabled = false
+        } 
         /*if (chofer.checked) {
             vehiculotab.disabled = false
         }*/
@@ -3825,6 +3828,8 @@ class Permisos {
             fotoMaterial = null
 
             $("#errorSubirMaterial").html(""); 
+
+            document.getElementById('btnSubirMaterial').value = 'Subir documento'
         }
     }
     agregar_vehiculo(fotoLateralVehiculo, fotoPlacaVehiculo) {
@@ -4024,7 +4029,7 @@ class Permisos {
             $(".reiniciar-vehiculo").val("")
             document.getElementById('btnSubirVehiculo').value = 'Subir archivo'
 
-            fotoFacturaVehiculo = null
+            //fotoFacturaVehiculo = null
             fotoLateralVehiculo = null
             fotoPlacaVehiculo = null
         }
@@ -4670,7 +4675,14 @@ $(tabMaterial).on('click', '.modificar-material', function (ev) {
     descripcion.value = datosMaterial[ev.target.dataset.idindextblmodmaterial].descripcion
     fotoMaterial = datosMaterial[ev.target.dataset.idindextblmodmaterial].fotografiaMaterial
 
-    /*
+    btnSubirMaterial.value = "Actualizar documento"
+
+	var archivo = "/assets/uploads/permisos/materiales/"+fotoMaterial;
+	var txt = "<input type='hidden' id='val_material' value ='"+fotoMaterial+"'>";
+	$("#errorSubirMaterial").html("<span class='color:#000'><a href='"+archivo+"' target='_blank'><i class='glyphicon glyphicon-cloud-download'> </i> &nbsp; Visualizar archivo</a></span>"+txt);			
+
+
+    /* fotografiaMaterial
     //datosMaterial.splice(ev.target.dataset.idIndextblmodmaterial, 1);
     datosMaterial[ev.target.dataset.idindextblmodmaterial].opcion = 2
     tr = $(this).parents('tr').closest('tr').addClass('hide');
