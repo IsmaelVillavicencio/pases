@@ -3630,7 +3630,10 @@ class Permisos {
                 tipomaterial: tipoMaterial.value,
                 tipomedida:(tipoMedida.value == '' ? 0 : tipoMedida.value)   ,
                 cantidad: cantidad.value,
-                descripcion: descripcion.value
+                descripcion: descripcion.value,
+                idimagen: '',
+                fotografiaMaterial: '',
+                opcion: 1
             }
 
             /*
