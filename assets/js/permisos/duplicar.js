@@ -4532,14 +4532,15 @@ $(tabPersonal).on('click', '.modificar-persona', function (ev) {
             idimagen: element.idimagen,
             fotografia: element.fotografia
         }
-        documentosAdicionalesAux.push(datos)
+        //documentosAdicionalesAux.push(datos)
+        documentosAdicionales.push(datos)
 
         DTDocAdicionales.row.add([
             '<center><a href="'+base_url+'assets/uploads/permisos/personal/'+element.fotografia+'" target="_blank" style="font-size: 18px;">Visualizar archivo</a></center>',
             '<div class="d-flex justify-content-center" >' +
                 '<div class="p-1">' +
                     '<a href="#!" title="Eliminar">' +
-                        '<span class="glyphicon glyphicon-trash eliminar" data-id="' + (documentosAdicionalesAux.length - 1) + '" data-idimagen="'+element.idimagen+'" data-nombre="'+element.fotografia+'"></span>' +
+                        '<span class="glyphicon glyphicon-trash eliminar" data-id="' + (documentosAdicionales.length - 1) + '" data-idimagen="'+element.idimagen+'" data-nombre="'+element.fotografia+'"></span>' +
                     '</a>' +
                 '</div>' +
             '</div>'
